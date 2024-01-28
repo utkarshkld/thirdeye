@@ -1,0 +1,15 @@
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#FF0000">
+
+<!--    <item android:id="@android:id/mask">-->
+<!--        <shape android:shape="oval">-->
+<!--            <solid android:color="#FF0000" /> &lt;!&ndash; Set your desired background color &ndash;&gt;-->
+<!--        </shape>-->
+<!--    </item>-->
+
+    <item android:id="@android:id/background">
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" /> <!-- Set your desired background color -->
+        </shape>
+    </item>
+</ripple>

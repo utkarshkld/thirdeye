@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".objdet">
+
+
+    <!-- Right-aligned buttons -->
+
+
+    <SurfaceView
+        android:id="@+id/obdsurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/obdtextView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_175sdp"
+        android:layout_above="@+id/obdbtnTakePicture"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="@dimen/_53sdp"
+        android:scrollbars="vertical"
+        android:background="@drawable/speechtext_view"
+        android:textColor="#FFF"/>
+
+    <Button
+        android:id="@+id/obdbtnTakePicture"
+        android:layout_width="85dp"
+        android:layout_height="85dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_50sdp"
+        android:background="@drawable/start_record" />
+</RelativeLayout>

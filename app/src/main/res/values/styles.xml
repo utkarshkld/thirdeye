@@ -1,0 +1,39 @@
+<resources>
+    <!-- Base application theme. -->
+
+        <!-- Base application theme. -->
+        <style name="Base.Theme.thirdeye" parent="Theme.Material3.DayNight.NoActionBar">
+            <!-- Customize your light theme here. -->
+            <item name="colorPrimary">@color/black</item>
+        </style>
+
+        <style name="Theme.thirdeye" parent="Base.Theme.thirdeye" />
+
+<!--    <style name="rmv" parent="Theme.AppCompat.Light.NoActionBar"/>-->
+    <style name="text">
+        <item name="android:textSize">20dp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:layout_marginLeft">33dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">300dp</item>
+        <item name="android:layout_above">@+id/btnTakePicture</item>
+        <item name="android:layout_marginBottom">50dp</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:scrollbarThumbVertical">@color/colorPrimaryDark</item>
+
+
+    </style>
+
+    <style name="back">
+        <item name="android:textSize">20dp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+
+
+
+
+
+</resources>

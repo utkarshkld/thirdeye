@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:background="@color/backgroud">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/llTitleBar"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/background"
+        android:layout_alignParentTop="true">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/backbtn"
+            android:src="@drawable/previous"
+            android:layout_marginTop="@dimen/_15sdp"
+            android:layout_marginBottom="@dimen/_15sdp"
+            android:layout_marginStart="@dimen/_22sdp"
+            android:layout_marginEnd="@dimen/_10sdp"/>
+
+
+
+    </LinearLayout>
+
+    <EditText
+        android:layout_width="@dimen/_280sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:id="@+id/editTextTranslate"
+        android:background="@drawable/textbackground"
+        android:hint="Write what you want to translate"
+        android:imeOptions="actionDone"
+        android:singleLine="true"
+        android:layout_below="@+id/llTitleBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:paddingStart="22dp"
+        android:textSize="@dimen/_14sdp"
+        android:paddingEnd="22dp"
+
+        android:textColorHint="@color/backText"
+        android:textColor="@color/white"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextTranslate"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/sourceLanguageSpinnerll"
+        android:background="@drawable/textbackground"
+        android:textColor="#FFFFFF"
+        >
+
+        <Spinner
+            android:layout_width="@dimen/_280sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:paddingStart="20dp"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/sourceLanguageSpinner"
+            android:textColor="#FFFFFF"
+
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/targetLanguageSpinnerll"
+        android:layout_marginBottom="20dp"
+        android:layout_below="@+id/sourceLanguageSpinnerll"
+        android:background="@drawable/textbackground"
+        android:textColor="#FFFFFF"
+        >
+
+        <Spinner
+            android:layout_width="@dimen/_280sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:paddingStart="20dp"
+            android:id="@+id/targetLanguageSpinner"
+            android:textColor="@color/white"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/translatedText"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_100sdp"
+        android:layout_below="@id/targetLanguageSpinnerll"
+        android:layout_above="@id/llgridView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="3dp"
+        android:paddingStart="22dp"
+        android:paddingTop="27dp"
+        android:paddingEnd="22dp"
+        android:paddingBottom="27dp"
+        android:text=""
+        android:textColor="@color/white"
+        android:textColorHint="@color/backText"
+        android:textSize="@dimen/_20sdp"
+        android:hint="Translated Text"
+        />
+
+
+
+
+
+
+    <LinearLayout
+        android:id="@+id/llgridView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:gravity="bottom">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="@dimen/_2sdp"
+            android:layout_marginRight="@dimen/_2sdp"
+            android:columnCount="3"
+            android:rowCount="1">
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnVoiceInput"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_rowWeight="1"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                app:cardBackgroundColor="@color/backgroud"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="8dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/_120sdp"
+                        android:layout_height="@dimen/_80sdp"
+                        android:background="@drawable/background_card"
+                        android:padding="@dimen/_10sdp"
+                        android:src="@drawable/mic_fill11" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_7sdp"
+                        android:padding="@dimen/_5sdp"
+                        android:textSize="@dimen/_13ssp"
+                        android:text="Speak"
+                        android:textColor="@color/white"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnTranslate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_rowWeight="1"
+                android:layout_column="2"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill"
+                app:cardBackgroundColor="@color/backgroud"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="8dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/_120sdp"
+                        android:layout_height="@dimen/_80sdp"
+                        android:background="@drawable/background_card_translate"
+                        android:padding="@dimen/_10sdp"
+                        android:src="@drawable/translate" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_7sdp"
+                        android:padding="@dimen/_5sdp"
+                        android:textSize="@dimen/_12ssp"
+                        android:text="Translate"
+                        android:textColor="@color/white"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+
+            </androidx.cardview.widget.CardView>
+
+        </GridLayout>
+
+
+    </LinearLayout>
+</RelativeLayout>

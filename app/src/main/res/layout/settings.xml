@@ -1,0 +1,136 @@
+<!-- res/layout/settings.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/_16sdp"
+    android:background="@android:color/black"> <!-- Set background color to black -->
+
+    <!-- Speech Rate Slider -->
+    <TextView
+        android:id="@+id/textSpeechRate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speech Rate"
+        android:textSize="@dimen/_18sdp"
+        android:textColor="@android:color/white" /> <!-- Set text color to white -->
+
+    <!-- Default Reading Language -->
+    <SeekBar
+        android:id="@+id/sliderSpeechRate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:max="100"
+        android:progress="50"
+        android:thumb="@drawable/custom_seekbar_thumb" />
+
+    <TextView
+        android:id="@+id/textDefaultLanguage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Default Reading Language"
+        android:textSize="@dimen/_18sdp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="@dimen/_15sdp" /> <!-- Set text color to white -->
+
+    <!-- Set text size of spinner items -->
+
+    <!-- Switch for Partially Blind -->
+
+    <Spinner
+        android:id="@+id/spinnerDefaultLanguage"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:background="@drawable/textbackground"
+        android:paddingStart="10dp"
+        android:textSize="@dimen/_20sdp" />
+    <TextView
+        android:id="@+id/inputlangage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Default Input Language"
+        android:textSize="@dimen/_18sdp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="@dimen/_15sdp" /> <!-- Set text color to white -->
+
+
+
+    <Spinner
+        android:id="@+id/spinnerDefaultinputlanguage"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:background="@drawable/textbackground"
+        android:paddingStart="10dp"
+        android:textSize="@dimen/_20sdp" />
+    <TextView
+        android:id="@+id/inputlangagetranslation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Translation Input Language"
+        android:textSize="@dimen/_18sdp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="@dimen/_15sdp" /> <!-- Set text color to white -->
+
+
+
+    <Spinner
+        android:id="@+id/spinnertransinputlanguage"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:background="@drawable/textbackground"
+        android:paddingStart="10dp"
+        android:textSize="@dimen/_20sdp" />
+
+    <TextView
+        android:id="@+id/textPartiallyBlind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Partially Blind"
+        android:textSize="@dimen/_18sdp"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="@dimen/_15sdp" /> <!-- Set text color to white -->
+
+    <Switch
+        android:id="@+id/switchPartiallyBlind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:switchMinWidth="53dp"
+        android:thumb="@drawable/custom_seekbar_thumb"
+        android:layout_marginTop="@dimen/_15sdp" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="bottom">
+
+        <!-- Cancel Button -->
+        <Button
+            android:id="@+id/buttonCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:background="#1B909F"
+            android:text="Back"
+            android:textColor="@android:color/white" />
+
+        <!-- Apply Button -->
+        <Button
+            android:id="@+id/buttonApply"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:background="@drawable/apply_ripple"
+            android:text="Apply"
+            android:textColor="@android:color/black" />
+    </LinearLayout>
+
+</LinearLayout>

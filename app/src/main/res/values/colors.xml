@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="mp_primary">#007F8B</color>
+    <color name="mp_variant">#12B5CB</color>
+    <color name="toolbar_background">#EEEEEE</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="bottom_sheet_background">#EEEEEE</color>
+    <color name="bottom_sheet_text_color">@android:color/black</color>
+    <color name="icActive">#FFFFFFFF</color>
+    <color name="icFocused">#DDFFFFFF</color>
+    <color name="icPressed">#AAFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="backgroud">#A1000000</color>
+    <color name="TextColor">#FFB4B4B4</color>
+    <color name="backText">#5A5A5A</color>
+    <color name="button_clicked_color">#1B909F</color>
+
+
+    <color name="backgroudcolorobjectfile">#5A5A5A</color>
+    <color name="TextColor2">#FFB4B4B4</color>
+</resources>

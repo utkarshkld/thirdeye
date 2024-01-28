@@ -1,0 +1,346 @@
+package com.example.thirdeye;
+
+import static java.util.Arrays.stream;
+
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.mlkit.common.model.RemoteModelManager;
+import com.google.mlkit.nl.translate.TranslateRemoteModel;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.nl.languageid.LanguageIdentification;
+import com.google.mlkit.nl.languageid.LanguageIdentifier;
+
+import com.google.mlkit.nl.translate.Translation;
+import com.google.mlkit.nl.translate.Translator;
+import com.google.mlkit.nl.translate.TranslatorOptions;
+
+public class appsettings extends AppCompatActivity {
+
+    private SeekBar seekBarSpeechRate;
+    private Spinner spinnerDefaultLanguage,spinnerinputlang,spinnertranslanguage;
+    private Switch switchPartiallyBlind;
+    private Button applybtn;
+    private Button cancelbtn;
+    private HashMap<String, String> languageMap = new HashMap<>();
+    private ProgressDialog progressDialog;
+    private String ouptutlang = MainActivity.output_lang;
+    private boolean blindness = MainActivity.blindness;
+    private float rate = MainActivity.speech_rate;
+    private String inputlang = MainActivity.input_lang;
+    private String trans_input = MainActivity.trans_input;
+    private boolean alreadydownloaded = false;
+    private boolean toret = false;
+
+    private List<Settings> finalset;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.settings);
+
+        // Initialize views
+        TextView textSpeechRate = findViewById(R.id.textSpeechRate);
+        TextView textDefaultLanguage = findViewById(R.id.textDefaultLanguage);
+        TextView textPartiallyBlind = findViewById(R.id.textPartiallyBlind);
+        spinnerinputlang = findViewById(R.id.spinnerDefaultinputlanguage);
+        spinnertranslanguage = findViewById(R.id.spinnertransinputlanguage);
+        seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
+        spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
+        switchPartiallyBlind = findViewById(R.id.switchPartiallyBlind);
+        applybtn = findViewById(R.id.buttonApply);
+        cancelbtn = findViewById(R.id.buttonCancel);
+        getAllSettings(this::onSettingsListLoaded);
+        cancelbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+        applybtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // implementation of query
+                downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()));
+
+            }
+        });
+
+
+
+
+        initializelanguageMap();
+        List<String> languages = new ArrayList<>(languageMap.values());
+        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
+        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,languageMap.keySet().toArray(new String[0]));
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        text_det_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDefaultLanguage.setAdapter(adapter);
+        spinnertranslanguage.setAdapter(adapter);
+        spinnerinputlang.setAdapter(text_det_adapter);
+        spinnerDefaultLanguage.setSelection(languages.indexOf(ouptutlang));
+        spinnertranslanguage.setSelection(languages.indexOf(trans_input)); // this is for translation model have to update the database
+        spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
+        switchPartiallyBlind.setChecked(blindness);
+        seekBarSpeechRate.setProgress((int)(rate*100/2.0f));
+
+
+
+
+
+        // Setup Switch for Partially Blind
+
+    }
+    public interface DownloadLanguageCallback {
+        void onDownloadComplete(boolean result);
+    }
+    public void downloadLanguage(String language) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        toret = false;
+        TranslatorOptions options = new TranslatorOptions.Builder()
+                .setSourceLanguage("en")
+                .setTargetLanguage(language)
+                .build();
+        RemoteModelManager modelManager = RemoteModelManager.getInstance();
+        modelManager.getDownloadedModels(TranslateRemoteModel.class)
+                .addOnSuccessListener(translateModels -> {
+                    Settings st = finalset.get(0);
+                    boolean alreadyDownloaded = false;
+                    for (TranslateRemoteModel model : translateModels) {
+                        String storedLang = model.getLanguage();
+                        Log.d("languagemodels", "downloadlanguage: "+storedLang);
+                        if (storedLang.equals(language)) {
+                            alreadyDownloaded = true;
+                            break;
+                        }
+                    }
+                    if (alreadyDownloaded) {
+                        toret = true;
+                    } else if(networkInfo == null || !networkInfo.isConnected()){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(appsettings.this);
+                        builder.setMessage("No internet connection. Please check your connection and try again.")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.create().show();
+                    } else {
+
+
+                        toret = true;
+                        runOnUiThread(() -> showProgressDialog()); // Show progress dialog on main UI thread
+                        downloadModel(options,progressDialog);
+
+                    }
+                    Log.d("checking before","I should be before the returning");
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            // Implementation of query (executed on a background thread)
+
+
+
+                            if (st != null) {
+                                MyRoomDatabase.getInstance(getApplicationContext())
+                                        .userDao()
+                                        .delete(st);
+                                Log.d("hmlo database", "run: todo has been deleted..."+st);
+                            }
+
+                            if(toret) {
+                                st.output_speech = languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString());
+                            }
+                            st.trans_input = languageMap.get(spinnertranslanguage.getSelectedItem().toString());
+                            st.input_lang = spinnerinputlang.getSelectedItem().toString();
+                            st.rate = (seekBarSpeechRate.getProgress() / 100.0f) * 2.0f;
+                            st.blindness = switchPartiallyBlind.isChecked();
+                            MainActivity.input_lang = st.input_lang;
+                            MainActivity.output_lang = st.output_speech;
+                            MainActivity.blindness = st.blindness;
+                            MainActivity.speech_rate = st.rate;
+                            MainActivity.trans_input = st.trans_input;
+                            insertSingleTodo(st);
+
+
+                            return null;
+
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            // Update UI or perform any post-execution tasks here
+
+                        }
+                    }.execute();
+
+                    ; // Callback indicating completion
+
+                })
+                .addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(appsettings.this, "Failed to retrieve downloaded models.", Toast.LENGTH_SHORT).show();
+                     // Callback indicating failure
+                });
+        Log.d("returning", "downloadlanguage: "+toret);
+    }
+
+
+    private void showProgressDialog() {
+        progressDialog = new ProgressDialog(appsettings.this);
+        progressDialog.setMessage("Downloading the translation model...");
+        progressDialog.setCancelable(false);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.show();
+    }
+    private void downloadModel(TranslatorOptions options, ProgressDialog progressDialog) {
+        Translator translator = Translation.getClient(options);
+
+        translator.downloadModelIfNeeded()
+                .addOnSuccessListener(unused -> {
+                    progressDialog.dismiss();
+                    // Model downloaded successfully, proceed with translation
+                    // You can add your translation logic here
+                })
+                .addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    // Model download failed, handle the failure
+                    Toast.makeText(appsettings.this, "Language can't be loaded", Toast.LENGTH_SHORT).show();
+                });
+    }
+    public void insertSingleTodo(Settings settings) {
+//        Settings settings = new Settings(language,blindness,speech_rate);
+        appsettings.InsertAsyncTask insertAsyncTask = new appsettings.InsertAsyncTask();
+        insertAsyncTask.execute(settings);
+    }
+    class InsertAsyncTask extends AsyncTask<Settings, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Settings... settings) {
+
+            MyRoomDatabase.getInstance(getApplicationContext())
+                    .userDao()
+                    .insert(settings[0]);
+
+            return null;
+        }
+    }
+    public interface SettingsListCallback {
+        void onSettingsListLoaded(List<Settings> settingsList);
+    }
+
+    public void onSettingsListLoaded(List<Settings> settingsList) {
+        finalset = settingsList;
+        Log.d("test", "onSettingsListLoaded: "+finalset);
+    }
+
+    public void getAllSettings(final MainActivity.SettingsListCallback callback) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Settings> todoList = MyRoomDatabase.getInstance(getApplicationContext())
+                        .userDao()
+                        .getAll();
+                callback.onSettingsListLoaded(todoList);
+
+            }
+        });
+        thread.start();
+    }
+    private void initializelanguageMap(){
+        languageMap.put("Bengali", "bn");
+        languageMap.put("Hindi", "hi");
+        languageMap.put("Gujarati", "gu");
+        languageMap.put("English", "en");
+        languageMap.put("Kannada", "kn");
+        languageMap.put("Marathi", "mr");
+        languageMap.put("Tamil", "ta");
+        languageMap.put("Telugu", "te");
+        languageMap.put("Urdu", "ur");
+        languageMap.put("Malayalam", "ml");
+
+        languageMap.put("Afrikaans", "af");
+        languageMap.put("Arabic", "ar");
+
+        languageMap.put("Bulgarian", "bg");
+//        languageMap.put("Catalan", "ca");
+        languageMap.put("Czech", "cs");
+
+        languageMap.put("Danish", "da");
+        languageMap.put("German", "de");
+        languageMap.put("Greek", "el");
+
+        languageMap.put("Spanish", "es");
+
+
+        languageMap.put("Finnish", "fi");
+        languageMap.put("French", "fr");
+
+        languageMap.put("Galician", "gl");//note
+//        languageMap.put("Hebrew", "he");
+//        languageMap.put("Croatian", "hr");
+//        languageMap.put("Haitian", "ht");
+        languageMap.put("Hungarian", "hu");
+        languageMap.put("Indonesian", "id");//in
+        languageMap.put("Icelandic", "is");
+        languageMap.put("Italian", "it");
+        languageMap.put("Japanese", "ja");
+//        languageMap.put("Georgian", "ka");
+        languageMap.put("Korean", "ko");
+        languageMap.put("Lithuanian", "lt");
+        languageMap.put("Latvian", "lv");
+//        languageMap.put("Macedonian", "mk");
+        languageMap.put("Malay", "ms");
+//        languageMap.put("Maltese", "mt");
+        languageMap.put("Dutch", "nl");
+        languageMap.put("Norwegian", "no");//nb
+        languageMap.put("Polish", "pl");
+        languageMap.put("Portuguese", "pt");
+        languageMap.put("Romanian", "ro");
+        languageMap.put("Russian", "ru");
+        languageMap.put("Slovak", "sk");
+//        languageMap.put("Slovenian", "sl");
+//        languageMap.put("Albanian", "sq");
+        languageMap.put("Swedish", "sv");
+//        languageMap.put("Swahili", "sw");
+        languageMap.put("Thai", "th");
+//        languageMap.put("Tagalog", "tl");
+        languageMap.put("Turkish", "tr");
+        languageMap.put("Ukrainian", "uk");
+        languageMap.put("Vietnamese", "vi");
+        languageMap.put("Chinese", "zh");
+    }
+
+}

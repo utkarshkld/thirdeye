@@ -1,0 +1,13 @@
+<!-- res/drawable/custom_ripple_button_apply.xml -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/button_clicked_color"> <!-- Ripple color is set to transparent to customize the background color -->
+
+    <!-- Background color before click -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white" /> <!-- Initial background color is white -->
+        </shape>
+    </item>
+
+
+</ripple>
