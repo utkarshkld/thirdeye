@@ -880,67 +880,60 @@ public class TextSpeech extends AppCompatActivity {
     }
     private void initializeLanguageMap() {
         // Add languages and their Locale codes to the HashMap
-        languageMap.put("Bengali", "bn");
-        languageMap.put("Hindi", "hi");
-        languageMap.put("Gujarati", "gu");
-        languageMap.put("English", "en");
-        languageMap.put("Kannada", "kn");
-        languageMap.put("Marathi", "mr");
-        languageMap.put("Tamil", "ta");
-        languageMap.put("Telugu", "te");
-        languageMap.put("Urdu", "ur");
-        languageMap.put("Malayalam", "ml");
-
         languageMap.put("Afrikaans", "af");
+        //languageMap.put("Albanian", "sq");
         languageMap.put("Arabic", "ar");
-
+        languageMap.put("Bengali", "bn");
         languageMap.put("Bulgarian", "bg");
-//        languageMap.put("Catalan", "ca");
+        //languageMap.put("Catalan", "ca");
+        languageMap.put("Chinese", "zh");
+        //languageMap.put("Croatian", "hr");
         languageMap.put("Czech", "cs");
-
         languageMap.put("Danish", "da");
-        languageMap.put("German", "de");
-        languageMap.put("Greek", "el");
-
-        languageMap.put("Spanish", "es");
-
-
+        languageMap.put("Dutch", "nl");
+        languageMap.put("English", "en");
         languageMap.put("Finnish", "fi");
         languageMap.put("French", "fr");
-
-        languageMap.put("Galician", "gl");//note
-//        languageMap.put("Hebrew", "he");
-//        languageMap.put("Croatian", "hr");
-//        languageMap.put("Haitian", "ht");
+        languageMap.put("Galician", "gl");
+        //languageMap.put("Georgian", "ka");
+        languageMap.put("German", "de");
+        languageMap.put("Greek", "el");
+        languageMap.put("Gujarati", "gu");
+        //languageMap.put("Haitian", "ht");
+        //languageMap.put("Hebrew", "he");
+        languageMap.put("Hindi", "hi");
         languageMap.put("Hungarian", "hu");
-        languageMap.put("Indonesian", "id");//in
         languageMap.put("Icelandic", "is");
+        languageMap.put("Indonesian", "id");
         languageMap.put("Italian", "it");
         languageMap.put("Japanese", "ja");
-//        languageMap.put("Georgian", "ka");
+        languageMap.put("Kannada", "kn");
         languageMap.put("Korean", "ko");
-        languageMap.put("Lithuanian", "lt");
         languageMap.put("Latvian", "lv");
-//        languageMap.put("Macedonian", "mk");
+        languageMap.put("Lithuanian", "lt");
+        //languageMap.put("Macedonian", "mk");
         languageMap.put("Malay", "ms");
-//        languageMap.put("Maltese", "mt");
-        languageMap.put("Dutch", "nl");
-        languageMap.put("Norwegian", "no");//nb
+        languageMap.put("Malayalam", "ml");
+        //languageMap.put("Maltese", "mt");
+        languageMap.put("Marathi", "mr");
+        languageMap.put("Norwegian", "no");
         languageMap.put("Polish", "pl");
         languageMap.put("Portuguese", "pt");
         languageMap.put("Romanian", "ro");
         languageMap.put("Russian", "ru");
         languageMap.put("Slovak", "sk");
-//        languageMap.put("Slovenian", "sl");
-//        languageMap.put("Albanian", "sq");
+        //languageMap.put("Slovenian", "sl");
+        languageMap.put("Spanish", "es");
+        //languageMap.put("Swahili", "sw");
         languageMap.put("Swedish", "sv");
-//        languageMap.put("Swahili", "sw");
+        //languageMap.put("Tagalog", "tl");
+        languageMap.put("Tamil", "ta");
+        languageMap.put("Telugu", "te");
         languageMap.put("Thai", "th");
-//        languageMap.put("Tagalog", "tl");
         languageMap.put("Turkish", "tr");
         languageMap.put("Ukrainian", "uk");
+        languageMap.put("Urdu", "ur");
         languageMap.put("Vietnamese", "vi");
-        languageMap.put("Chinese", "zh");
 
     }
 

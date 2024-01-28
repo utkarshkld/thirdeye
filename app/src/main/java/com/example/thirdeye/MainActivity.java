@@ -42,9 +42,12 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     public static Vibrator vibe;
+    public static HashMap<String, String> translationMap = new HashMap<>();
+    public static HashMap<String,String> languageMap = new HashMap<>();
     private static final int SPEECH_REQUEST_CODE = 1;
     private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
-    private TextToSpeech textToSpeech;
+    public static TextToSpeech textToSpeech;
+    public static String speaklang;
     private MicHandler shakeListener;
     private int i = 0;
     private ImageView eyebtn;
@@ -66,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        initializeLanguageMap();
+        translationmap.initializetransMap();
+        //Commands are Translated
         // Check and request RECORD_AUDIO permission
         checkRecordAudioPermission();
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -102,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
         eyebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent intent = new Intent(MainActivity.this,appsettings.class);
                 startActivity(intent);
             }
@@ -109,30 +116,29 @@ public class MainActivity extends AppCompatActivity {
         objectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 vibe.vibrate(50);
+                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent intent = new Intent(MainActivity.this, cMainActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
             }
         });
         wordsButton.setOnClickListener(new View.OnClickListener() {
-
-
                 @Override
                 public void onClick(View view) {
                     vibe.vibrate(50);
+                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
                     Intent intent = new Intent(MainActivity.this, TextSpeech.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
                 }
-
-
-
         });
         st.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
+                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent intent = new Intent(MainActivity.this, LangTranslate.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -185,8 +191,13 @@ public class MainActivity extends AppCompatActivity {
                 blindness = currset.blindness;
                 input_lang = currset.input_lang;
                 trans_input =currset.trans_input;
-
-
+        }
+        textToSpeech.setLanguage(new Locale(output_lang));
+        for( Map.Entry<String, String> entry : languageMap.entrySet()){
+            if(entry.getValue().equals(output_lang)){
+                speaklang = entry.getKey();
+                break;
+            }
         }
         Log.d("test", "onSettingsListLoaded: "+finalset);
     }
@@ -281,30 +292,91 @@ public class MainActivity extends AppCompatActivity {
                 String spokenText = matches.get(0).toLowerCase();
 
                 if (spokenText.contains("object")) {
-                    textToSpeech.speak("Opening Objects", TextToSpeech.QUEUE_FLUSH, null, null);
+                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
                     Intent intent = new Intent(MainActivity.this, cMainActivity.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
 
                 } else if (spokenText.contains("read")) {
-                    textToSpeech.speak("Opening Words", TextToSpeech.QUEUE_FLUSH, null, null);
+                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
                     Intent intent = new Intent(MainActivity.this, TextSpeech.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
 
                 } else if (spokenText.contains("translate")) {
-                    textToSpeech.speak("Opening Speech to Text", TextToSpeech.QUEUE_FLUSH, null, null);
+                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
                     Intent intent = new Intent(MainActivity.this, LangTranslate.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
 
-                } else {
+                }else if(spokenText.contains("setting")){
+                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
+                    Intent intent = new Intent(MainActivity.this, appsettings.class);
+                    startActivity(intent);
+                }else {
                     Toast.makeText(this, "Command not recognized", Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
+    private void initializeLanguageMap() {
+        // Add languages and their Locale codes to the HashMap
+        languageMap.put("Afrikaans", "af");
+        //languageMap.put("Albanian", "sq");
+        languageMap.put("Arabic", "ar");
+        languageMap.put("Bengali", "bn");
+        languageMap.put("Bulgarian", "bg");
+        //languageMap.put("Catalan", "ca");
+        languageMap.put("Chinese", "zh");
+        //languageMap.put("Croatian", "hr");
+        languageMap.put("Czech", "cs");
+        languageMap.put("Danish", "da");
+        languageMap.put("Dutch", "nl");
+        languageMap.put("English", "en");
+        languageMap.put("Finnish", "fi");
+        languageMap.put("French", "fr");
+        languageMap.put("Galician", "gl");
+        //languageMap.put("Georgian", "ka");
+        languageMap.put("German", "de");
+        languageMap.put("Greek", "el");
+        languageMap.put("Gujarati", "gu");
+        //languageMap.put("Haitian", "ht");
+        //languageMap.put("Hebrew", "he");
+        languageMap.put("Hindi", "hi");
+        languageMap.put("Hungarian", "hu");
+        languageMap.put("Icelandic", "is");
+        languageMap.put("Indonesian", "id");
+        languageMap.put("Italian", "it");
+        languageMap.put("Japanese", "ja");
+        languageMap.put("Kannada", "kn");
+        languageMap.put("Korean", "ko");
+        languageMap.put("Latvian", "lv");
+        languageMap.put("Lithuanian", "lt");
+        //languageMap.put("Macedonian", "mk");
+        languageMap.put("Malay", "ms");
+        languageMap.put("Malayalam", "ml");
+        //languageMap.put("Maltese", "mt");
+        languageMap.put("Marathi", "mr");
+        languageMap.put("Norwegian", "no");
+        languageMap.put("Polish", "pl");
+        languageMap.put("Portuguese", "pt");
+        languageMap.put("Romanian", "ro");
+        languageMap.put("Russian", "ru");
+        languageMap.put("Slovak", "sk");
+        //languageMap.put("Slovenian", "sl");
+        languageMap.put("Spanish", "es");
+        //languageMap.put("Swahili", "sw");
+        languageMap.put("Swedish", "sv");
+        //languageMap.put("Tagalog", "tl");
+        languageMap.put("Tamil", "ta");
+        languageMap.put("Telugu", "te");
+        languageMap.put("Thai", "th");
+        languageMap.put("Turkish", "tr");
+        languageMap.put("Ukrainian", "uk");
+        languageMap.put("Urdu", "ur");
+        languageMap.put("Vietnamese", "vi");
 
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

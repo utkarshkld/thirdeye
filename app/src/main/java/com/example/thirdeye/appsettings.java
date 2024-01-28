@@ -6,39 +6,33 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.mlkit.common.model.RemoteModelManager;
 import com.google.mlkit.nl.translate.TranslateRemoteModel;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.nl.languageid.LanguageIdentification;
-import com.google.mlkit.nl.languageid.LanguageIdentifier;
 
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
@@ -101,7 +95,10 @@ public class appsettings extends AppCompatActivity {
 
         initializelanguageMap();
         List<String> languages = new ArrayList<>(languageMap.values());
+        List<String> keys = new ArrayList<>(languageMap.keySet());
+
         List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
+
         ArrayAdapter<String> text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,languageMap.keySet().toArray(new String[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -166,7 +163,7 @@ public class appsettings extends AppCompatActivity {
 
                     }
                     Log.d("checking before","I should be before the returning");
-                    new AsyncTask<Void, Void, Void>() {
+                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... voids) {
                             // Implementation of query (executed on a background thread)
@@ -192,9 +189,14 @@ public class appsettings extends AppCompatActivity {
                             MainActivity.blindness = st.blindness;
                             MainActivity.speech_rate = st.rate;
                             MainActivity.trans_input = st.trans_input;
+                            for( Map.Entry<String, String> entry : languageMap.entrySet()){
+                                if(entry.getValue().equals(st.output_speech)){
+                                    MainActivity.speaklang = entry.getKey();
+                                    break;
+                                }
+                            }
+                            MainActivity.textToSpeech.setLanguage(new Locale(st.output_speech));
                             insertSingleTodo(st);
-
-
                             return null;
 
                         }
@@ -280,67 +282,60 @@ public class appsettings extends AppCompatActivity {
         thread.start();
     }
     private void initializelanguageMap(){
-        languageMap.put("Bengali", "bn");
-        languageMap.put("Hindi", "hi");
-        languageMap.put("Gujarati", "gu");
-        languageMap.put("English", "en");
-        languageMap.put("Kannada", "kn");
-        languageMap.put("Marathi", "mr");
-        languageMap.put("Tamil", "ta");
-        languageMap.put("Telugu", "te");
-        languageMap.put("Urdu", "ur");
-        languageMap.put("Malayalam", "ml");
-
         languageMap.put("Afrikaans", "af");
+        //languageMap.put("Albanian", "sq");
         languageMap.put("Arabic", "ar");
-
+        languageMap.put("Bengali", "bn");
         languageMap.put("Bulgarian", "bg");
-//        languageMap.put("Catalan", "ca");
+        //languageMap.put("Catalan", "ca");
+        languageMap.put("Chinese", "zh");
+        //languageMap.put("Croatian", "hr");
         languageMap.put("Czech", "cs");
-
         languageMap.put("Danish", "da");
-        languageMap.put("German", "de");
-        languageMap.put("Greek", "el");
-
-        languageMap.put("Spanish", "es");
-
-
+        languageMap.put("Dutch", "nl");
+        languageMap.put("English", "en");
         languageMap.put("Finnish", "fi");
         languageMap.put("French", "fr");
-
-        languageMap.put("Galician", "gl");//note
-//        languageMap.put("Hebrew", "he");
-//        languageMap.put("Croatian", "hr");
-//        languageMap.put("Haitian", "ht");
+        languageMap.put("Galician", "gl");
+        //languageMap.put("Georgian", "ka");
+        languageMap.put("German", "de");
+        languageMap.put("Greek", "el");
+        languageMap.put("Gujarati", "gu");
+        //languageMap.put("Haitian", "ht");
+        //languageMap.put("Hebrew", "he");
+        languageMap.put("Hindi", "hi");
         languageMap.put("Hungarian", "hu");
-        languageMap.put("Indonesian", "id");//in
         languageMap.put("Icelandic", "is");
+        languageMap.put("Indonesian", "id");
         languageMap.put("Italian", "it");
         languageMap.put("Japanese", "ja");
-//        languageMap.put("Georgian", "ka");
+        languageMap.put("Kannada", "kn");
         languageMap.put("Korean", "ko");
-        languageMap.put("Lithuanian", "lt");
         languageMap.put("Latvian", "lv");
-//        languageMap.put("Macedonian", "mk");
+        languageMap.put("Lithuanian", "lt");
+        //languageMap.put("Macedonian", "mk");
         languageMap.put("Malay", "ms");
-//        languageMap.put("Maltese", "mt");
-        languageMap.put("Dutch", "nl");
-        languageMap.put("Norwegian", "no");//nb
+        languageMap.put("Malayalam", "ml");
+        //languageMap.put("Maltese", "mt");
+        languageMap.put("Marathi", "mr");
+        languageMap.put("Norwegian", "no");
         languageMap.put("Polish", "pl");
         languageMap.put("Portuguese", "pt");
         languageMap.put("Romanian", "ro");
         languageMap.put("Russian", "ru");
         languageMap.put("Slovak", "sk");
-//        languageMap.put("Slovenian", "sl");
-//        languageMap.put("Albanian", "sq");
+        //languageMap.put("Slovenian", "sl");
+        languageMap.put("Spanish", "es");
+        //languageMap.put("Swahili", "sw");
         languageMap.put("Swedish", "sv");
-//        languageMap.put("Swahili", "sw");
+        //languageMap.put("Tagalog", "tl");
+        languageMap.put("Tamil", "ta");
+        languageMap.put("Telugu", "te");
         languageMap.put("Thai", "th");
-//        languageMap.put("Tagalog", "tl");
         languageMap.put("Turkish", "tr");
         languageMap.put("Ukrainian", "uk");
+        languageMap.put("Urdu", "ur");
         languageMap.put("Vietnamese", "vi");
-        languageMap.put("Chinese", "zh");
-    }
 
+    }
 }
