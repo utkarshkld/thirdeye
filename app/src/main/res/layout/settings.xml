@@ -6,10 +6,11 @@
     android:background="@color/backgroud">
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="80dp"
     android:id="@+id/llTitleBar"
     android:orientation="horizontal"
     android:background="@drawable/background"
+    android:padding="@dimen/_8sdp"
     android:layout_alignParentTop="true">
 
     <ImageView
@@ -18,10 +19,8 @@
         android:layout_gravity="center"
         android:id="@+id/backbtn_"
         android:src="@drawable/previous"
-        android:layout_marginTop="@dimen/_15sdp"
-        android:layout_marginBottom="@dimen/_15sdp"
         android:layout_marginStart="@dimen/_22sdp"
-        android:layout_marginEnd="@dimen/_10sdp"/>
+        />
 
 
 
@@ -42,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Default Reading Language"
-        android:textSize="@dimen/_18sdp"
+        android:textSize="@dimen/_15sdp"
         android:layout_marginBottom="15dp"
         android:textColor="@android:color/white"
          /> <!-- Set text color to white -->
@@ -52,20 +51,22 @@
     <!-- Switch for Partially Blind -->
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
         android:layout_centerHorizontal="true"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         >
 
         <Spinner
             android:id="@+id/spinnerDefaultLanguage"
-            android:layout_width="@dimen/_270sdp"
+            android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_centerHorizontal="true"
-            android:dropDownWidth="@dimen/_270sdp"
+
             android:overlapAnchor="false"
             android:textSize="@dimen/_20sdp" />
     </LinearLayout>
@@ -74,27 +75,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Default Input Language"
-        android:textSize="@dimen/_18sdp"
+        android:textSize="@dimen/_15sdp"
         android:textColor="@android:color/white"
         android:layout_marginBottom="15dp" /> <!-- Set text color to white -->
 
 
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         >
 
         <Spinner
             android:id="@+id/spinnerDefaultinputlanguage"
-            android:layout_width="@dimen/_270sdp"
+            android:layout_width="match_parent"
             android:layout_height="52dp"
             android:overlapAnchor="false"
-            android:dropDownWidth="@dimen/_270sdp"
+
+
             android:layout_centerHorizontal="true"
 
             android:textSize="@dimen/_20sdp" />
@@ -104,25 +108,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Translation Input Language"
-        android:textSize="@dimen/_18sdp"
+        android:textSize="@dimen/_15sdp"
         android:textColor="@android:color/white"
         android:layout_marginBottom="@dimen/_15sdp" /> <!-- Set text color to white -->
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:layout_centerHorizontal="true"
         >
 
         <Spinner
             android:id="@+id/spinnertransinputlanguage"
-            android:layout_width="@dimen/_272sdp"
+            android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_centerHorizontal="true"
-            android:dropDownWidth="@dimen/_270sdp"
             android:overlapAnchor="false"
 
             />
@@ -134,14 +139,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Speech Rate"
-        android:textSize="@dimen/_18sdp"
+        android:textSize="@dimen/_15sdp"
         android:textColor="@android:color/white" /> <!-- Set text color to white -->
 
     <!-- Default Reading Language -->
     <SeekBar
         android:id="@+id/sliderSpeechRate"
-        android:layout_width="@dimen/_270sdp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/_10sdp"
         android:layout_marginTop="20dp"
         android:max="100"
         android:progress="50"
@@ -149,27 +155,39 @@
         android:thumb="@drawable/custom_seekbar_thumb"
         />
     <!-- Buttons -->
-    <TextView
-        android:id="@+id/textPartiallyBlind"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Partially Blind"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/_18sdp" />
 
-    <Switch
-        android:id="@+id/switchPartiallyBlind"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
 
-        android:switchMinWidth="53dp"
-        android:theme="@style/SwitchTheme"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:layout_marginTop="15dp"
+        >
 
-        android:thumb="@drawable/custom_seekbar_thumb"
-        />
+        <!-- Cancel Button -->
+        <TextView
+            android:id="@+id/textPartiallyBlind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
+            android:text="Partially Blind"
+            android:layout_weight="1"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_15sdp" />
+
+        <Switch
+            android:id="@+id/switchPartiallyBlind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:switchMinWidth="53dp"
+            android:layout_weight="1"
+            android:theme="@style/SwitchTheme"
+            android:thumb="@drawable/custom_seekbar_thumb"
+            />
+
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -181,7 +199,7 @@
         <Button
             android:id="@+id/buttonCancel"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_weight="1"
             android:background="@drawable/back_ripple"
@@ -192,7 +210,7 @@
         <Button
             android:id="@+id/buttonApply"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_marginStart="@dimen/_8sdp"
             android:layout_weight="1"
             android:background="@drawable/apply_ripple"

@@ -56,6 +56,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -115,9 +116,9 @@ public class TextSpeech extends AppCompatActivity {
 
     public List<String> words = new ArrayList<>();
     //    private ImageView imageView;
-    private Button btnTakePicture;
-    private Button btnPausePlay;
-    private Button btnReplay;
+    private ImageButton btnTakePicture;
+    private ImageButton btnPausePlay;
+    private ImageButton btnReplay;
     private Button micc;
 
     private boolean s = false;
@@ -251,8 +252,8 @@ public class TextSpeech extends AppCompatActivity {
                     prefixArray = new ArrayList<>();
                     textView.setText("");
                     takePictureAndRecognizeText();
-                    btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
-                    btnTakePicture.setBackgroundResource(R.drawable.retake_icon);
+                    btnPausePlay.setImageResource(R.drawable.stop_fill);
+                    btnTakePicture.setImageResource(R.drawable.retake_icon);
                     btnPausePlay.setVisibility(View.VISIBLE);
                     btnReplay.setVisibility(View.VISIBLE);
                     Transition transition2 = new Slide(Gravity.TOP);
@@ -269,7 +270,7 @@ public class TextSpeech extends AppCompatActivity {
                     textToSpeech.stop();
                     isPlaying = false;
                     btnPausePlay.setVisibility(View.GONE);
-                    btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
+                    btnTakePicture.setImageResource(R.drawable.camera_icon);
                     btnReplay.setVisibility(View.GONE);
                     Transition transition2 = new Slide();
                     transition2.setDuration(500);
@@ -301,12 +302,13 @@ public class TextSpeech extends AppCompatActivity {
                 MainActivity.vibe.vibrate(50);
                 if (!isPaused) {
                     isPaused = true;
-                    btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
+                    btnPausePlay.setImageResource(R.drawable.stop_fill);
+
                     speakText(textView.getText().toString().substring(index), 0);
 
                 } else {
                     isPaused = false;
-                    btnPausePlay.setBackgroundResource(R.drawable.play_fill);
+                    btnPausePlay.setImageResource(R.drawable.play_fill);
                     index2 = index;
                     if (textToSpeech != null) {
                         textToSpeech.stop();
@@ -321,7 +323,7 @@ public class TextSpeech extends AppCompatActivity {
                 textToSpeech.stop();
                 isPaused = true;
                 MainActivity.vibe.vibrate(50);
-                btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
+                btnPausePlay.setImageResource(R.drawable.stop_fill);
                 index = 0;
                 index2 = 0;
                 speakText(textView.getText().toString(), 0);

@@ -9,6 +9,7 @@ import android.graphics.fonts.Font;
 import android.graphics.fonts.FontStyle;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -57,6 +58,7 @@ import com.google.mlkit.nl.translate.TranslatorOptions;
 public class appsettings extends AppCompatActivity {
 
     private SeekBar seekBarSpeechRate;
+    ProgressDialog progressDialog2;
     private Spinner spinnerDefaultLanguage,spinnerinputlang,spinnertranslanguage;
     private Switch switchPartiallyBlind;
     private Button applybtn;
@@ -70,6 +72,7 @@ public class appsettings extends AppCompatActivity {
     private String trans_input = MainActivity.trans_input;
     private boolean alreadydownloaded = false;
     private ImageView backbtn;
+    private boolean buttonClickable = true;
     private boolean toret = false;
 
     private List<Settings> finalset;
@@ -107,21 +110,29 @@ public class appsettings extends AppCompatActivity {
         applybtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    Spinner spinner = spinnerDefaultLanguage;
-                    Field popup = Spinner.class.getDeclaredField("mPopup");
-                    popup.setAccessible(true);
+                if (buttonClickable) {
 
-                    // Get private mPopup member variable and try cast to ListPopupWindow
-                    android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinner);
-                    Log.d("height check", " happen" + popupWindow);
-                } catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
-                    // silently fail...
-                    Log.d("height check","can't happen");
+                    downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()));
+                    final ProgressDialog progressDialog = new ProgressDialog(appsettings.this);
+                    progressDialog.setMessage("Applying all the changes...");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+
+                    applybtn.setEnabled(false); // Disable the button
+                    buttonClickable = false;
+    //                    applyProgressDialog();
+
+
+                    // Re-enable the button after 1 second
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            applybtn.setEnabled(true);
+                            progressDialog.dismiss();
+                            buttonClickable = true;
+                        }
+                    }, 1000); // 1 second
                 }
-
-                // implementation of query
-                downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()));
             }
 
         });
@@ -140,8 +151,7 @@ public class appsettings extends AppCompatActivity {
 
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-        setdropdownheight(spinnerDefaultLanguage);
-        setdropdownheight(spinnertranslanguage);
+
         spinnerDefaultLanguage.setAdapter(adapter);
         spinnertranslanguage.setAdapter(adapter);
         spinnerinputlang.setAdapter(text_det_adapter);
@@ -159,29 +169,41 @@ public class appsettings extends AppCompatActivity {
         // Setup Switch for Partially Blind
 
     }
-    public interface DownloadLanguageCallback {
-        void onDownloadComplete(boolean result);
-    }
-    public void setdropdownheight(Spinner spinner){
-        try {
-            Field popup = Spinner.class.getDeclaredField("mPopup");
-            popup.setAccessible(true);
+    private void applyProgressDialog() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Applying all the changes...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
-            // Get private mPopup member variable and try cast to ListPopupWindow
-            android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinner);
-            Log.d("height check"," happen"+popupWindow);
-            popupWindow.setHeight(50);
-//            popupWindow.setVerticalOffset(10);
-//            popupWindow.setWidth(50);
-            // Set popupWindow height to 500px
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-        }
-        catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
-            // silently fail...
-            Log.d("height check","can't happen");
-        }
+            }
+        }, 1500);
     }
+
+//    public void setdropdownheight(Spinner spinner){
+//        try {
+//            Field popup = Spinner.class.getDeclaredField("mPopup");
+//            popup.setAccessible(true);
+//
+//            // Get private mPopup member variable and try cast to ListPopupWindow
+//            android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinner);
+//            Log.d("height check"," happen"+popupWindow);
+//            popupWindow.setHeight(50);
+////            popupWindow.setVerticalOffset(10);
+////            popupWindow.setWidth(50);
+//            // Set popupWindow height to 500px
+//
+//        }
+//        catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
+//            // silently fail...
+//            Log.d("height check","can't happen");
+//        }
+//    }
     public void downloadLanguage(String language) {
+
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         toret = false;
@@ -214,8 +236,6 @@ public class appsettings extends AppCompatActivity {
                                 });
                         builder.create().show();
                     } else {
-
-
                         toret = true;
                         runOnUiThread(() -> showProgressDialog()); // Show progress dialog on main UI thread
                         downloadModel(options,progressDialog);
@@ -317,6 +337,8 @@ public class appsettings extends AppCompatActivity {
 
             return null;
         }
+
+
     }
     public interface SettingsListCallback {
         void onSettingsListLoaded(List<Settings> settingsList);

@@ -83,22 +83,25 @@
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="@color/backgroud"
-                app:cardCornerRadius="@dimen/_8sdp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardUseCompatPadding="true">
+
+                android:foreground="@drawable/ripple_card">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
+                    android:layout_marginTop="10dp"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_width="@dimen/_76sdp"
+                        android:layout_height="@dimen/_76sdp"
+                        android:padding="@dimen/_10sdp"
                         android:background="@drawable/background_card"
-                        android:padding="@dimen/_13sdp"
+
                         android:src="@drawable/file" />
 
                     <TextView
@@ -126,20 +129,22 @@
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="@color/backgroud"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardUseCompatPadding="true">
+
+                android:foreground="@drawable/ripple_card">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
+                    android:layout_marginTop="10dp"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_width="@dimen/_76sdp"
+                        android:layout_height="@dimen/_76sdp"
                         android:background="@drawable/background_card"
                         android:padding="@dimen/_13sdp"
                         android:src="@drawable/object" />
@@ -169,22 +174,24 @@
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="@color/backgroud"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardUseCompatPadding="true">
+
+                android:foreground="@drawable/ripple_card">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
+                    android:layout_marginTop="10dp"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_width="@dimen/_76sdp"
+                        android:layout_height="@dimen/_76sdp"
                         android:background="@drawable/background_card"
-                        android:padding="@dimen/_10sdp"
+                        android:paddingBottom="@dimen/_4sdp"
                         android:src="@drawable/speech_to_text" />
 
                     <TextView

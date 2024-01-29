@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:id="@+id/rellayout"
     tools:context=".TextSpeech"
-    android:background="@color/black">
+    android:background="@color/backgroud">
 
     <!-- Right-aligned buttons -->
 
@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/llTitleBar"
         android:orientation="horizontal"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="-3dp"
         android:background="@color/black"
         android:layout_alignParentTop="true">
 
@@ -30,17 +30,15 @@
             android:layout_marginBottom="@dimen/_15sdp"
             android:layout_marginStart="@dimen/_22sdp"
             android:layout_marginEnd="@dimen/_10sdp"/>
-
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
         <Button
             android:id="@+id/micButton1"
             android:layout_width="70dp"
             android:layout_height="70dp"
-
-            android:layout_marginLeft="@dimen/_200sdp"
-
-
-
-            android:layout_marginTop="@dimen/_5sdp"
+            android:layout_gravity="center"
             android:background="@drawable/mic_ripple" />
 
     </LinearLayout>
@@ -72,7 +70,7 @@
 
     <Spinner
         android:id="@+id/spinnerLanguages"
-        android:layout_width="@dimen/_100sdp"
+        android:layout_width="@dimen/_95sdp"
         android:layout_height="40dp"
         android:layout_below="@+id/llTitleBar"
         android:overlapAnchor="false"
@@ -92,7 +90,7 @@
     >
     <Spinner
     android:id="@+id/detectlnguage"
-    android:layout_width="@dimen/_100sdp"
+    android:layout_width="@dimen/_95sdp"
     android:layout_height="40dp"
     android:overlapAnchor="false"
 
@@ -114,40 +112,42 @@
         android:scrollbars="vertical"
         />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnReplay"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_toLeftOf="@id/btnTakePicture"
-        android:layout_marginRight="@dimen/_20sdp"
+        android:layout_marginRight="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_30sdp"
+        android:background="@drawable/imagebutton_background"
+
         android:layout_alignParentBottom="true"
+        android:foreground="@drawable/ripple_card"
+        android:src="@drawable/replay_icon" />
 
-
-
-        android:background="@drawable/replay_icon" />
-
-    <Button
+    <ImageButton
         android:id="@+id/btnTakePicture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:foreground="@drawable/ripple_card"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="@dimen/_30sdp"
-        android:background="@drawable/camera_icon" />
+        android:background="@drawable/imagebutton_background"
+        android:src="@drawable/camera_icon" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnPausePlay"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
 
         android:layout_alignParentBottom="true"
-
-        android:layout_marginLeft="@dimen/_20sdp"
+        android:foreground="@drawable/ripple_card"
+        android:layout_marginLeft="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_30sdp"
+        android:background="@drawable/imagebutton_background"
         android:layout_toRightOf="@+id/btnTakePicture"
-        android:background="@drawable/stop_fill" />
+        android:src="@drawable/stop_fill" />
 
 
 </RelativeLayout>

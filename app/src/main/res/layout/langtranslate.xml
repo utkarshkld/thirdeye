@@ -33,25 +33,28 @@
     </LinearLayout>
 
     <EditText
-        android:layout_width="@dimen/_280sdp"
-        android:layout_height="52dp"
         android:id="@+id/editTextTranslate"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_below="@+id/llTitleBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_10sdp"
         android:background="@drawable/textbackground"
         android:hint="Write what you want to translate"
         android:imeOptions="actionDone"
-        android:singleLine="true"
-        android:layout_below="@+id/llTitleBar"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
         android:paddingStart="22dp"
-        android:textSize="20dp"
-        android:paddingEnd="22dp"
 
+        android:paddingEnd="22dp"
+        android:singleLine="true"
+        android:textColor="@color/white"
         android:textColorHint="@color/backText"
-        android:textColor="@color/white"/>
+        android:textSize="20dp" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/editTextTranslate"
         android:layout_centerHorizontal="true"
@@ -59,10 +62,13 @@
         android:id="@+id/sourceLanguageSpinnerll"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_margin="@dimen/_10sdp"
         >
 
         <Spinner
-            android:layout_width="@dimen/_280sdp"
+            android:layout_width="match_parent"
             android:layout_height="52dp"
             android:overlapAnchor="false"
 
@@ -76,7 +82,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:id="@+id/targetLanguageSpinnerll"
@@ -84,10 +90,13 @@
         android:layout_below="@+id/sourceLanguageSpinnerll"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_margin="@dimen/_10sdp"
         >
 
         <Spinner
-            android:layout_width="@dimen/_280sdp"
+            android:layout_width="match_parent"
             android:layout_height="52dp"
             android:overlapAnchor="false"
             android:dropDownWidth="@dimen/_280sdp"
@@ -124,6 +133,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="5dp"
         android:layout_gravity="bottom"
         android:gravity="bottom">
 
@@ -134,6 +144,7 @@
             android:layout_marginLeft="@dimen/_2sdp"
             android:layout_marginRight="@dimen/_2sdp"
             android:columnCount="3"
+            android:padding="@dimen/_2sdp"
             android:rowCount="1">
 
 
@@ -143,19 +154,20 @@
                 android:layout_height="wrap_content"
                 android:layout_row="0"
                 android:layout_rowWeight="1"
-                android:layout_column="1"
+                android:layout_column="0"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="#161616"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardUseCompatPadding="true">
+                android:foreground="@drawable/ripple_card">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
+                    android:layout_marginTop="15dp"
                     android:orientation="vertical">
 
                     <ImageView
@@ -170,7 +182,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/_7sdp"
                         android:padding="@dimen/_5sdp"
-                        android:textSize="@dimen/_13ssp"
+                        android:textSize="20dp"
                         android:text="Speak"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
@@ -186,26 +198,27 @@
                 android:layout_height="wrap_content"
                 android:layout_row="0"
                 android:layout_rowWeight="1"
-                android:layout_column="2"
+                android:layout_column="1"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="#161616"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardUseCompatPadding="true">
+                android:foreground="@drawable/ripple_card">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:layout_gravity="center_horizontal|center_vertical"
                     android:gravity="center"
+                    android:layout_marginTop="15dp"
                     android:orientation="vertical">
 
                     <ImageView
                         android:layout_width="@dimen/_120sdp"
                         android:layout_height="@dimen/_80sdp"
                         android:background="@drawable/background_card_translate"
-                        android:padding="@dimen/_10sdp"
+                        android:padding="13dp"
                         android:src="@drawable/translate" />
 
                     <TextView
@@ -213,7 +226,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/_7sdp"
                         android:padding="@dimen/_5sdp"
-                        android:textSize="@dimen/_12ssp"
+                        android:textSize="20dp"
                         android:text="Translate"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
