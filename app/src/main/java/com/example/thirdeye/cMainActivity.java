@@ -57,6 +57,7 @@ public class cMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 isPlay = false;
+                ObjectDetectorHelper.textToSpeech.shutdown();
                 ObjectDetectorHelper.textToSpeech.stop();
                 onBackPressed();
             }
@@ -66,6 +67,7 @@ public class cMainActivity extends AppCompatActivity {
                                        public void onClick(View v) {
                                            isPlay = false;
                                            ObjectDetectorHelper.textToSpeech.stop();
+                                           ObjectDetectorHelper.textToSpeech.shutdown();
                                            onBackPressed();
                                        }
                                    });

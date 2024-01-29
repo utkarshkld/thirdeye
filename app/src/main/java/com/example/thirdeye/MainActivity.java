@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     public static String speaklang;
     private MicHandler shakeListener;
     private int i = 0;
-    private ImageView eyebtn;
+    private ImageView eyebtn,settingbtn;
     private String UserDeafultLanguage = Locale.getDefault().getLanguage();
     public static String output_lang;
     public static float speech_rate;
@@ -104,8 +104,9 @@ public class MainActivity extends AppCompatActivity {
         CardView objectButton = findViewById(R.id.objectbutton);
         CardView wordsButton = findViewById(R.id.wordsButton);
         CardView st = findViewById(R.id.btnspeechtotext);
+        settingbtn = findViewById(R.id.settings);
         micButton.setOnClickListener(v -> startVoiceRecognition());
-        eyebtn.setOnClickListener(new View.OnClickListener() {
+        settingbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         objectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

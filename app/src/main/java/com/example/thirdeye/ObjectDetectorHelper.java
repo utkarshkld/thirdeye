@@ -62,7 +62,7 @@ public class ObjectDetectorHelper {
     public Context context;
     public DetectorListener objectDetectorListener;
 
-    private Map<String, Long> objectResolver;
+    private static Map<String, Long> objectResolver;
     private String currobject;
     private ObjectDetector objectDetector;
     private int imageRotation;
@@ -277,7 +277,7 @@ public class ObjectDetectorHelper {
             long currTime = System.currentTimeMillis();
             currobject = t.categories().get(0).categoryName();
             long lastSpeakTime = objectResolver.getOrDefault(currobject, 0L);
-            if (lastSpeakTime + 2000<= currTime) {
+            if (lastSpeakTime + 3000<= currTime) {
                 textToSpeech.setLanguage(new Locale(cMainActivity.languageMap.get(language)));
                 speakText(translationMap.get(language+"_"+currobject),0);
                 objectResolver.replace(currobject,currTime);

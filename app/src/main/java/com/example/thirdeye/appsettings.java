@@ -1,21 +1,37 @@
 package com.example.thirdeye;
 
+import static android.provider.Telephony.TextBasedSmsColumns.STATUS;
 import static java.util.Arrays.stream;
 
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.fonts.Font;
+import android.graphics.fonts.FontStyle;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,6 +69,7 @@ public class appsettings extends AppCompatActivity {
     private String inputlang = MainActivity.input_lang;
     private String trans_input = MainActivity.trans_input;
     private boolean alreadydownloaded = false;
+    private ImageView backbtn;
     private boolean toret = false;
 
     private List<Settings> finalset;
@@ -71,6 +88,7 @@ public class appsettings extends AppCompatActivity {
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
         switchPartiallyBlind = findViewById(R.id.switchPartiallyBlind);
+        backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
         cancelbtn = findViewById(R.id.buttonCancel);
         getAllSettings(this::onSettingsListLoaded);
@@ -80,14 +98,32 @@ public class appsettings extends AppCompatActivity {
                 onBackPressed();
             }
         });
+        backbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
         applybtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
+                    Spinner spinner = spinnerDefaultLanguage;
+                    Field popup = Spinner.class.getDeclaredField("mPopup");
+                    popup.setAccessible(true);
+
+                    // Get private mPopup member variable and try cast to ListPopupWindow
+                    android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinner);
+                    Log.d("height check", " happen" + popupWindow);
+                } catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
+                    // silently fail...
+                    Log.d("height check","can't happen");
+                }
 
                 // implementation of query
                 downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()));
-
             }
+
         });
 
 
@@ -99,10 +135,13 @@ public class appsettings extends AppCompatActivity {
 
         List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
 
-        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,languageMap.keySet().toArray(new String[0]));
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        text_det_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, textDetList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,languageMap.keySet().toArray(new String[0]));
+
+        adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+        setdropdownheight(spinnerDefaultLanguage);
+        setdropdownheight(spinnertranslanguage);
         spinnerDefaultLanguage.setAdapter(adapter);
         spinnertranslanguage.setAdapter(adapter);
         spinnerinputlang.setAdapter(text_det_adapter);
@@ -116,11 +155,31 @@ public class appsettings extends AppCompatActivity {
 
 
 
+
         // Setup Switch for Partially Blind
 
     }
     public interface DownloadLanguageCallback {
         void onDownloadComplete(boolean result);
+    }
+    public void setdropdownheight(Spinner spinner){
+        try {
+            Field popup = Spinner.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
+
+            // Get private mPopup member variable and try cast to ListPopupWindow
+            android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinner);
+            Log.d("height check"," happen"+popupWindow);
+            popupWindow.setHeight(50);
+//            popupWindow.setVerticalOffset(10);
+//            popupWindow.setWidth(50);
+            // Set popupWindow height to 500px
+
+        }
+        catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
+            // silently fail...
+            Log.d("height check","can't happen");
+        }
     }
     public void downloadLanguage(String language) {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

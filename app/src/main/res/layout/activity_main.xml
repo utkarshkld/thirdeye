@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="90dp"
         android:id="@+id/llTitleBar"
         android:orientation="horizontal"
         android:background="@drawable/background"
@@ -18,11 +18,24 @@
 
         <ImageView
             android:id="@+id/eyebtn"
-            android:layout_width="@dimen/_40sdp"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/rdeye"
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/_30sdp"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/settings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/settings"
+            android:layout_gravity="center"
+            android:layout_marginRight="@dimen/_30sdp"
+            />
+
 
     </LinearLayout>
 
@@ -71,7 +84,7 @@
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="@color/backgroud"
                 app:cardCornerRadius="@dimen/_8sdp"
-                app:cardElevation="8dp"
+                app:cardElevation="0dp"
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
@@ -82,10 +95,10 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:background="@drawable/background_card"
-                        android:padding="@dimen/_10sdp"
+                        android:padding="@dimen/_13sdp"
                         android:src="@drawable/file" />
 
                     <TextView
@@ -114,7 +127,7 @@
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="@color/backgroud"
                 app:cardCornerRadius="8dp"
-                app:cardElevation="8dp"
+                app:cardElevation="0dp"
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
@@ -125,10 +138,10 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:background="@drawable/background_card"
-                        android:padding="@dimen/_10sdp"
+                        android:padding="@dimen/_13sdp"
                         android:src="@drawable/object" />
 
                     <TextView
@@ -136,9 +149,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/_7sdp"
                         android:padding="@dimen/_5sdp"
-                        android:textSize="20dp"
                         android:text="Object"
                         android:textColor="@color/white"
+                        android:textSize="20dp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -157,7 +170,7 @@
                 android:layout_gravity="fill"
                 app:cardBackgroundColor="@color/backgroud"
                 app:cardCornerRadius="8dp"
-                app:cardElevation="8dp"
+                app:cardElevation="0dp"
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
@@ -168,8 +181,8 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:background="@drawable/background_card"
                         android:padding="@dimen/_10sdp"
                         android:src="@drawable/speech_to_text" />

@@ -34,7 +34,7 @@
 
     <EditText
         android:layout_width="@dimen/_280sdp"
-        android:layout_height="@dimen/_40sdp"
+        android:layout_height="52dp"
         android:id="@+id/editTextTranslate"
         android:background="@drawable/textbackground"
         android:hint="Write what you want to translate"
@@ -44,7 +44,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:paddingStart="22dp"
-        android:textSize="@dimen/_14sdp"
+        android:textSize="20dp"
         android:paddingEnd="22dp"
 
         android:textColorHint="@color/backText"
@@ -63,8 +63,10 @@
 
         <Spinner
             android:layout_width="@dimen/_280sdp"
-            android:layout_height="@dimen/_40sdp"
-            android:paddingStart="20dp"
+            android:layout_height="52dp"
+            android:overlapAnchor="false"
+
+            android:dropDownWidth="@dimen/_280sdp"
             android:layout_centerHorizontal="true"
             android:id="@+id/sourceLanguageSpinner"
             android:textColor="#FFFFFF"
@@ -86,25 +88,28 @@
 
         <Spinner
             android:layout_width="@dimen/_280sdp"
-            android:layout_height="@dimen/_40sdp"
-            android:paddingStart="20dp"
+            android:layout_height="52dp"
+            android:overlapAnchor="false"
+            android:dropDownWidth="@dimen/_280sdp"
             android:id="@+id/targetLanguageSpinner"
             android:textColor="@color/white"
             />
 
     </LinearLayout>
 
+
     <TextView
         android:id="@+id/translatedText"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_100sdp"
-        android:layout_below="@id/targetLanguageSpinnerll"
         android:layout_above="@id/llgridView"
+        android:layout_below="@id/targetLanguageSpinnerll"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="10dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="3dp"
+        android:layout_marginBottom="15dp"
+        android:hint="Translated Text"
         android:paddingStart="22dp"
         android:paddingTop="27dp"
         android:paddingEnd="22dp"
@@ -112,14 +117,7 @@
         android:text=""
         android:textColor="@color/white"
         android:textColorHint="@color/backText"
-        android:textSize="@dimen/_20sdp"
-        android:hint="Translated Text"
-        />
-
-
-
-
-
+        android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
         android:id="@+id/llgridView"
@@ -148,9 +146,9 @@
                 android:layout_column="1"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                app:cardBackgroundColor="@color/backgroud"
+                app:cardBackgroundColor="#161616"
                 app:cardCornerRadius="8dp"
-                app:cardElevation="8dp"
+                app:cardElevation="0dp"
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
@@ -191,9 +189,9 @@
                 android:layout_column="2"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                app:cardBackgroundColor="@color/backgroud"
+                app:cardBackgroundColor="#161616"
                 app:cardCornerRadius="8dp"
-                app:cardElevation="8dp"
+                app:cardElevation="0dp"
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout

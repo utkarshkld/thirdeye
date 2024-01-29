@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:id="@+id/rellayout"
     tools:context=".TextSpeech"
-    android:background="@color/backgroud">
+    android:background="@color/black">
 
     <!-- Right-aligned buttons -->
 
@@ -59,37 +59,48 @@
         android:layout_centerHorizontal="true"
 
         android:layout_marginBottom="0dp" />
-
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/textbackground"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_40sdp"
+        android:layout_marginBottom="@dimen/_16sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/llTitleBar"
+        >
 
     <Spinner
         android:id="@+id/spinnerLanguages"
-        android:layout_width="@dimen/_80sdp"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="40dp"
         android:layout_below="@+id/llTitleBar"
-        android:layout_alignParentEnd="true"
-
-        android:layout_marginTop="@dimen/_20sdp"
-        android:layout_marginEnd="@dimen/_50sdp"
-        android:layout_marginBottom="@dimen/_16sdp"
-        android:background="@drawable/textbackground"
+        android:overlapAnchor="false"
         android:padding="@dimen/_2sdp"
 
         />
-
+    </LinearLayout>
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/textbackground"
+    android:layout_marginLeft="@dimen/_40sdp"
+    android:layout_marginTop="@dimen/_20sdp"
+    android:id="@+id/spinnerdetectlangll"
+    android:layout_marginBottom="@dimen/_16sdp"
+    android:layout_below="@+id/llTitleBar"
+    >
     <Spinner
-        android:id="@+id/detectlnguage"
-        android:layout_width="@dimen/_80sdp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/llTitleBar"
+    android:id="@+id/detectlnguage"
+    android:layout_width="@dimen/_100sdp"
+    android:layout_height="40dp"
+    android:overlapAnchor="false"
 
-        android:layout_marginLeft="@dimen/_50sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+    android:padding="@dimen/_2sdp"
 
-        android:layout_marginBottom="@dimen/_16sdp"
-        android:background="@drawable/textbackground"
-        android:padding="@dimen/_2sdp"
+    /></LinearLayout>
 
-        />
+
 
     <TextView
         android:id="@+id/textView"
@@ -97,7 +108,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/btnTakePicture"
-        android:layout_below="@id/spinnerLanguages"
+        android:layout_below="@+id/spinnerdetectlangll"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="@dimen/_20sdp"
         android:scrollbars="vertical"

@@ -53,20 +53,27 @@
                 android:layout_marginBottom="@dimen/_15sdp"
                 android:layout_marginStart="@dimen/_22sdp"
                 android:layout_marginEnd="@dimen/_10sdp"/>
-
-            <Spinner
-                android:id="@+id/objdetspinnerlang"
-                android:layout_width="@dimen/_80sdp"
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-
-                android:layout_marginLeft="@dimen/_150sdp"
+                android:id="@+id/spinnerll"
                 android:layout_gravity="center"
-
                 android:background="@drawable/textbackground"
-                android:padding="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_22sdp">
+                <Spinner
 
-                />
+                    android:id="@+id/objdetspinnerlang"
+                    android:layout_width="120dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+
+                    android:overlapAnchor="false"
+                    android:padding="@dimen/_2sdp" />
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -100,6 +107,11 @@
             app:defaultNavHost="true"
             app:navGraph="@navigation/nav_graph"
             tools:context=".cMainActivity" />
+
+
+
+
+
 
 
     </RelativeLayout>

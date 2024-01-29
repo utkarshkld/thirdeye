@@ -30,6 +30,9 @@
         <item name="android:letterSpacing">0.02</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
+    <style name="SwitchTheme" >
+        <item name="android:colorControlActivated">#757575</item>
+    </style>
 
 
 

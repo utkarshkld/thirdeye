@@ -866,6 +866,7 @@ public class TextSpeech extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         releaseCamera();
+        textToSpeech.shutdown();
         super.onBackPressed();
 
     }

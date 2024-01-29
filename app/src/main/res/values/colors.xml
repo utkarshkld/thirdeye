@@ -14,7 +14,7 @@
     <color name="icPressed">#AAFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="backgroud">#A1000000</color>
+    <color name="backgroud">#161616</color>
     <color name="TextColor">#FFB4B4B4</color>
     <color name="backText">#5A5A5A</color>
     <color name="button_clicked_color">#1B909F</color>
