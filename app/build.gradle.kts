@@ -59,11 +59,12 @@ android {
 project.extra["ASSET_DIR"] = projectDir.toString() + "/src/main/assets"
 
 dependencies {
+
     implementation(kotlin("stdlib"))
     implementation("androidx.core:core-ktx:1.6.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
-    implementation ("com.google.android.material:material:1.5.0")
+    implementation("com.google.android.material:material:1.6.1")
 // App compat and UI things
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")

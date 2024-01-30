@@ -125,8 +125,8 @@
 
         android:layout_marginBottom="15dp"
         android:hint="Translated Text"
-        android:paddingStart="22dp"
-        android:paddingTop="27dp"
+
+        android:paddingTop="22dp"
         android:paddingEnd="22dp"
         android:paddingBottom="27dp"
         android:text=""
@@ -140,7 +140,6 @@
         android:id="@+id/llgridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="5dp"
         android:layout_gravity="bottom"
@@ -167,7 +166,7 @@
                 android:layout_column="0"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                app:cardBackgroundColor="#161616"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
                 android:foreground="@drawable/ripple_card">
@@ -211,7 +210,7 @@
                 android:layout_column="1"
                 android:layout_columnWeight="1"
                 android:layout_gravity="fill"
-                app:cardBackgroundColor="#161616"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
                 android:foreground="@drawable/ripple_card">

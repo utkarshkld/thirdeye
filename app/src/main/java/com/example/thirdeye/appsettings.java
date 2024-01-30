@@ -2,12 +2,14 @@ package com.example.thirdeye;
 
 import static android.provider.Telephony.TextBasedSmsColumns.STATUS;
 import static java.util.Arrays.stream;
-
+import java.util.Calendar;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontStyle;
+import androidx.appcompat.widget.SwitchCompat;
+import android.speech.tts.TextToSpeech;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,6 +52,7 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.mlkit.common.model.RemoteModelManager;
 import com.google.mlkit.nl.translate.TranslateRemoteModel;
 
@@ -60,13 +63,16 @@ import com.google.mlkit.nl.translate.TranslatorOptions;
 public class appsettings extends AppCompatActivity {
 
     private SeekBar seekBarSpeechRate;
+    Calendar calendar;
     ProgressDialog progressDialog2;
     private Spinner spinnerDefaultLanguage,spinnerinputlang,spinnertranslanguage;
-    private Switch switchPartiallyBlind;
+    private SwitchCompat switchPartiallyBlind;
     private LinearLayout llsettings;
     private Button applybtn;
+    private TextToSpeech textToSpeech;
     private Button cancelbtn;
     private HashMap<String, String> languageMap = new HashMap<>();
+    private HashMap<Integer, String> WeekDays = new HashMap<>();
     private ProgressDialog progressDialog;
     private String ouptutlang = MainActivity.output_lang;
     private boolean blindness = MainActivity.blindness;
@@ -93,12 +99,49 @@ public class appsettings extends AppCompatActivity {
         spinnertranslanguage = findViewById(R.id.spinnertransinputlanguage);
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
-        switchPartiallyBlind = findViewById(R.id.switchPartiallyBlind);
+        switchPartiallyBlind = findViewById(R.id.partallyblindswitch);
         llsettings = findViewById(R.id.llsettings);
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
         cancelbtn = findViewById(R.id.buttonCancel);
+        initializetexttospeech();
         getAllSettings(this::onSettingsListLoaded);
+
+
+
+        seekBarSpeechRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            boolean check = true;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // This method is called when the progress of the seek bar changes
+
+                    calendar = Calendar.getInstance();
+                    int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+                    textToSpeech.speak("Today is " + WeekDays.get(dayOfWeek), TextToSpeech.QUEUE_FLUSH, null, null);
+                    textToSpeech.setSpeechRate((progress / 100.0f) * 2.0f);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // This method is called when the user starts touching the seek bar
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // This method is called when the user stops touching the seek bar
+
+                    calendar = Calendar.getInstance();
+                    int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+                    int currprogg = seekBarSpeechRate.getProgress();
+                    textToSpeech.speak("Today is " + WeekDays.get(dayOfWeek), TextToSpeech.QUEUE_FLUSH, null, null);
+                    textToSpeech.setSpeechRate((currprogg / 100.0f) * 2.0f);
+            }
+        });
+
         cancelbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,15 +218,22 @@ public class appsettings extends AppCompatActivity {
         spinnertranslanguage.setSelection(languages.indexOf(trans_input)); // this is for translation model have to update the database
         spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
         switchPartiallyBlind.setChecked(blindness);
-        seekBarSpeechRate.setProgress((int)(rate*100/2.0f));
-
-
-
-
-
+        seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
 
         // Setup Switch for Partially Blind
 
+    }
+    public void initializetexttospeech(){
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    textToSpeech.setLanguage(new Locale("en"));
+                } else {
+                    Toast.makeText(appsettings.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        },"com.google.android.tts");
     }
     public static int dpToPx(int dp)
     {
@@ -388,6 +438,13 @@ public class appsettings extends AppCompatActivity {
         thread.start();
     }
     private void initializelanguageMap(){
+        WeekDays.put(1, "Sunday");
+        WeekDays.put(2, "Monday");
+        WeekDays.put(3, "Tuesday");
+        WeekDays.put(4, "Wednesday");
+        WeekDays.put(5, "Thursday");
+        WeekDays.put(6, "Friday");
+        WeekDays.put(7, "Saturday");
         languageMap.put("Afrikaans", "af");
         //languageMap.put("Albanian", "sq");
         languageMap.put("Arabic", "ar");

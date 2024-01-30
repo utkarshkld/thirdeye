@@ -66,6 +66,7 @@ public class LangTranslate extends AppCompatActivity {
     private TextView translatedTextView; // Added TextView to display translated text
     private String outputlangugage = MainActivity.output_lang;
     private String trans_input = MainActivity.trans_input;
+    private float speeh_rate = MainActivity.speech_rate;
 
 
     // Map to map language codes to their full names
@@ -113,6 +114,7 @@ public class LangTranslate extends AppCompatActivity {
         targetLanguageSpinner.setAdapter(adapter);
         sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(trans_input));
         targetLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
+        initializetexttospeech();
         editTextLetters.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -124,16 +126,7 @@ public class LangTranslate extends AppCompatActivity {
                 }
             }
         });
-        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    textToSpeech.setLanguage(Locale.US);
-                } else {
-                    Toast.makeText(LangTranslate.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        },"com.google.android.tts");
+
 
         btnVoiceInput.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -227,7 +220,20 @@ public class LangTranslate extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+    private void initializetexttospeech(){
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    textToSpeech.setLanguage(Locale.US);
+                } else {
+                    Toast.makeText(LangTranslate.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        },"com.google.android.tts");
+        textToSpeech.setSpeechRate(speeh_rate);
 
+    }
     private void detectAndTranslateLanguage(String sourceText) {
         LanguageIdentifier languageIdentifier = LanguageIdentification.getClient();
 
