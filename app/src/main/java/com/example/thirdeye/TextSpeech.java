@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -350,12 +351,24 @@ public class TextSpeech extends AppCompatActivity {
         languageAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, languageMap.keySet().toArray(new String[0]));
         languageAdapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+        spinnerLanguages.setDropDownHorizontalOffset(dpToPx(-3));
+        text_det_spinner.setDropDownHorizontalOffset(dpToPx(-3));
+//        spinnerLanguages.setDropDownVerticalOffset(dpToPx(23));
         spinnerLanguages.setAdapter(languageAdapter);
         text_det_spinner.setAdapter(text_det_adapter);
         Log.d("checking input language",input_lang);
         text_det_spinner.setSelection(textDetList.indexOf(input_lang));
         spinnerLanguages.setSelection(selectedLanguages.indexOf(outputlangugage));
 
+    }
+    public static int dpToPx(int dp)
+    {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int pxToDp(int px)
+    {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 
 

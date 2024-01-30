@@ -2,6 +2,7 @@ package com.example.thirdeye;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -57,8 +58,10 @@ public class cMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 isPlay = false;
-                ObjectDetectorHelper.textToSpeech.shutdown();
-                ObjectDetectorHelper.textToSpeech.stop();
+                if(ObjectDetectorHelper.textToSpeech!=null) {
+                    ObjectDetectorHelper.textToSpeech.stop();
+                    ObjectDetectorHelper.textToSpeech.shutdown();
+                }
                 onBackPressed();
             }
         });
@@ -66,8 +69,10 @@ public class cMainActivity extends AppCompatActivity {
                                        @Override
                                        public void onClick(View v) {
                                            isPlay = false;
-                                           ObjectDetectorHelper.textToSpeech.stop();
-                                           ObjectDetectorHelper.textToSpeech.shutdown();
+                                           if(ObjectDetectorHelper.textToSpeech!=null) {
+                                               ObjectDetectorHelper.textToSpeech.stop();
+                                               ObjectDetectorHelper.textToSpeech.shutdown();
+                                           }
                                            onBackPressed();
                                        }
                                    });
@@ -76,8 +81,19 @@ public class cMainActivity extends AppCompatActivity {
         selectedLanguages = new ArrayList<>(languageMap.values());
         languageAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, languageMap.keySet().toArray(new String[0]));
         languageAdapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+//        spinnerLanguages.setDropDownVerticalOffset(dpToPx(26));
+        spinnerLanguages.setDropDownHorizontalOffset(dpToPx(-3));
         spinnerLanguages.setAdapter(languageAdapter);
         spinnerLanguages.setSelection(selectedLanguages.indexOf(outputlang));
+    }
+    public static int dpToPx(int dp)
+    {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int pxToDp(int px)
+    {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 
     private void initializeLanguageMap() {
@@ -153,7 +169,10 @@ public class cMainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         isPlay = false;
-
+        if(ObjectDetectorHelper.textToSpeech!=null) {
+            ObjectDetectorHelper.textToSpeech.stop();
+            ObjectDetectorHelper.textToSpeech.shutdown();
+        }
         super.onBackPressed();
 
     }

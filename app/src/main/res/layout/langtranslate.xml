@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/llTitleBar"
         android:orientation="horizontal"
-        android:layout_marginBottom="20dp"
+
         android:background="@drawable/background"
         android:layout_alignParentTop="true">
 
@@ -31,22 +31,27 @@
 
 
     </LinearLayout>
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_below="@id/llTitleBar"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_above="@+id/llgridView">
     <EditText
         android:id="@+id/editTextTranslate"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_below="@+id/llTitleBar"
+
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="@dimen/_10sdp"
         android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_10sdp"
         android:background="@drawable/textbackground"
         android:hint="Write what you want to translate"
         android:imeOptions="actionDone"
-        android:paddingStart="22dp"
 
+
+        android:paddingStart="22dp"
         android:paddingEnd="22dp"
         android:singleLine="true"
         android:textColor="@color/white"
@@ -54,27 +59,27 @@
         android:textSize="20dp" />
 
     <LinearLayout
+        android:id="@+id/sourceLanguageSpinnerll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/editTextTranslate"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:id="@+id/sourceLanguageSpinnerll"
+
+        android:layout_marginTop="@dimen/_10sdp"
+
+        android:layout_marginBottom="@dimen/_10sdp"
         android:background="@drawable/textbackground"
-        android:textColor="#FFFFFF"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
-        android:layout_margin="@dimen/_10sdp"
-        >
+        android:textColor="#FFFFFF">
 
         <Spinner
+            android:id="@+id/sourceLanguageSpinner"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:overlapAnchor="false"
-
-            android:dropDownWidth="@dimen/_280sdp"
             android:layout_centerHorizontal="true"
-            android:id="@+id/sourceLanguageSpinner"
+            android:overlapAnchor="false"
+            android:popupBackground="@drawable/spinner_popup"
             android:textColor="#FFFFFF"
 
             />
@@ -84,22 +89,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+
         android:id="@+id/targetLanguageSpinnerll"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:layout_below="@+id/sourceLanguageSpinnerll"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
-        android:layout_margin="@dimen/_10sdp"
+
         >
 
         <Spinner
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:overlapAnchor="false"
-            android:dropDownWidth="@dimen/_280sdp"
+            android:popupBackground="@drawable/spinner_popup"
             android:id="@+id/targetLanguageSpinner"
             android:textColor="@color/white"
             />
@@ -114,9 +120,9 @@
         android:layout_above="@id/llgridView"
         android:layout_below="@id/targetLanguageSpinnerll"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="10dp"
+
         android:layout_marginTop="15dp"
-        android:layout_marginEnd="10dp"
+
         android:layout_marginBottom="15dp"
         android:hint="Translated Text"
         android:paddingStart="22dp"
@@ -128,10 +134,13 @@
         android:textColorHint="@color/backText"
         android:textSize="@dimen/_20sdp" />
 
+
+</LinearLayout>
     <LinearLayout
         android:id="@+id/llgridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="5dp"
         android:layout_gravity="bottom"
@@ -141,6 +150,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+
             android:layout_marginLeft="@dimen/_2sdp"
             android:layout_marginRight="@dimen/_2sdp"
             android:columnCount="3"
@@ -171,8 +181,8 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="@dimen/_120sdp"
-                        android:layout_height="@dimen/_80sdp"
+                        android:layout_width="@dimen/_100sdp"
+                        android:layout_height="@dimen/_60sdp"
                         android:background="@drawable/background_card"
                         android:padding="@dimen/_10sdp"
                         android:src="@drawable/mic_fill11" />
@@ -215,8 +225,8 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="@dimen/_120sdp"
-                        android:layout_height="@dimen/_80sdp"
+                        android:layout_width="@dimen/_100sdp"
+                        android:layout_height="@dimen/_60sdp"
                         android:background="@drawable/background_card_translate"
                         android:padding="13dp"
                         android:src="@drawable/translate" />

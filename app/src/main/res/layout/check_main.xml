@@ -67,12 +67,13 @@
                 <Spinner
 
                     android:id="@+id/objdetspinnerlang"
-                    android:layout_width="120dp"
-                    android:layout_height="50dp"
+                    android:layout_width="150dp"
+                    android:layout_height="52dp"
+                    android:dropDownWidth="150dp"
                     android:layout_gravity="center"
-
+                    android:popupBackground="@drawable/spinner_popup"
                     android:overlapAnchor="false"
-                    android:padding="@dimen/_2sdp" />
+                    android:padding="3dp" />
             </LinearLayout>
 
         </LinearLayout>

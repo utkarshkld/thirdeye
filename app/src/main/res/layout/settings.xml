@@ -29,7 +29,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/_16sdp"
+    android:padding="20dp"
 
     > <!-- Set background color to black -->
 
@@ -53,6 +53,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/llsettings"
         android:layout_marginBottom="15dp"
         android:layout_centerHorizontal="true"
         android:background="@drawable/textbackground"
@@ -66,9 +67,38 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_centerHorizontal="true"
+            android:popupBackground="@drawable/spinner_popup_settings2"
 
             android:overlapAnchor="false"
-            android:textSize="@dimen/_20sdp" />
+            android:textSize="@dimen/_50sdp" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/inputlangagetranslation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Translation Input Language"
+        android:textSize="@dimen/_15sdp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="@dimen/_15sdp" /> <!-- Set text color to white -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/textbackground"
+        android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_centerHorizontal="true"
+        >
+
+        <Spinner
+            android:id="@+id/spinnertransinputlanguage"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:overlapAnchor="false"
+            android:popupBackground="@drawable/spinner_popup_settings2"
+            />
     </LinearLayout>
     <TextView
         android:id="@+id/inputlangage"
@@ -97,41 +127,10 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:overlapAnchor="false"
-
-
-            android:layout_centerHorizontal="true"
-
-            android:textSize="@dimen/_20sdp" />
+            android:popupBackground="@drawable/spinner_popup_settings"
+             />
     </LinearLayout>
-    <TextView
-        android:id="@+id/inputlangagetranslation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Translation Input Language"
-        android:textSize="@dimen/_15sdp"
-        android:textColor="@android:color/white"
-        android:layout_marginBottom="@dimen/_15sdp" /> <!-- Set text color to white -->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/textbackground"
-        android:textColor="#FFFFFF"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:layout_centerHorizontal="true"
-        >
-
-        <Spinner
-            android:id="@+id/spinnertransinputlanguage"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_centerHorizontal="true"
-            android:overlapAnchor="false"
-
-            />
-    </LinearLayout>
 
     <!-- Set text color to white -->
     <TextView

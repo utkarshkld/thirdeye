@@ -3,6 +3,7 @@ package com.example.thirdeye;
 import static android.provider.Telephony.TextBasedSmsColumns.STATUS;
 import static java.util.Arrays.stream;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
@@ -10,6 +11,7 @@ import android.graphics.fonts.FontStyle;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -61,6 +63,7 @@ public class appsettings extends AppCompatActivity {
     ProgressDialog progressDialog2;
     private Spinner spinnerDefaultLanguage,spinnerinputlang,spinnertranslanguage;
     private Switch switchPartiallyBlind;
+    private LinearLayout llsettings;
     private Button applybtn;
     private Button cancelbtn;
     private HashMap<String, String> languageMap = new HashMap<>();
@@ -91,6 +94,7 @@ public class appsettings extends AppCompatActivity {
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
         switchPartiallyBlind = findViewById(R.id.switchPartiallyBlind);
+        llsettings = findViewById(R.id.llsettings);
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
         cancelbtn = findViewById(R.id.buttonCancel);
@@ -137,12 +141,17 @@ public class appsettings extends AppCompatActivity {
 
         });
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
 
 
-
+        Log.d("getting widht of ll",""+width+"pixels");
         initializelanguageMap();
         List<String> languages = new ArrayList<>(languageMap.values());
         List<String> keys = new ArrayList<>(languageMap.keySet());
+
 
         List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
 
@@ -151,7 +160,14 @@ public class appsettings extends AppCompatActivity {
 
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-
+//        spinnertranslanguage.setDropDownVerticalOffset(dpToPx(26));
+//        spinnerDefaultLanguage.setDropDownVerticalOffset(dpToPx(26));
+        spinnerDefaultLanguage.setDropDownHorizontalOffset(dpToPx(-10));
+        spinnerinputlang.setDropDownHorizontalOffset(dpToPx(-10));
+        spinnertranslanguage.setDropDownHorizontalOffset(dpToPx(-10));
+        spinnertranslanguage.setDropDownWidth(width-dpToPx(40));
+        spinnerinputlang.setDropDownWidth(width-dpToPx(40));
+        spinnerDefaultLanguage.setDropDownWidth(width-dpToPx(40));
         spinnerDefaultLanguage.setAdapter(adapter);
         spinnertranslanguage.setAdapter(adapter);
         spinnerinputlang.setAdapter(text_det_adapter);
@@ -168,6 +184,15 @@ public class appsettings extends AppCompatActivity {
 
         // Setup Switch for Partially Blind
 
+    }
+    public static int dpToPx(int dp)
+    {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int pxToDp(int px)
+    {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
     private void applyProgressDialog() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
