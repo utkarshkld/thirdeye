@@ -102,7 +102,7 @@ public class LangTranslate extends AppCompatActivity {
         initializeMap();
         List<String> selectedLanguages = new ArrayList<>(languageMap.values()); // Get language names from the map
         List<String> keylang = new ArrayList<>(languageMap.keySet());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, languageMap.keySet().toArray(new String[0]));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, languageMap.keySet().toArray(new String[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         sourceLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
         targetLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
