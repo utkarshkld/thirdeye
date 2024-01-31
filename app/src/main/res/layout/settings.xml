@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/backgroud">
+    android:background="@color/backgroud"
+    android:id="@+id/llsettings">
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="80dp"
@@ -56,10 +57,9 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/llsettings"
-        android:layout_marginBottom="10dp"
+        android:layout_height="52dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
         android:paddingStart="10dp"
@@ -67,28 +67,32 @@
         >
 
         <Spinner
+            android:layout_gravity="center_vertical"
             android:id="@+id/spinnerDefaultLanguage"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_centerHorizontal="true"
+            android:scrollbarStyle="insideInset"
+            android:scrollbarThumbVertical="@drawable/scrollbar"
+            android:layout_height="match_parent"
             android:popupBackground="@drawable/spinner_popup_settings"
-            android:spinnerMode="dropdown"
             android:overlapAnchor="false"/>
     </LinearLayout>
+
+
     <TextView
         android:id="@+id/inputlangage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:text="Default Input Language"
-        android:textSize="@dimen/_15sdp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@android:color/white"
-        android:layout_marginBottom="10dp" /> <!-- Set text color to white -->
+        android:textSize="@dimen/_15sdp" /> <!-- Set text color to white -->
 
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/textbackground"
@@ -100,7 +104,7 @@
         <Spinner
             android:id="@+id/spinnerDefaultinputlanguage"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="match_parent"
             android:overlapAnchor="false"
             android:popupBackground="@drawable/spinner_popup_settings"
             />
@@ -116,7 +120,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/textbackground"
         android:textColor="#FFFFFF"
@@ -128,7 +132,7 @@
         <Spinner
             android:id="@+id/spinnertransinputlanguage"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="match_parent"
             android:overlapAnchor="false"
             android:popupBackground="@drawable/spinner_popup_settings2"
             />
@@ -141,9 +145,10 @@
         android:id="@+id/textSpeechRate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/cairo_semibold"
         android:text="Speech Rate"
-        android:textSize="@dimen/_15sdp"
-        android:textColor="@android:color/white" /> <!-- Set text color to white -->
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_15sdp" /> <!-- Set text color to white -->
 
     <!-- Default Reading Language -->
     <SeekBar

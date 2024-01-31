@@ -2,8 +2,9 @@
     <!-- Base application theme. -->
 
         <!-- Base application theme. -->
-        <style name="Base.Theme.thirdeye" parent="Theme.Material3.DayNight.NoActionBar">
+        <style name="Base.Theme.thirdeye" parent="Theme.AppCompat.NoActionBar">
             <!-- Customize your light theme here. -->
+            <item name="android:fontFamily">@font/cairo_semibold</item>
             <item name="colorPrimary">@color/black</item>
         </style>
 
@@ -33,6 +34,9 @@
     <style name="SwitchTheme" >
         <item name="android:colorControlActivated">#757575</item>
     </style>
+
+
+
 
 
 

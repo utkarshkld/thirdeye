@@ -18,6 +18,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -198,8 +199,8 @@ public class appsettings extends AppCompatActivity {
 
         List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
 
-        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, textDetList);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,languageMap.keySet().toArray(new String[0]));
+        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, textDetList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,keys);
 
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
@@ -219,7 +220,6 @@ public class appsettings extends AppCompatActivity {
         spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
         switchPartiallyBlind.setChecked(blindness);
         seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
-
         // Setup Switch for Partially Blind
 
     }
