@@ -14,6 +14,7 @@ import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -33,6 +34,7 @@ import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,12 +54,14 @@ public class MainActivity extends AppCompatActivity {
     private int i = 0;
     private ImageView eyebtn,settingbtn;
     private String UserDeafultLanguage = Locale.getDefault().getLanguage();
-    public static String output_lang;
+    public static String output_lang = null;
     public static float speech_rate;
     public static boolean blindness;
     public static String input_lang;
     public static String trans_input;
     public static List<Settings> finalset;
+    public boolean first,second,third;
+    public static Map<String, List<String>> commandmap = new HashMap<>();
 
 
 
@@ -84,7 +88,13 @@ public class MainActivity extends AppCompatActivity {
         // we
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
-                int result = textToSpeech.setLanguage(Locale.getDefault());
+                int result;
+                if(output_lang == null) {
+                    result = textToSpeech.setLanguage(Locale.getDefault());
+                }
+                else{
+                    result = textToSpeech.setLanguage(new Locale(output_lang));
+                }
 
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     // Handle language initialization errors here
@@ -178,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
     public void onSettingsListLoaded(List<Settings> settingsList) {
         finalset = settingsList;
         if(finalset == null || finalset.size() == 0){
-            speech_rate = 0.8f;
+            speech_rate = 1f;
             output_lang = UserDeafultLanguage;
             blindness = false;
             input_lang = "English";
@@ -217,6 +227,58 @@ public class MainActivity extends AppCompatActivity {
         });
         thread.start();
     }
+
+
+//    public boolean onkeydown(int keyCode, KeyEvent event) {
+//
+//        if (keyCode == KeyEvent.KEYCODE_POWER){
+//            first = true;
+//        }
+//        else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+//            second = true;
+//        }else if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+//            third = true;
+//        }
+//        if(first && third) {
+//            // read
+//            textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
+//            Intent intent = new Intent(MainActivity.this, TextSpeech.class);
+//            startActivity(intent);
+//            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+//
+//        }else if(first && second){
+//            //langtranslate
+//            textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
+//            Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+//            startActivity(intent);
+//            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+//
+//
+//        }else if(second && third){
+//            //objdet
+//            textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
+//            Intent intent = new Intent(MainActivity.this, cMainActivity.class);
+//            startActivity(intent);
+//            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+//        }
+//
+//        return true;
+//    }
+//    public boolean onKeyUp(int keyCode, KeyEvent event) {
+//
+//        if (keyCode == KeyEvent.KEYCODE_POWER){
+//            first = false;
+//        }
+//        else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+//            second = false;
+//        }
+//        else if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+//            third = false;
+//        }
+//        return true;
+//    }
+
+
 
     public  void deleteATodo(Settings setting) {
 
@@ -270,20 +332,48 @@ public class MainActivity extends AppCompatActivity {
     private void startVoiceRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a command...");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
 
+        // Get the selected language code from the map
+        String selectedSourceLanguage = output_lang;
+
+        if (selectedSourceLanguage != null) {
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
+        }
         try {
             startActivityForResult(intent, SPEECH_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "Speech recognition is not available on your device.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void startRecording() {
         ImageView micButton = findViewById(R.id.micButton);
         micButton.performClick();
     }
+    private boolean partialmatch(String text, String pattern,int n,int m){
+        int dp[][]=new int[2][m+1];
+        int res=0;
 
+        for(int i=1;i<=n;i++)
+        {
+            for(int j=1;j<=m;j++)
+            {
+                if(text.charAt(i-1)==pattern.charAt(j-1))
+                {
+                    dp[i%2][j]=dp[(i-1)%2][j-1]+1;
+                    if(dp[i%2][j]>res)
+                        res=dp[i%2][j];
+                }
+                else dp[i%2][j]=0;
+            }
+        }
+        if(res > m/2){
+            return true;
+        }
+        return false;
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -292,32 +382,121 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (matches != null && !matches.isEmpty()) {
                 String spokenText = matches.get(0).toLowerCase();
+                List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
+//                Log.d("checking input cmd",wordList.toString());
+                Log.d("object cmd",commandmap.get("object").toString());
+                Log.d("traslate cmd",commandmap.get("translate").toString());
+                Log.d("read cmd",commandmap.get("read").toString());
+                boolean ismatched = false;
+                //we got the string seperated by space
+                if(!ismatched){                   // for object
 
-                if (spokenText.contains("object")) {
-                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
-                    Intent intent = new Intent(MainActivity.this, cMainActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                    for(String str : commandmap.get("object")){
+                        int n = str.length();
+                        for(String str2 : wordList) {
+                            int m = str2.length();
+                            if (partialmatch(str,str2,n,m)) {
+                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                Intent intent = new Intent(MainActivity.this, cMainActivity.class);
+                                startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                ismatched = true;
+                                break;
+                            }
+                        }
+                        if(ismatched){
+                            break;
+                        }
+                    }
+                }
+                if(!ismatched){
+                    // for object
 
-                } else if (spokenText.contains("read")) {
-                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
-                    Intent intent = new Intent(MainActivity.this, TextSpeech.class);
-                    startActivity(intent);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-
-                } else if (spokenText.contains("translate")) {
-                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
-                    Intent intent = new Intent(MainActivity.this, LangTranslate.class);
-                    startActivity(intent);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-
-                }else if(spokenText.contains("setting")){
-                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
-                    Intent intent = new Intent(MainActivity.this, appsettings.class);
-                    startActivity(intent);
-                }else {
+                    for(String str : commandmap.get("read")){
+                        int n = str.length();
+                        for(String str2 : wordList) {
+                            int m = str2.length();
+                            if (partialmatch(str,str2,n,m)) {
+                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                Intent intent = new Intent(MainActivity.this, TextSpeech.class);
+                                startActivity(intent);;
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                ismatched = true;
+                                break;
+                            }
+                        }
+                        if(ismatched){
+                            break;
+                        }
+                    }
+                }
+                if(!ismatched){
+                    // for object
+                    for(String str : commandmap.get("translate")){
+                        int n = str.length();
+                        for(String str2 : wordList) {
+                            int m = str2.length();
+                            if (partialmatch(str,str2,n,m)) {
+                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+                                startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                ismatched = true;
+                                break;
+                            }
+                        }
+                        if(ismatched){
+                            break;
+                        }
+                    }
+                }
+                if(!ismatched){
+                    for(String str : commandmap.get("settings")){
+                        int n = str.length();
+                        for(String str2 : wordList) {
+                            int m = str2.length();
+                            if (partialmatch(str,str2,n,m)) {
+                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                Intent intent = new Intent(MainActivity.this, appsettings.class);
+                                startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                ismatched = true;
+                                break;
+                            }
+                        }
+                        if(ismatched){
+                            break;
+                        }
+                    }
+                }
+                if(!ismatched){
                     Toast.makeText(this, "Command not recognized", Toast.LENGTH_SHORT).show();
                 }
+//                if (spokenText.contains("object")) {
+//                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
+//                    Intent intent = new Intent(MainActivity.this, cMainActivity.class);
+//                    startActivity(intent);
+//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+//
+//                } else if (spokenText.contains("read")) {
+//                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
+//                    Intent intent = new Intent(MainActivity.this, TextSpeech.class);
+//                    startActivity(intent);
+//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+//
+//                } else if (spokenText.contains("translate")) {
+//                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
+//                    Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+//                    startActivity(intent);
+//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+//
+//                }else if(spokenText.contains("setting")){
+//                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
+//                    Intent intent = new Intent(MainActivity.this, appsettings.class);
+//                    startActivity(intent);
+//                }else {
+//                    Toast.makeText(this, "Command not recognized", Toast.LENGTH_SHORT).show();
+//                }
             }
         }
     }

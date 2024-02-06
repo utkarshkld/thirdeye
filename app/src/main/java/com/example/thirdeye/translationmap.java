@@ -1,8 +1,232 @@
 package com.example.thirdeye;
 import static com.example.thirdeye.MainActivity.translationMap;
+import static com.example.thirdeye.MainActivity.commandmap;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class translationmap {
 
      public static void initializetransMap() {
+             List<String> objectTranslations = new ArrayList<>();
+             objectTranslations.add("voorwerp"); // Afrikaans
+             objectTranslations.add("objekt"); // Albanian
+             objectTranslations.add("كائن"); // Arabic
+             objectTranslations.add("অবজেক্ট"); // Bengali
+             objectTranslations.add("обект"); // Bulgarian
+             objectTranslations.add("对象"); // Chinese
+             objectTranslations.add("česky"); // Czech
+             objectTranslations.add("objekt"); // Danish
+             objectTranslations.add("object"); // Dutch
+             objectTranslations.add("object"); // English
+             objectTranslations.add("objekti"); // Finnish
+             objectTranslations.add("objet"); // French
+             objectTranslations.add("obxecto"); // Galician
+             objectTranslations.add("ობიექტი"); // Georgian
+             objectTranslations.add("Objekt"); // German
+             objectTranslations.add("αντικείμενο"); // Greek
+             objectTranslations.add("વસ્તુ"); // Gujarati
+             objectTranslations.add("objè"); // Haitian
+             objectTranslations.add("אובייקט"); // Hebrew
+             objectTranslations.add("वस्तु"); // Hindi
+             objectTranslations.add("objektum"); // Hungarian
+             objectTranslations.add("hlutur"); // Icelandic
+             objectTranslations.add("objek"); // Indonesian
+             objectTranslations.add("oggetto"); // Italian
+             objectTranslations.add("オブジェクト"); // Japanese
+             objectTranslations.add("ವಸ್ತು"); // Kannada
+             objectTranslations.add("객체"); // Korean
+             objectTranslations.add("objekts"); // Latvian
+             objectTranslations.add("objektas"); // Lithuanian
+             objectTranslations.add("објект"); // Macedonian
+             objectTranslations.add("objek"); // Malay
+//             objectTranslations.add("वास्तु");
+             objectTranslations.add("വസ്തുവിന്റെ"); // Malayalam
+             objectTranslations.add("oġġett"); // Maltese
+             objectTranslations.add("ऑब्जेक्ट"); // Marathi
+             objectTranslations.add("objekt"); // Norwegian
+             objectTranslations.add("obiekt"); // Polish
+             objectTranslations.add("objeto"); // Portuguese
+             objectTranslations.add("obiect"); // Romanian
+             objectTranslations.add("объект"); // Russian
+             objectTranslations.add("objekt"); // Slovak
+             objectTranslations.add("predmet"); // Slovenian
+             objectTranslations.add("objeto"); // Spanish
+             objectTranslations.add("kitu"); // Swahili
+             objectTranslations.add("objekt"); // Swedish
+             objectTranslations.add("bagay"); // Tagalog
+             objectTranslations.add("பொருள்"); // Tamil
+             objectTranslations.add("వస్తువు"); // Telugu
+             objectTranslations.add("วัตถุ"); // Thai
+             objectTranslations.add("nesne"); // Turkish
+             objectTranslations.add("об'єкт"); // Ukrainian
+             objectTranslations.add("اشیاء"); // Urdu
+             objectTranslations.add("đối tượng");//Vietnamese
+             commandmap.put("object",objectTranslations);
+             List<String> readTranslations = new ArrayList<>();
+             readTranslations.add("lees"); // Afrikaans
+             readTranslations.add("lexoni"); // Albanian
+             readTranslations.add("اقرأ"); // Arabic
+             readTranslations.add("পড়া"); // Bengali
+             readTranslations.add("чета"); // Bulgarian
+             readTranslations.add("阅读"); // Chinese
+             readTranslations.add("číst"); // Czech
+             readTranslations.add("læse"); // Danish
+             readTranslations.add("lezení"); // Dutch
+             readTranslations.add("read"); // English
+             readTranslations.add("lue"); // Finnish
+             readTranslations.add("lire"); // French
+             readTranslations.add("ler"); // Galician
+             readTranslations.add("წაიკითხეთ"); // Georgian
+             readTranslations.add("lesen"); // German
+             readTranslations.add("διαβάζω"); // Greek
+             readTranslations.add("વાંચો"); // Gujarati
+             readTranslations.add("li"); // Haitian
+             readTranslations.add("קריאה"); // Hebrew
+             readTranslations.add("पढ़ना"); // Hindi
+             readTranslations.add("olvas"); // Hungarian
+             readTranslations.add("lesa"); // Icelandic
+             readTranslations.add("membaca"); // Indonesian
+             readTranslations.add("leggere"); // Italian
+             readTranslations.add("読む"); // Japanese
+             readTranslations.add("ಓದು"); // Kannada
+             readTranslations.add("읽기"); // Korean
+             readTranslations.add("lasīt"); // Latvian
+             readTranslations.add("skaityti"); // Lithuanian
+             readTranslations.add("читај"); // Macedonian
+             readTranslations.add("membaca"); // Malay
+             readTranslations.add("വായിക്കുക"); // Malayalam
+             readTranslations.add("taqra"); // Maltese
+             readTranslations.add("वाचा"); // Marathi
+             readTranslations.add("lese"); // Norwegian
+             readTranslations.add("czytać"); // Polish
+             readTranslations.add("ler"); // Portuguese
+             readTranslations.add("citi"); // Romanian
+             readTranslations.add("читать"); // Russian
+             readTranslations.add("čítaj"); // Slovak
+             readTranslations.add("beri"); // Slovenian
+             readTranslations.add("leer"); // Spanish
+             readTranslations.add("soma"); // Swahili
+             readTranslations.add("läsa"); // Swedish
+             readTranslations.add("magbasa"); // Tagalog
+             readTranslations.add("படிக்க"); // Tamil
+             readTranslations.add("చదువు"); // Telugu
+             readTranslations.add("อ่าน"); // Thai
+             readTranslations.add("okumak"); // Turkish
+             readTranslations.add("читати"); // Ukrainian
+             readTranslations.add("پڑھنا"); // Urdu
+             readTranslations.add("đọc"); // Vietnamese
+             commandmap.put("read",readTranslations);
+             List<String> translateTranslations = new ArrayList<>();
+             translateTranslations.add("vertaal"); // Afrikaans
+             translateTranslations.add("përkthe"); // Albanian
+             translateTranslations.add("ترجمة"); // Arabic
+             translateTranslations.add("অনুবাদ"); // Bengali
+             translateTranslations.add("превеждам"); // Bulgarian
+             translateTranslations.add("翻译"); // Chinese
+             translateTranslations.add("přeložit"); // Czech
+             translateTranslations.add("oversætte"); // Danish
+             translateTranslations.add("vertalen"); // Dutch
+             translateTranslations.add("translate"); // English
+             translateTranslations.add("kääntää"); // Finnish
+             translateTranslations.add("traduire"); // French
+             translateTranslations.add("traducir"); // Galician
+             translateTranslations.add("თარგმნა"); // Georgian
+             translateTranslations.add("übersetzen"); // German
+             translateTranslations.add("μεταφράζω"); // Greek
+             translateTranslations.add("અનુવાદ"); // Gujarati
+             translateTranslations.add("tradui"); // Haitian
+             translateTranslations.add("תרגם"); // Hebrew
+             translateTranslations.add("अनुवाद करें"); // Hindi
+             translateTranslations.add("fordít"); // Hungarian
+             translateTranslations.add("þýða"); // Icelandic
+             translateTranslations.add("menerjemahkan"); // Indonesian
+             translateTranslations.add("tradurre"); // Italian
+             translateTranslations.add("翻訳する"); // Japanese
+             translateTranslations.add("ಅನುವಾದಿಸಿ"); // Kannada
+             translateTranslations.add("번역"); // Korean
+             translateTranslations.add("tulkot"); // Latvian
+             translateTranslations.add("vertėjas"); // Lithuanian
+             translateTranslations.add("преведува"); // Macedonian
+             translateTranslations.add("terjemahkan"); // Malay
+             translateTranslations.add("അനുവാദം"); // Malayalam
+             translateTranslations.add("jtraduċi"); // Maltese
+             translateTranslations.add("भाषांतर करा"); // Marathi
+             translateTranslations.add("oversette"); // Norwegian
+             translateTranslations.add("tłumaczyć"); // Polish
+             translateTranslations.add("traduzir"); // Portuguese
+             translateTranslations.add("traduce"); // Romanian
+             translateTranslations.add("перевести"); // Russian
+             translateTranslations.add("preložiť"); // Slovak
+             translateTranslations.add("prevedi"); // Slovenian
+             translateTranslations.add("traducir"); // Spanish
+             translateTranslations.add("tafsiri"); // Swahili
+             translateTranslations.add("översätta"); // Swedish
+             translateTranslations.add("isalin"); // Tagalog
+             translateTranslations.add("மொழிபெயர்"); // Tamil
+             translateTranslations.add("అనువాదించు"); // Telugu
+             translateTranslations.add("แปล"); // Thai
+             translateTranslations.add("çevir"); // Turkish
+             translateTranslations.add("перекладати"); // Ukrainian
+             translateTranslations.add("ترجمہ کریں"); // Urdu
+             translateTranslations.add("dịch"); // Vietnamese
+             commandmap.put("translate",translateTranslations);
+             List<String> settingsTranslations = new ArrayList<>();
+             settingsTranslations.add("instellings"); // Afrikaans
+             settingsTranslations.add("parametrat"); // Albanian
+             settingsTranslations.add("الإعدادات"); // Arabic
+             settingsTranslations.add("সেটিংস"); // Bengali
+             settingsTranslations.add("настройки"); // Bulgarian
+             settingsTranslations.add("设置"); // Chinese
+             settingsTranslations.add("nastavení"); // Czech
+             settingsTranslations.add("indstillinger"); // Danish
+             settingsTranslations.add("instellingen"); // Dutch
+             settingsTranslations.add("settings"); // English
+             settingsTranslations.add("asetukset"); // Finnish
+             settingsTranslations.add("paramètres"); // French
+             settingsTranslations.add("configuración"); // Galician
+             settingsTranslations.add("პარამეტრები"); // Georgian
+             settingsTranslations.add("Einstellungen"); // German
+             settingsTranslations.add("ρυθμίσεις"); // Greek
+             settingsTranslations.add("સેટિંગ્સ"); // Gujarati
+             settingsTranslations.add("paramèt"); // Haitian
+             settingsTranslations.add("הגדרות"); // Hebrew
+             settingsTranslations.add("सेटिंग्स"); // Hindi
+             settingsTranslations.add("beállítások"); // Hungarian
+             settingsTranslations.add("stillingar"); // Icelandic
+             settingsTranslations.add("pengaturan"); // Indonesian
+             settingsTranslations.add("impostazioni"); // Italian
+             settingsTranslations.add("設定"); // Japanese
+             settingsTranslations.add("ಸೆಟ್ಟಿಂಗುಗಳು"); // Kannada
+             settingsTranslations.add("설정"); // Korean
+             settingsTranslations.add("iestatījumi"); // Latvian
+             settingsTranslations.add("nustatymai"); // Lithuanian
+             settingsTranslations.add("поставувања"); // Macedonian
+             settingsTranslations.add("tetapan"); // Malay
+             settingsTranslations.add("ക്രമീകരണങ്ങൾ"); // Malayalam
+             settingsTranslations.add("settings"); // Maltese
+             settingsTranslations.add("सेटिंग्ज"); // Marathi
+             settingsTranslations.add("innstillinger"); // Norwegian
+             settingsTranslations.add("ustawienia"); // Polish
+             settingsTranslations.add("configurações"); // Portuguese
+             settingsTranslations.add("setări"); // Romanian
+             settingsTranslations.add("настройки"); // Russian
+             settingsTranslations.add("nastavenia"); // Slovak
+             settingsTranslations.add("nastavitve"); // Slovenian
+             settingsTranslations.add("ajustes"); // Spanish
+             settingsTranslations.add("mipangilio"); // Swahili
+             settingsTranslations.add("inställningar"); // Swedish
+             settingsTranslations.add("mga setting"); // Tagalog
+             settingsTranslations.add("அமைப்புகள்"); // Tamil
+             settingsTranslations.add("సెట్టింగులు"); // Telugu
+             settingsTranslations.add("การตั้งค่า"); // Thai
+             settingsTranslations.add("ayarlar"); // Turkish
+             settingsTranslations.add("налаштування"); // Ukrainian
+             settingsTranslations.add("ترتیبات"); // Urdu
+             settingsTranslations.add("cài đặt"); // Vietnamese
+
+             // Add translations list to the map
+             commandmap.put("settings", settingsTranslations);
              translationMap.put("Hindi_opening setting", "शुरुआत सेटिंग");
 
              translationMap.put("English_opening setting", "opening setting");

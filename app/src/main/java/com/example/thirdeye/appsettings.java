@@ -96,8 +96,8 @@ public class appsettings extends AppCompatActivity {
         TextView textSpeechRate = findViewById(R.id.textSpeechRate);
         TextView textDefaultLanguage = findViewById(R.id.textDefaultLanguage);
         TextView textPartiallyBlind = findViewById(R.id.textPartiallyBlind);
-        spinnerinputlang = findViewById(R.id.spinnerDefaultinputlanguage);
-        spinnertranslanguage = findViewById(R.id.spinnertransinputlanguage);
+//        spinnerinputlang = findViewById(R.id.spinnerDefaultinputlanguage);
+//        spinnertranslanguage = findViewById(R.id.spinnertransinputlanguage);
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
         switchPartiallyBlind = findViewById(R.id.partallyblindswitch);
@@ -207,17 +207,17 @@ public class appsettings extends AppCompatActivity {
 //        spinnertranslanguage.setDropDownVerticalOffset(dpToPx(26));
 //        spinnerDefaultLanguage.setDropDownVerticalOffset(dpToPx(26));
         spinnerDefaultLanguage.setDropDownHorizontalOffset(dpToPx(-10));
-        spinnerinputlang.setDropDownHorizontalOffset(dpToPx(-10));
-        spinnertranslanguage.setDropDownHorizontalOffset(dpToPx(-10));
-        spinnertranslanguage.setDropDownWidth(width-dpToPx(40));
-        spinnerinputlang.setDropDownWidth(width-dpToPx(40));
+//        spinnerinputlang.setDropDownHorizontalOffset(dpToPx(-10));
+//        spinnertranslanguage.setDropDownHorizontalOffset(dpToPx(-10));
+//        spinnertranslanguage.setDropDownWidth(width-dpToPx(40));
+//        spinnerinputlang.setDropDownWidth(width-dpToPx(40));
         spinnerDefaultLanguage.setDropDownWidth(width-dpToPx(40));
         spinnerDefaultLanguage.setAdapter(adapter);
-        spinnertranslanguage.setAdapter(adapter);
-        spinnerinputlang.setAdapter(text_det_adapter);
+//        spinnertranslanguage.setAdapter(adapter);
+//        spinnerinputlang.setAdapter(text_det_adapter);
         spinnerDefaultLanguage.setSelection(languages.indexOf(ouptutlang));
-        spinnertranslanguage.setSelection(languages.indexOf(trans_input)); // this is for translation model have to update the database
-        spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
+//        spinnertranslanguage.setSelection(languages.indexOf(trans_input)); // this is for translation model have to update the database
+//        spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
         switchPartiallyBlind.setChecked(blindness);
         seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
         // Setup Switch for Partially Blind
@@ -334,8 +334,8 @@ public class appsettings extends AppCompatActivity {
                             if(toret) {
                                 st.output_speech = languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString());
                             }
-                            st.trans_input = languageMap.get(spinnertranslanguage.getSelectedItem().toString());
-                            st.input_lang = spinnerinputlang.getSelectedItem().toString();
+//                            st.trans_input = languageMap.get(spinnertranslanguage.getSelectedItem().toString());
+//                            st.input_lang = spinnerinputlang.getSelectedItem().toString();
                             st.rate = (seekBarSpeechRate.getProgress() / 100.0f) * 2.0f;
                             st.blindness = switchPartiallyBlind.isChecked();
                             MainActivity.input_lang = st.input_lang;

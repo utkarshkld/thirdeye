@@ -19,7 +19,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.SystemClock;
+import android.os.Handler;
+
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.text.SpannableString;
 import android.util.Log;
 
@@ -53,7 +56,7 @@ public class ObjectDetectorHelper {
     public static final int OTHER_ERROR = 0;
     public static final int GPU_ERROR = 1;
     public static final String TAG = "ObjectDetectorHelper";
-    private long temptime = 0, temptime2 = 0;
+//    private long temptime = 0, temptime2 = 0;
     public float threshold = THRESHOLD_DEFAULT;
     public int maxResults = MAX_RESULTS_DEFAULT;
     public int currentDelegate = DELEGATE_GPU;
@@ -62,13 +65,15 @@ public class ObjectDetectorHelper {
     public Context context;
     public DetectorListener objectDetectorListener;
 
-    private static Map<String, Long> objectResolver;
+    private static Map<String, Long> objectResolver = cMainActivity.objectResolver;
     private String currobject;
     private ObjectDetector objectDetector;
     private int imageRotation;
     private ImageProcessingOptions imageProcessingOptions;
     public static TextToSpeech textToSpeech;
-    private float speechrate = MainActivity.speech_rate;
+//    private float speechrate = MainActivity.speech_rate;
+    private final String output_lang = MainActivity.output_lang;
+    private boolean isWordspeaking = false;
 
     public ObjectDetectorHelper(float threshold, int maxResults, int currentDelegate, int currentModel,
                                 RunningMode runningMode, Context context, DetectorListener objectDetectorListener) {
@@ -79,7 +84,6 @@ public class ObjectDetectorHelper {
         this.runningMode = runningMode;
         this.context = context;
         this.objectDetectorListener = objectDetectorListener;
-
         objectResolver = new HashMap<>();
         currobject = "";
         setupObjectDetector();
@@ -90,23 +94,53 @@ public class ObjectDetectorHelper {
     private void initializeTextToSpeech() {
         textToSpeech = new TextToSpeech(context, status -> {
             if (status == TextToSpeech.SUCCESS) {
-                int result = textToSpeech.setLanguage(Locale.US);
+                int result;
+                if(output_lang.equals("id")){
+                    result = textToSpeech.setLanguage(new Locale("in"));
+                }else if(output_lang.equals("no")){
+                    result = textToSpeech.setLanguage(new Locale("nb"));
+                }
+                else {
+                    result = textToSpeech.setLanguage(new Locale(output_lang));
+                }
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e(TAG, "TextToSpeech: Language not supported.");
+                }else{
+
+                        // Set up utterance progress listener
+                        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                            @Override
+                            public void onStart(String utteranceId) {
+                                // Set your flag to true when speech starts isWordspeaking = true;
+                            }
+
+                            @Override
+                            public void onDone(String utteranceId) {
+                                // Set your flag to false when speech is completed
+
+
+                            }
+
+                            @Override
+                            public void onError(String utteranceId) {
+                                // Handle errors if needed
+                            }
+                        });
+
                 }
             } else {
                 Log.e(TAG, "TextToSpeech initialization failed.");
             }
         }, "com.google.android.tts");
-        textToSpeech.setSpeechRate(speechrate);
+        textToSpeech.setSpeechRate(1.2f);
     }
 
     private void speakText(String text, int startPosition) {
-        SpannableString spannableString = new SpannableString(text);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(spannableString, TextToSpeech.QUEUE_ADD, null, null);
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceId");
         } else {
-            textToSpeech.speak(spannableString.toString(), TextToSpeech.QUEUE_ADD, null, null);
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceId");
         }
     }
 
@@ -135,21 +169,19 @@ public class ObjectDetectorHelper {
         try {
             ObjectDetector.ObjectDetectorOptions.Builder optionsBuilder = ObjectDetector.ObjectDetectorOptions.builder()
                     .setBaseOptions(baseOptionsBuilder.build())
-                    .setScoreThreshold(.50f)
+                    .setScoreThreshold(.55f)
                     .setRunningMode(runningMode)
-                    .setMaxResults(5);
+                    .setMaxResults(3);
 
             imageProcessingOptions = ImageProcessingOptions.builder()
                     .setRotationDegrees(imageRotation)
                     .build();
 
-            switch (runningMode) {
-                case LIVE_STREAM:
+
                     optionsBuilder.setRunningMode(runningMode)
                             .setResultListener(this::returnLivestreamResult)
                             .setErrorListener(this::returnLivestreamError);
-                    break;
-            }
+
 
             ObjectDetector.ObjectDetectorOptions options = optionsBuilder.build();
             objectDetector = ObjectDetector.createFromOptions(context, options);
@@ -166,78 +198,15 @@ public class ObjectDetectorHelper {
         return objectDetector == null;
     }
 
-//    public ResultBundle detectVideoFile(Uri videoUri, long inferenceIntervalMs) throws IOException {
-//        if (runningMode != RunningMode.VIDEO) {
-//            throw new IllegalArgumentException("Attempting to call detectVideoFile while not using RunningMode.VIDEO");
-//        }
-//        if (objectDetector == null) {
-//            return null;
-//        }
-//
-//        long startTime = SystemClock.uptimeMillis();
-//        boolean didErrorOccurred = false;
-//
-//        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-//        retriever.setDataSource(context, videoUri);
-//        String videoLengthMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-//        Integer width = null;
-//        Integer height = null;
-//
-//        Bitmap firstFrame = retriever.getFrameAtTime(0);
-//        if (firstFrame != null) {
-//            width = firstFrame.getWidth();
-//            height = firstFrame.getHeight();
-//        }
-//
-//        if (videoLengthMs == null || width == null || height == null) {
-//            return null;
-//        }
-//
-//        List<ObjectDetectorResult> resultList = new ArrayList<>();
-//        long numberOfFrameToRead = Long.parseLong(videoLengthMs) / inferenceIntervalMs;
-//
-//        for (int i = 0; i <= numberOfFrameToRead; i++) {
-//            long timestampMs = i * inferenceIntervalMs;
-//            Bitmap frame = retriever.getFrameAtTime(timestampMs * 1000, MediaMetadataRetriever.OPTION_CLOSEST);
-//
-//            if (frame != null) {
-//                Bitmap argb8888Frame = frame.copy(Bitmap.Config.ARGB_8888, false);
-//                MPImage mpImage = new BitmapImageBuilder(argb8888Frame).build();
-//                ObjectDetectorResult detectionResult = objectDetector.detectForVideo(mpImage, timestampMs);
-//
-//                if (detectionResult != null) {
-//                    resultList.add(detectionResult);
-//                } else {
-//                    didErrorOccurred = true;
-//                    objectDetectorListener.onError("ResultBundle could not be returned in detectVideoFile",OTHER_ERROR);
-//                }
-//            } else {
-//                didErrorOccurred = true;
-//                objectDetectorListener.onError("Frame at specified time could not be retrieved when detecting in video.",GPU_ERROR);
-//            }
-//        }
-//
-//        retriever.release();
-//        long inferenceTimePerFrameMs = (SystemClock.uptimeMillis() - startTime) / numberOfFrameToRead;
-//
-//        if (didErrorOccurred) {
-//            return null;
-//        } else {
-//            return new ResultBundle(resultList, inferenceTimePerFrameMs, height, width);
-//        }
-//    }
 
     public void detectLivestreamFrame(ImageProxy imageProxy) {
         if (runningMode != RunningMode.LIVE_STREAM) {
             throw new IllegalArgumentException("Attempting to call detectLivestreamFrame while not using RunningMode.LIVE_STREAM");
         }
 
-
-        Log.d(TAG, "detectLivestreamFrame: 111");
-        temptime = System.currentTimeMillis();
         long frameTime = SystemClock.uptimeMillis();
         Bitmap bitmapBuffer = Bitmap.createBitmap(imageProxy.getWidth(), imageProxy.getHeight(), Bitmap.Config.ARGB_8888);
-//        imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.getPlanes()[0].getBuffer()); }
+
         try {
             bitmapBuffer.copyPixelsFromBuffer(imageProxy.getPlanes()[0].getBuffer());
         } catch (Exception e) {
@@ -252,14 +221,8 @@ public class ObjectDetectorHelper {
             setupObjectDetector();
             return;
         }
-
         MPImage mpImage = new BitmapImageBuilder(bitmapBuffer).build();
-        if (System.currentTimeMillis() - temptime2 >= 1000) {
-            temptime2 = System.currentTimeMillis();
-            detectAsync(mpImage, frameTime);
-        }
-
-
+        detectAsync(mpImage, frameTime);
     }
 
     @VisibleForTesting
@@ -272,19 +235,19 @@ public class ObjectDetectorHelper {
     private void returnLivestreamResult(ObjectDetectorResult result, MPImage input) {
         long finishTimeMs = SystemClock.uptimeMillis();
         long inferenceTime = finishTimeMs - result.timestampMs();
-        String language = cMainActivity.spinnerLanguages.getSelectedItem().toString();
+        String language = cMainActivity.languageMap.get(output_lang);
+        Log.d("objectdetector helper",language);
         for (Detection t : result.detections()) {
             long currTime = System.currentTimeMillis();
             currobject = t.categories().get(0).categoryName();
             long lastSpeakTime = objectResolver.getOrDefault(currobject, 0L);
-            if (lastSpeakTime + 3000<= currTime) {
-                textToSpeech.setLanguage(new Locale(cMainActivity.languageMap.get(language)));
+            if (lastSpeakTime + 4000 <= currTime ) {
+//                Log.d("objectdetector helper",language+"_"+currobject);
                 speakText(translationMap.get(language+"_"+currobject),0);
-                objectResolver.replace(currobject,currTime);
+                objectResolver.put(currobject,currTime);
 
             }
         }
-
         objectDetectorListener.onResults(new ResultBundle(
                 Collections.singletonList(result),
                 inferenceTime,

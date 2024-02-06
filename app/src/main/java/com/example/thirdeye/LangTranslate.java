@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -21,7 +22,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -51,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class LangTranslate extends AppCompatActivity {
 
@@ -71,8 +78,7 @@ public class LangTranslate extends AppCompatActivity {
 
     // Map to map language codes to their full names
     private HashMap<String, String> languageMap = new HashMap<>();
-    private boolean isdownloaded = false;
-
+    private int index = 0,index2 = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +88,7 @@ public class LangTranslate extends AppCompatActivity {
         btnTranslate = findViewById(R.id.btnTranslate);
         btnVoiceInput = findViewById(R.id.btnVoiceInput);
         sourceLanguageSpinner = findViewById(R.id.sourceLanguageSpinner);
-        targetLanguageSpinner = findViewById(R.id.targetLanguageSpinner);
+//        targetLanguageSpinner = findViewById(R.id.targetLanguageSpinner);
         spinnerll = findViewById(R.id.sourceLanguageSpinnerll);
         translatedTextView = findViewById(R.id.translatedText); // Initialize TextView
         backbtn = findViewById(R.id.backbtn);
@@ -101,19 +107,20 @@ public class LangTranslate extends AppCompatActivity {
 
         initializeMap();
         List<String> selectedLanguages = new ArrayList<>(languageMap.values()); // Get language names from the map
-        List<String> keylang = new ArrayList<>(languageMap.keySet());
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, languageMap.keySet().toArray(new String[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         sourceLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
-        targetLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
+//        targetLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
         sourceLanguageSpinner.setDropDownWidth(width-dpToPx(40));
-        targetLanguageSpinner.setDropDownWidth(width-dpToPx(40));
+//        targetLanguageSpinner.setDropDownWidth(width-dpToPx(40));
 //        sourceLanguageSpinner.setDropDownVerticalOffset(dpToPx(26)-2);
 //        targetLanguageSpinner.setDropDownVerticalOffset(dpToPx(26)-2);
         sourceLanguageSpinner.setAdapter(adapter);
-        targetLanguageSpinner.setAdapter(adapter);
-        sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(trans_input));
-        targetLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
+//
+        Log.d("Output lang : ",outputlangugage+" "+languageMap.values());
+        sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
+//        targetLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
         initializetexttospeech();
         editTextLetters.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -131,6 +138,8 @@ public class LangTranslate extends AppCompatActivity {
         btnVoiceInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                index = 0;
+                index2 = 0;
                 startSpeechRecognition();
             }
         });
@@ -146,6 +155,8 @@ public class LangTranslate extends AppCompatActivity {
                     if (sourceText.equalsIgnoreCase("voice input")) {
                         startSpeechRecognition();
                     } else {
+                        index = 0;
+                        index2 = 0;
                         detectAndTranslateLanguage(sourceText);
                     }
                 }
@@ -186,27 +197,28 @@ public class LangTranslate extends AppCompatActivity {
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
 
         // Get the selected language code from the map
-        String selectedSourceLanguage = languageMap.get(sourceLanguageSpinner.getSelectedItem().toString());
-        String selectedTargetLanguage = languageMap.get(targetLanguageSpinner.getSelectedItem().toString());
+        String selectedSourceLanguage = outputlangugage  ;
+
         if (selectedSourceLanguage != null) {
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
         }
         try {
             startActivityForResult(intent, SPEECH_REQUEST_CODE);
+
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
         }
     }
 
     // Helper function to get a key from a value in a map
-    private String getKeyByValue(Map<String, String> map, String value) {
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (value.equals(entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
+//    private String getKeyByValue(Map<String, String> map, String value) {
+//        for (Map.Entry<String, String> entry : map.entrySet()) {
+//            if (value.equals(entry.getValue())) {
+//                return entry.getKey();
+//            }
+//        }
+//        return null;
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -225,9 +237,71 @@ public class LangTranslate extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
-                    textToSpeech.setLanguage(Locale.US);
+                    int result;
+                    if(outputlangugage == "id"){
+                        result = textToSpeech.setLanguage(new Locale("in"));
+                    }else if(outputlangugage == "no"){
+                        result = textToSpeech.setLanguage(new Locale("nb"));
+                    }
+                    else {
+                        result = textToSpeech.setLanguage(new Locale(outputlangugage));
+                    }
+                    if (result == TextToSpeech.LANG_MISSING_DATA ||
+                            result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e("IN Language Translate", "TextToSpeech: Language not supported.");
+                    }else {
+
+                        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                            @Override
+                            public void onStart(String utteranceId) {
+                                Log.i("TTS", "utterance started");
+                            }
+
+                            @Override
+                            public void onDone(String utteranceId) {
+                                Log.i("TTS", "utterance done");
+                            }
+
+                            @Override
+                            public void onError(String utteranceId) {
+                                Log.i("TTS", "utterance error");
+                            }
+
+                            @Override
+                            public void onRangeStart(String utteranceId,
+                                                     int start,
+                                                     int end,
+                                                     int frame) {
+//
+
+                                start = start + index2;
+                                end = end + index2;
+                                index = end;
+                                final int a = start, b = end;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        Spannable textWithHighlights = new SpannableString(translatedTextView.getText().toString());
+                                        textWithHighlights.setSpan(new ForegroundColorSpan(Color.RED), a, b, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                                        translatedTextView.setText(textWithHighlights);
+                                        // Calculate line start for the 'end' offset
+                                        int lineStart = translatedTextView.getLayout().getLineForOffset(a);
+                                        // Scroll to the calculated line
+//                                        translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)-5));
+//                                        textView.setText(textWithHighlights);
+//                                        int lineStart = textView.getLayout().getLineForOffset(b);
+//                                        textView.scrollTo(0, lineStart*((textView.getHeight()/20)-5));
+
+                                    }
+                                });
+                            }
+
+                        });
+                    }
+
                 } else {
-                    Toast.makeText(LangTranslate.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
+                    Log.e("IN Language Translates", "TextToSpeech initialization failed.");
                 }
             }
         },"com.google.android.tts");
@@ -242,16 +316,16 @@ public class LangTranslate extends AppCompatActivity {
                     @Override
                     public void onSuccess(String sourceLanguage) {
                         // Get the selected language code from the map
-                        String targetLanguage = languageMap.get(targetLanguageSpinner.getSelectedItem().toString());
+
 
                         TranslatorOptions options = new TranslatorOptions.Builder()
                                 .setSourceLanguage(sourceLanguage)
-                                .setTargetLanguage(targetLanguage)
+                                .setTargetLanguage(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem())))
                                 .build();
 
                         Translator translator = Translation.getClient(options);
 
-                        isdownloaded = false;
+
                         ProgressDialog progressDialog = new ProgressDialog(LangTranslate.this);
                         progressDialog.setMessage("Downloading the translation model...");
                         progressDialog.setCancelable(false);
@@ -262,15 +336,16 @@ public class LangTranslate extends AppCompatActivity {
                             translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-                                    isdownloaded = true;
+
                                     myRunnable.stop();
                                     Task<String> result = translator.translate(sourceText).addOnSuccessListener(new OnSuccessListener<String>() {
                                         @Override
                                         public void onSuccess(String s) {
                                             translatedTextView.setText(s); // Set the translated text in the TextView
                                             translatedTextView.setVisibility(View.VISIBLE);
-                                            textToSpeech.setLanguage(new Locale(targetLanguage));// Make the TextView visible
-                                            textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, null);
+                                            // Make the TextView visible
+                                            textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
+                                            textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceID");
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {
                                         @Override

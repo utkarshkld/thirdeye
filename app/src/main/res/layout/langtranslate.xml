@@ -51,8 +51,8 @@
         android:imeOptions="actionDone"
 
 
-        android:paddingStart="22dp"
-        android:paddingEnd="22dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:singleLine="true"
         android:textColor="@color/white"
         android:textColorHint="@color/backText"
@@ -86,40 +86,37 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
 
-        android:id="@+id/targetLanguageSpinnerll"
-        android:layout_marginBottom="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_below="@+id/sourceLanguageSpinnerll"
-        android:background="@drawable/textbackground"
-        android:textColor="#FFFFFF"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+<!--        android:id="@+id/targetLanguageSpinnerll"-->
+<!--        android:layout_marginBottom="@dimen/_10sdp"-->
+<!--        android:layout_marginTop="@dimen/_10sdp"-->
+<!--        android:layout_below="@+id/sourceLanguageSpinnerll"-->
+<!--        android:background="@drawable/textbackground"-->
+<!--        android:textColor="#FFFFFF"-->
+<!--        android:paddingStart="10dp"-->
+<!--        android:paddingEnd="10dp"-->
 
-        >
+<!--        >-->
 
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:overlapAnchor="false"
-            android:popupBackground="@drawable/spinner_popup"
-            android:id="@+id/targetLanguageSpinner"
-            android:textColor="@color/white"
-            />
+<!--        <Spinner-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="52dp"-->
+<!--            android:overlapAnchor="false"-->
+<!--            android:popupBackground="@drawable/spinner_popup"-->
+<!--            android:id="@+id/targetLanguageSpinner"-->
+<!--            android:textColor="@color/white"-->
+<!--            />-->
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
 
     <TextView
         android:id="@+id/translatedText"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_100sdp"
-        android:layout_above="@id/llgridView"
-        android:layout_below="@id/targetLanguageSpinnerll"
-        android:layout_centerHorizontal="true"
 
         android:layout_marginTop="15dp"
 

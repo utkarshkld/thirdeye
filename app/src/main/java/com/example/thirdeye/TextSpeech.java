@@ -4,16 +4,14 @@ package com.example.thirdeye;
 
 
 import static java.lang.Thread.sleep;
-import com.google.mlkit.nl.languageid.IdentifiedLanguage;
+
 import com.google.mlkit.nl.languageid.LanguageIdentification;
-import com.google.mlkit.nl.languageid.LanguageIdentificationOptions;
 import com.google.mlkit.nl.languageid.LanguageIdentifier;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -24,26 +22,15 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.Voice;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
-import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.transition.TransitionManager;
@@ -52,15 +39,12 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,18 +55,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.thirdeye.databinding.CheckMainBinding;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.mlkit.nl.languageid.LanguageIdentification;
-import com.google.mlkit.nl.languageid.LanguageIdentifier;
-import com.google.mlkit.nl.translate.TranslateLanguage;
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
 
 
 import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.label.ImageLabel;
+import com.google.mlkit.vision.label.ImageLabeler;
+import com.google.mlkit.vision.label.ImageLabeling;
+import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
@@ -93,7 +80,6 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
 import android.speech.tts.UtteranceProgressListener;
 
-import java.io.File;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -101,16 +87,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import android.app.ProgressDialog;
-import android.content.Context;
+
 import android.os.Handler;
 import android.os.Looper;
 
 
-
 public class TextSpeech extends AppCompatActivity {
+    private CheckMainBinding textspeech;
+    private int count = 0;
 
     private SurfaceHolder surfaceViewHolder;
     private SurfaceView surfaceView;
@@ -121,6 +108,7 @@ public class TextSpeech extends AppCompatActivity {
     private ImageButton btnPausePlay;
     private ImageButton btnReplay;
     private Button micc;
+    private int langcounter = 0;
 
     private boolean s = false;
     private TextView textView;
@@ -152,21 +140,24 @@ public class TextSpeech extends AppCompatActivity {
     private int endingIndex = 0;
     private static int index = 0;
     private static int index2 = 0;
-
+    private StringBuilder alltext;
     private List<String> selectedLanguages;
     private ArrayAdapter<String> languageAdapter, text_det_adapter;
     private ImageView back;
     private boolean isSpeaking = false;
     private ArrayList<Integer> prefixArray = new ArrayList<>();
     private ProgressDialog waiting;
-    private SensorManager mSensorManager;
-    private Sensor mLightSensor;
-    private float mLightQuantity;
+    public static Bitmap currentframe;
+
     boolean firsttime = true, nonflash = false;
+    private long lastpgdet = 0,lastpagedet2 = 0;
+    private boolean isCaptured = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.textspeech);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         waiting = new ProgressDialog(TextSpeech.this);
@@ -187,58 +178,8 @@ public class TextSpeech extends AppCompatActivity {
         btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
         Handler handler = new Handler();
         MyRunnable myRunnable = new MyRunnable(this, handler);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
-        // Implement a listener to receive updates
-//        SensorEventListener listener = new SensorEventListener() {
-//            @Override
-//            public void onSensorChanged(SensorEvent event) {
-//                mLightQuantity = event.values[0];
-//                Log.d(TAG, "onSensorChanged: hui " + mLightQuantity);
-//                if (mLightQuantity <= 2.00 && firsttime && !isPlaying) {
-//                    firsttime = false;
-//
-//                    // turn on flash
-//                    speaktext2(" Turning Flash light On.");
-//                    releaseCamera();
-//                    camera = Camera.open();
-//                    Camera.Parameters params = camera.getParameters();
-//                    params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-//                    params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-//                    camera.setParameters(params);
-//                    camera.setDisplayOrientation(CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), TextSpeech.this));
-//
-//                    try {
-//                        camera.setPreviewDisplay(surfaceViewHolder);
-//                        camera.startPreview();
-//
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                    camera.setPreviewCallback(new Camera.PreviewCallback() {
-//                        @Override
-//                        public void onPreviewFrame(byte[] data, Camera camera) {
-//
-//                            data2 = data;
-//                        }
-//                    });
-//
-//                }
-//
-//
-//            }
-//
-//            @Override
-//            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-//
-//            }
-//        };
 
-        // Register the listener with the light sensor -- choosing
-        // one of the SensorManager.SENSOR_DELAY_* constants.
-//        mSensorManager.registerListener(
-//                listener, mLightSensor, SensorManager.SENSOR_DELAY_UI);
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -251,6 +192,7 @@ public class TextSpeech extends AppCompatActivity {
                     index2 = 0;
                     words = new ArrayList<>();
                     prefixArray = new ArrayList<>();
+                    isCaptured = true;
                     textView.setText("");
                     takePictureAndRecognizeText();
                     btnPausePlay.setImageResource(R.drawable.stop_fill);
@@ -269,6 +211,7 @@ public class TextSpeech extends AppCompatActivity {
 
                     myRunnable.stop();
                     textToSpeech.stop();
+                    isCaptured = false;
                     isPlaying = false;
                     btnPausePlay.setVisibility(View.GONE);
                     btnTakePicture.setImageResource(R.drawable.camera_icon);
@@ -342,23 +285,23 @@ public class TextSpeech extends AppCompatActivity {
         });
 
         // Initialize the Spinner and set up its adapter
-        spinnerLanguages = findViewById(R.id.spinnerLanguages);
-        text_det_spinner = findViewById(R.id.detectlnguage);
+//        spinnerLanguages = findViewById(R.id.spinnerLanguages);
+//        text_det_spinner = findViewById(R.id.detectlnguage);
         initializeLanguageMap();
-        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
-        selectedLanguages = new ArrayList<>(languageMap.values());
-        text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
-        languageAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, languageMap.keySet().toArray(new String[0]));
-        languageAdapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-        spinnerLanguages.setDropDownHorizontalOffset(dpToPx(-3));
-        text_det_spinner.setDropDownHorizontalOffset(dpToPx(-3));
-//        spinnerLanguages.setDropDownVerticalOffset(dpToPx(23));
-        spinnerLanguages.setAdapter(languageAdapter);
-        text_det_spinner.setAdapter(text_det_adapter);
+//        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
+//        selectedLanguages = new ArrayList<>(languageMap.values());
+//        text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
+//        languageAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, languageMap.keySet().toArray(new String[0]));
+//        languageAdapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+//        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+//        spinnerLanguages.setDropDownHorizontalOffset(dpToPx(-3));
+//        text_det_spinner.setDropDownHorizontalOffset(dpToPx(-3));
+////        spinnerLanguages.setDropDownVerticalOffset(dpToPx(23));
+//        spinnerLanguages.setAdapter(languageAdapter);
+//        text_det_spinner.setAdapter(text_det_adapter);
         Log.d("checking input language",input_lang);
-        text_det_spinner.setSelection(textDetList.indexOf(input_lang));
-        spinnerLanguages.setSelection(selectedLanguages.indexOf(outputlangugage));
+//        text_det_spinner.setSelection(textDetList.indexOf(input_lang));
+//        spinnerLanguages.setSelection(selectedLanguages.indexOf(outputlangugage));
 
     }
     public static int dpToPx(int dp)
@@ -426,7 +369,15 @@ public class TextSpeech extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
-                    int result = textToSpeech.setLanguage(new Locale("en"));
+                    int result;
+                    if(outputlangugage == "id"){
+                        result = textToSpeech.setLanguage(new Locale("in"));
+                    }else if(outputlangugage == "no"){
+                        result = textToSpeech.setLanguage(new Locale("nb"));
+                    }
+                    else {
+                        result = textToSpeech.setLanguage(new Locale(outputlangugage));
+                    }
                     if (result == TextToSpeech.LANG_MISSING_DATA ||
                             result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e(TAG, "TextToSpeech: Language not supported.");
@@ -458,12 +409,7 @@ public class TextSpeech extends AppCompatActivity {
                                 start = start + index2;
                                 end = end + index2;
                                 index = end;
-
-
                                 final int a = start, b = end;
-
-
-
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -471,16 +417,10 @@ public class TextSpeech extends AppCompatActivity {
                                         Spannable textWithHighlights = new SpannableString(textView.getText().toString());
                                         textWithHighlights.setSpan(new ForegroundColorSpan(Color.RED), a, b, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                                         textView.setText(textWithHighlights);
-
-
                                         // Calculate line start for the 'end' offset
                                         int lineStart = textView.getLayout().getLineForOffset(a);
-
-
-
                                         // Scroll to the calculated line
                                         textView.scrollTo(0, lineStart*((textView.getHeight()/20)-5));
-
 //                                        textView.setText(textWithHighlights);
 //                                        int lineStart = textView.getLayout().getLineForOffset(b);
 //                                        textView.scrollTo(0, lineStart*((textView.getHeight()/20)-5));
@@ -516,6 +456,7 @@ public class TextSpeech extends AppCompatActivity {
             }
 
         }, "com.google.android.tts");
+        textToSpeech2.setSpeechRate(1.3f);
         textToSpeech.setSpeechRate(speechrate);
 
 
@@ -526,142 +467,186 @@ public class TextSpeech extends AppCompatActivity {
             byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
             Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
             InputImage image = InputImage.fromBitmap(bitmap, CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), this));
-            String selectedlang = text_det_spinner.getSelectedItem().toString();
-            if( selectedlang== "Hindi") {
-                detecttextwithlanguage(hindirecog, image,selectedlang);
-            }else if(selectedlang== "Marathi"){
-                detecttextwithlanguage(hindirecog, image,selectedlang);
-            }else if(selectedlang == "Japanese"){
-                detecttextwithlanguage(japaneserecog,image,selectedlang);
-            }else if(selectedlang =="Korean"){
-                detecttextwithlanguage(koreanrecog,image,selectedlang);
-            }else{
-                detecttextwithlanguage(engtextrecog,image,selectedlang);
-            }
+
+            langcounter = 0;
+            alltext = new StringBuilder("");
+            StringBuilder expirydatebuilder = new StringBuilder();
+            textView.setTextAppearance(R.style.text);
+            textView.setBackgroundResource(R.drawable.speechtext_view);
+            textView.setMovementMethod(new ScrollingMovementMethod());
+            detecttextwithlanguage(engtextrecog,image,"English",expirydatebuilder); // This can detect the all the latin language
+            // Hindi and marathi
+
+//            detecttextwithlanguage(koreanrecog,image,"Korean",alltext,expirydatebuilder);
+
+            // Trying to detect all the languages
+//            if( selectedlang== "Hindi") {
+//                detecttextwithlanguage(hindirecog, image,selectedlang);
+//            }else if(selectedlang== "Marathi"){
+//                detecttextwithlanguage(hindirecog, image,selectedlang);
+//            }else if(selectedlang == "Japanese"){
+//                detecttextwithlanguage(japaneserecog,image,selectedlang);
+//            }else if(selectedlang =="Korean"){
+//                detecttextwithlanguage(koreanrecog,image,selectedlang);
+//            }else{
+//                detecttextwithlanguage(engtextrecog,image,selectedlang);
+//            }
+
+
 
         } catch (Exception e) {
             Log.e(TAG, "ERROR");
         }
     }
 
-    private void detecttextwithlanguage(TextRecognizer textrecog, InputImage image,String language) {
+    private void detecttextwithlanguage(TextRecognizer textrecog, InputImage image,String language,StringBuilder expirydatebuilder) {
         textrecog.process(image).addOnSuccessListener(new OnSuccessListener<Text>() {
             @Override
             public void onSuccess(Text result) {
-                Log.e(TAG, "onSuccess: result size is " + result.getTextBlocks().size());
-                String resultText = result.getText();
-                StringBuilder stringBuilder = new StringBuilder();
+//                Log.e(TAG, "onSuccess: result size is " + result.getTextBlocks().size());
+                StringBuilder stringBuilder = new StringBuilder(),stringBuilder1 = new StringBuilder();
 
                 for (Text.TextBlock block : result.getTextBlocks()) {
-                    String blockText = block.getText();
-                    Point[] blockCornerPoints = block.getCornerPoints();
-                    stringBuilder.append("\n");
-                    Rect blockFrame = block.getBoundingBox();
+//                    String blockText = block.getText();
+//                    Point[] blockCornerPoints = block.getCornerPoints();
+////                    stringBuilder.append("\n");
+//                    Rect blockFrame = block.getBoundingBox();
                     for (Text.Line line : block.getLines()) {
 
-                        String lineText = line.getText();
-                        Point[] lineCornerPoints = line.getCornerPoints();
-                        Rect lineFrame = line.getBoundingBox();
+//                        String lineText = line.getText();
+//                        Point[] lineCornerPoints = line.getCornerPoints();
+//                        Rect lineFrame = line.getBoundingBox();
+
                         for (Text.Element element : line.getElements()) {
                             String elementText = element.getText();
-                            Point[] elementCornerPoints = element.getCornerPoints();
-                            Rect elementFrame = element.getBoundingBox();
-                            Log.e(TAG, "onSuccess: " + elementText);
-                            Toast.makeText(TextSpeech.this, elementText, Toast.LENGTH_SHORT);
-                            stringBuilder.append(elementText + " ");
+//                            Point[] elementCornerPoints = element.getCornerPoints();
+//                            Rect elementFrame = element.getBoundingBox();
+//                            Log.e(TAG, "onSuccess: " + elementText);
+//                            Toast.makeText(TextSpeech.this, elementText, Toast.LENGTH_SHORT);
+                            stringBuilder1.append(elementText + " ");
                         }
                     }
                 }
 
-                textView.setTextAppearance(R.style.text);
-                textView.setBackgroundResource(R.drawable.speechtext_view);
-                textView.setMovementMethod(new ScrollingMovementMethod());
-                if (spinnerLanguages.getSelectedItem().toString() != language) {
-                    LanguageIdentifier languageIdentifier = LanguageIdentification.getClient();
-                    languageIdentifier.identifyLanguage(stringBuilder.toString())
-                            .addOnSuccessListener(new OnSuccessListener<String>() {
-                                @Override
-                                public void onSuccess(String sourceLanguage) {
-                                    // Get the selected language code from the map
-                                    String targetLanguage = languageMap.get(spinnerLanguages.getSelectedItem().toString());
-                                    Toast.makeText(TextSpeech.this, targetLanguage, Toast.LENGTH_SHORT).show();
-                                    TranslatorOptions options = new TranslatorOptions.Builder()
-                                            .setSourceLanguage(languageMap.get(language))
-                                            .setTargetLanguage(targetLanguage)
-                                            .build();
-
-                                    Translator translator = Translation.getClient(options);
-
-                                    ProgressDialog progressDialog = new ProgressDialog(TextSpeech.this);
-                                    progressDialog.setMessage("Downloading the translation model...");
-                                    progressDialog.setCancelable(false);
-                                    progressDialog.show();
-                                    MyRunnable2 myRunnable2 = new MyRunnable2(TextSpeech.this, new Handler(), progressDialog);
-                                    myRunnable2.start();
-
-                                    translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
-
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            s = true;
-                                            myRunnable2.stop();
-                                            progressDialog.dismiss();
-                                            Task<String> result = translator.translate(stringBuilder.toString()).addOnSuccessListener(new OnSuccessListener<String>() {
-                                                @Override
-                                                public void onSuccess(String s) {
-                                                    textView.setText(s); // Set the translated text in the TextView
-                                                    if(targetLanguage == "id"){
-                                                        textToSpeech.setLanguage(new Locale("in"));
-                                                    }else if(targetLanguage == "no"){
-                                                        textToSpeech.setLanguage(new Locale("nb"));
-                                                    }
-                                                    else {
-                                                        textToSpeech.setLanguage(new Locale(targetLanguage));
-                                                    }
-
-                                                    speakText(s, 0);
-                                                }
-                                            }).addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    Toast.makeText(TextSpeech.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                }
-                                            });
-
+                // will get identified text here have to modify here
+                String x = stringBuilder1.toString();
+                String temp = x.toLowerCase();
+//                "(use[ ]*by|best[ ]*before|exp|expiry|mfg|mfd|manufacturing)(date)*[. /-:]*(date)*[. /-:]*((([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7](20\\d{2}))|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7]\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/\\d{2})|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./7 ]*(20[0-9]{2}))|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ 7]*([0-9]{2}))$)"
+                Pattern expiryDatePattern = Pattern.compile("([uj]se *by|best *before|exp|expiry|mfg|mfd|manufacturing)[., /-:(date)]*((([0O][1-9]|[12]\\d|3[01])[-,./]*([0O][1-9]|1[0-2])[-,./]*(20\\d{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\.([0O][1-9]|1[O0-2])\\.(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\/([0O][1-9]|1[O0-2])\\/(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])[-./,]*([0O][1-9]|1[O0-2])[-./,]*\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\.([0O][1-9]|1[O0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\/([0O][1-9]|1[O0-2])\\/\\d{2})|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*(2[0O][O0-9]{2}))|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*([O0-9]{2}))$)", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = expiryDatePattern.matcher(temp);
 //
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            myRunnable2.stop();
-                                            progressDialog.dismiss();
-                                        }
-                                    });
+                if(language.equals("English")) {
+                    while (matcher.find()) {
+                        // If the line contains the expiry date, append it to the expiryDateBuilder
+                        String categ = matcher.group(1);
+                        String Date = matcher.group(2);
+                        Log.d("expiry use", "onSuccess: " + categ + " " + Date + temp + " " + x);
+                        // removing cat firs
+                        int a = 0, b = 0;
+                        if (categ != null) {
+//                        a = temp.indexOf(categ);
+//                        if(a!=-1)
+//                        x = x.substring(0, a - 1) + x.substring(a + categ.length());
+                        }
+                        if (Date != null) {
 
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(TextSpeech.this, "Language detection failed.", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                } else {
-                    textView.setText(stringBuilder.toString());
-                    textToSpeech.setLanguage(new Locale(languageMap.get(language)));
-                    String[] arr = stringBuilder.toString().split(" ");
-                    words = Arrays.asList(arr);
-                    prefixArray.add(0);
-                    for (int i = 1; i < words.size(); ++i) {
-                        prefixArray.add(prefixArray.get(i - 1) + words.get(i - 1).length() + 1);
+//                        b = temp.indexOf(Date) - categ.length();
+//                        if(b!=-1)
+//                        x = x.substring(0, b - 1) + x.substring(b + Date.length());
+                        }
+                        if (categ.equals("mfd") || categ.equals("manufacturing") || categ.equals("mfg")) {
+                            Log.d("expiry use", "onSuccess: " + a + " " + b);
+                            expirydatebuilder.append("Manufacturing Date : ").append(matcher.group(2)).append("\n");
+                        } else if (categ != null) {
+                            Log.d("expiry use", "onSuccess: " + a + " " + b + "manufacture");
+                            expirydatebuilder.append("Expire Date : ").append(matcher.group(2)).append("\n");
+                        }
                     }
-                    speakText(stringBuilder.toString(), 0);
                 }
+                stringBuilder.append(x);
+
+                                // Get the selected language code from the map
+                                String targetLanguage = outputlangugage;
+                                Toast.makeText(TextSpeech.this, targetLanguage, Toast.LENGTH_SHORT).show();
+                                TranslatorOptions options = new TranslatorOptions.Builder()
+                                        .setSourceLanguage(languageMap.get(language))
+                                        .setTargetLanguage(targetLanguage)
+                                        .build();
+                                Translator translator = Translation.getClient(options);
+                                ProgressDialog progressDialog = new ProgressDialog(TextSpeech.this);
+                                progressDialog.setMessage("Downloading the translation model...");
+                                progressDialog.setCancelable(false);
+                                progressDialog.show();
+                                MyRunnable2 myRunnable2 = new MyRunnable2(TextSpeech.this, new Handler(), progressDialog);
+                                myRunnable2.start();
+                                translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        s = true;
+                                        myRunnable2.stop();
+                                        progressDialog.dismiss();
+
+
+                                        Task<String> result = translator.translate(stringBuilder.toString()).addOnSuccessListener(new OnSuccessListener<String>() {
+                                            @Override
+                                            public void onSuccess(String s) {
+                                                alltext.append(s+"\n");
+                                                if(language.equals("Korean")) {
+                                                    alltext.insert(0,expirydatebuilder+"\n");
+                                                    textView.setText(alltext.toString());
+                                                    speakText(alltext.toString(), 0);
+//                                                    if(targetLanguage == "id"){
+//                                                        textToSpeech.setLanguage(new Locale("in"));
+//                                                    }else if(targetLanguage == "no"){
+//                                                        textToSpeech.setLanguage(new Locale("nb"));
+//                                                    }
+//                                                    else {
+//                                                        textToSpeech.setLanguage(new Locale(targetLanguage));
+//                                                    }
+
+                                                }
+                                                else{
+                                                    if(language.equals("English")){
+                                                        detecttextwithlanguage(hindirecog,image,"Hindi",expirydatebuilder);
+                                                    }else if(language.equals("Hindi")){
+                                                        detecttextwithlanguage(japaneserecog,image,"Japanese",expirydatebuilder);
+                                                    }else if(language.equals("Japanese")){
+                                                        detecttextwithlanguage(koreanrecog,image,"Korean",expirydatebuilder);
+                                                    }
+                                                }
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(TextSpeech.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        myRunnable2.stop();
+                                        progressDialog.dismiss();
+                                    }
+                                });
+
+                            }
+                        });
+
+
+//                else {
+//
+//                    textView.setText(stringBuilder.toString());
+//                    alltext =
+//                    textToSpeech.setLanguage(new Locale(languageMap.get(language)));
+//
+//                    speakText(stringBuilder.toString(), 0);
+//                }
 
 
             }
-        });
-    }
+
 
 
     private void speakText(String text, int startPosition) {
@@ -671,7 +656,7 @@ public class TextSpeech extends AppCompatActivity {
         } else {
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
-//
+
     }
 
 
@@ -698,7 +683,7 @@ public class TextSpeech extends AppCompatActivity {
     }
 
     private void startCamera() {
-        firsttime = true;
+
         camera = Camera.open();
         Camera.Parameters params = camera.getParameters();
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
@@ -717,7 +702,58 @@ public class TextSpeech extends AppCompatActivity {
             public void onPreviewFrame(byte[] data, Camera camera) {
 
                 data2 = data;
+                if(!isCaptured) {
+                    byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
+                    InputImage image = InputImage.fromBitmap(bitmap, CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), TextSpeech.this));
+                    ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
+                    labeler.process(image)
+                            .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
+                                @Override
+                                public void onSuccess(List<ImageLabel> labels) {
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                }
+                            });
+                    labeler.process(image)
+                            .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
+                                @Override
+                                public void onSuccess(List<ImageLabel> labels) {
+                                    for (ImageLabel label : labels) {
+                                        String text = label.getText();
+                                        float confidence = label.getConfidence();
+                                        int index = label.getIndex();
+                                        if (confidence >= 0.5 && text.equals("Paper")) {
+                                            if (System.currentTimeMillis() - lastpgdet >= 5000) {
+                                                lastpagedet2 = 0;
+                                                lastpgdet = System.currentTimeMillis();
+                                                count = 0;
+                                                speaktext2("Document or Screen Detected. Hold Still");
+                                            }
+                                            if (System.currentTimeMillis() - lastpagedet2 >= 1000) {
+                                                lastpagedet2 = System.currentTimeMillis();
+                                                ++count;
+                                            }
+                                            if (count == 4) {
+                                                count = 0;
+                                                textToSpeech2.stop();
+                                                if(!isCaptured) {
+                                                    isCaptured = true;
+//                                                    releaseCamera();
+                                                    btnTakePicture.performClick();
+                                                    releaseCamera();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                }
             }
+
         });
     }
 
@@ -726,16 +762,13 @@ public class TextSpeech extends AppCompatActivity {
             return;
         }
         if (camera != null) {
-
             camera.stopPreview();
             try {
-                // Set preview display
                 camera.setPreviewDisplay(surfaceViewHolder);
 //
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // Start the camera preview...
             camera.startPreview();
         }
     }
@@ -754,7 +787,6 @@ public class TextSpeech extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.e(TAG, "onRequestPermissionsResult: Permission check");
         btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
-
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CAMERA:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -800,20 +832,10 @@ public class TextSpeech extends AppCompatActivity {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (matches != null && !matches.isEmpty()) {
-
                 String spokenText = matches.get(0).toLowerCase();
-                boolean k = false;
-                String temp = "";
-                for (String s : languageMap.keySet()) {
-                    if (spokenText.contains(s.toLowerCase())) {
-                        k = true;
-                        temp = s;
-                        break;
-                    }
-                }
-                if (k) {
-                    spinnerLanguages.setSelection(selectedLanguages.indexOf(languageMap.get(temp)));
-                } else if (spokenText.contains("click") || spokenText.contains("capture")) {
+
+
+                if (spokenText.contains("click") || spokenText.contains("capture")) {
                     if (isPlaying) {
                         speaktext2("Go to capture mode first.");
                     } else {
@@ -861,7 +883,7 @@ public class TextSpeech extends AppCompatActivity {
     public void speaktext2(String text) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech2.speak(text, TextToSpeech.QUEUE_FLUSH, null, "word");
+            textToSpeech2.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
         } else {
             textToSpeech2.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
@@ -881,6 +903,7 @@ public class TextSpeech extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         releaseCamera();
+        textToSpeech.stop();
         textToSpeech.shutdown();
         super.onBackPressed();
 
@@ -892,7 +915,7 @@ public class TextSpeech extends AppCompatActivity {
                 return t;
             }
         }
-    return "invalid";
+        return "invalid";
     }
     private void initializeLanguageMap() {
         // Add languages and their Locale codes to the HashMap
@@ -985,7 +1008,7 @@ public class TextSpeech extends AppCompatActivity {
 
             // Simulate a long-running task
             try {
-                Thread.sleep(1500);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

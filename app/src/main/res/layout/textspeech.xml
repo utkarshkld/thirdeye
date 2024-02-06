@@ -57,58 +57,58 @@
         android:layout_centerHorizontal="true"
 
         android:layout_marginBottom="0dp" />
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/textbackground"
-        android:layout_marginTop="@dimen/_20sdp"
-        android:layout_marginEnd="@dimen/_20sdp"
-        android:layout_marginBottom="@dimen/_16sdp"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/llTitleBar"
+<!--    <LinearLayout-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@drawable/textbackground"-->
+<!--        android:layout_marginTop="@dimen/_20sdp"-->
+<!--        android:layout_marginEnd="@dimen/_20sdp"-->
+<!--        android:layout_marginBottom="@dimen/_16sdp"-->
+<!--        android:layout_alignParentEnd="true"-->
+<!--        android:layout_below="@+id/llTitleBar"-->
 
-        >
+<!--        >-->
 
-    <Spinner
-        android:id="@+id/spinnerLanguages"
-        android:layout_width="150dp"
-        android:dropDownWidth="150dp"
-        android:layout_height="52dp"
-        android:popupBackground="@drawable/spinner_popup"
-        android:overlapAnchor="false"
-        android:padding="3dp"
-        />
-    </LinearLayout>
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/textbackground"
-    android:layout_marginLeft="@dimen/_20sdp"
-    android:layout_marginTop="@dimen/_20sdp"
-    android:id="@+id/spinnerdetectlangll"
-    android:layout_marginBottom="@dimen/_16sdp"
-    android:layout_below="@+id/llTitleBar"
-    >
-    <Spinner
-    android:id="@+id/detectlnguage"
-    android:layout_width="150dp"
-    android:layout_height="52dp"
-    android:popupBackground="@drawable/spinner_popup"
-    android:overlapAnchor="false"
-    android:dropDownWidth="150dp"
-    android:padding="3dp"
+<!--    <Spinner-->
+<!--        android:id="@+id/spinnerLanguages"-->
+<!--        android:layout_width="150dp"-->
+<!--        android:dropDownWidth="150dp"-->
+<!--        android:layout_height="52dp"-->
+<!--        android:popupBackground="@drawable/spinner_popup"-->
+<!--        android:overlapAnchor="false"-->
+<!--        android:padding="3dp"-->
+<!--        />-->
+<!--    </LinearLayout>-->
+<!--<LinearLayout-->
+<!--    android:layout_width="wrap_content"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:background="@drawable/textbackground"-->
+<!--    android:layout_marginLeft="@dimen/_20sdp"-->
+<!--    android:layout_marginTop="@dimen/_20sdp"-->
+<!--    android:id="@+id/spinnerdetectlangll"-->
+<!--    android:layout_marginBottom="@dimen/_16sdp"-->
+<!--    android:layout_below="@+id/llTitleBar"-->
+<!--    >-->
+<!--    <Spinner-->
+<!--    android:id="@+id/detectlnguage"-->
+<!--    android:layout_width="150dp"-->
+<!--    android:layout_height="52dp"-->
+<!--    android:popupBackground="@drawable/spinner_popup"-->
+<!--    android:overlapAnchor="false"-->
+<!--    android:dropDownWidth="150dp"-->
+<!--    android:padding="3dp"-->
 
-    /></LinearLayout>
+<!--    /></LinearLayout>-->
 
 
 
     <TextView
         android:id="@+id/textView"
-
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/btnTakePicture"
-        android:layout_below="@+id/spinnerdetectlangll"
+        android:layout_below="@+id/llTitleBar"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="@dimen/_20sdp"
         android:scrollbars="vertical"
@@ -122,7 +122,6 @@
         android:layout_marginRight="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_30sdp"
         android:background="@drawable/imagebutton_background"
-
         android:layout_alignParentBottom="true"
         android:foreground="@drawable/ripple_card"
         android:src="@drawable/replay_icon" />

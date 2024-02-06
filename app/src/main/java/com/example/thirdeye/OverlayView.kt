@@ -47,6 +47,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var outputRotate = 0
     private var runningMode: RunningMode = RunningMode.IMAGE
     private var textToSpeech: TextToSpeech? = null
+    private var outputlang : String? = cMainActivity.languageMap.get(MainActivity.output_lang);
 
 
     init {
@@ -121,7 +122,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             // Create text to display alongside detected objects
             val category = results?.detections()!![index].categories()[0]
             val drawableText =
-                ObjectDetectorHelper.translationMap.get(cMainActivity.spinnerLanguages.selectedItem.toString()+"_"+category.categoryName()) + " " + String.format(
+                ObjectDetectorHelper.translationMap.get(outputlang+"_"+category.categoryName()) + " " + String.format(
                     "%.2f",
                     category.score()
                 )
