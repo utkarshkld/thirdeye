@@ -58,9 +58,7 @@
             android:exported="true"
             >
         </activity>
-        <activity android:name="com.example.thirdeye.helloworld"
-            android:exported="true">
-         </activity>
+
         <activity android:name=".appsettings"
 
             android:exported="true">

@@ -3,12 +3,17 @@ package com.example.thirdeye;
 import static android.provider.Telephony.TextBasedSmsColumns.STATUS;
 import static java.util.Arrays.stream;
 import java.util.Calendar;
+
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontStyle;
 import androidx.appcompat.widget.SwitchCompat;
+
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -64,9 +70,10 @@ import com.google.mlkit.nl.translate.TranslatorOptions;
 public class appsettings extends AppCompatActivity {
 
     private SeekBar seekBarSpeechRate;
+    private MicHandler shakeListener;
     Calendar calendar;
     ProgressDialog progressDialog2;
-    private Spinner spinnerDefaultLanguage,spinnerinputlang,spinnertranslanguage;
+    private Spinner spinnerDefaultLanguage;
     private SwitchCompat switchPartiallyBlind;
     private LinearLayout llsettings;
     private Button applybtn;
@@ -83,9 +90,12 @@ public class appsettings extends AppCompatActivity {
     private boolean alreadydownloaded = false;
     private ImageView backbtn;
     private boolean buttonClickable = true;
+    private String speaklang;
     private boolean toret = false;
 
     private List<Settings> finalset;
+    private static final int SPEECH_REQUEST_CODE = 1;
+    private List<String> languages = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,9 +114,16 @@ public class appsettings extends AppCompatActivity {
         llsettings = findViewById(R.id.llsettings);
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
-        cancelbtn = findViewById(R.id.buttonCancel);
+//        cancelbtn = findViewById(R.id.buttonCancel);
         initializetexttospeech();
         getAllSettings(this::onSettingsListLoaded);
+        initializelanguageMap();
+        for( Map.Entry<String, String> entry : languageMap.entrySet()){
+            if(entry.getValue().equals(ouptutlang)){
+                speaklang = entry.getKey();
+                break;
+            }
+        }
 
 
 
@@ -116,25 +133,19 @@ public class appsettings extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // This method is called when the progress of the seek bar changes
-
                     calendar = Calendar.getInstance();
                     int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-
                     textToSpeech.speak("Today is " + WeekDays.get(dayOfWeek), TextToSpeech.QUEUE_FLUSH, null, null);
                     textToSpeech.setSpeechRate((progress / 100.0f) * 2.0f);
-
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 // This method is called when the user starts touching the seek bar
 
             }
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // This method is called when the user stops touching the seek bar
-
                     calendar = Calendar.getInstance();
                     int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                     int currprogg = seekBarSpeechRate.getProgress();
@@ -142,13 +153,13 @@ public class appsettings extends AppCompatActivity {
                     textToSpeech.setSpeechRate((currprogg / 100.0f) * 2.0f);
             }
         });
-
-        cancelbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
+        shakeListener = new MicHandler(this);
+        shakeListener.setOnShakeListener(() -> {
+            Toast.makeText(appsettings.this, "Shake detected!", Toast.LENGTH_SHORT).show();
+            startVoiceRecognition();
         });
+
+
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,8 +203,8 @@ public class appsettings extends AppCompatActivity {
 
 
         Log.d("getting widht of ll",""+width+"pixels");
-        initializelanguageMap();
-        List<String> languages = new ArrayList<>(languageMap.values());
+
+        languages = new ArrayList<>(languageMap.values());
         List<String> keys = new ArrayList<>(languageMap.keySet());
 
 
@@ -221,6 +232,96 @@ public class appsettings extends AppCompatActivity {
         switchPartiallyBlind.setChecked(blindness);
         seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
         // Setup Switch for Partially Blind
+    }
+    private void startVoiceRecognition() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
+
+        // Get the selected language code from the map
+        String selectedSourceLanguage = languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString());
+
+        if (selectedSourceLanguage != null) {
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
+        }
+        try {
+            startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private boolean partialmatch(String text, String pattern,int n,int m){
+        int dp[][]=new int[2][m+1];
+        int res=0;
+
+        for(int i=1;i<=n;i++)
+        {
+            for(int j=1;j<=m;j++)
+            {
+                if(text.charAt(i-1)==pattern.charAt(j-1))
+                {
+                    dp[i%2][j]=dp[(i-1)%2][j-1]+1;
+                    if(dp[i%2][j]>res)
+                        res=dp[i%2][j];
+                }
+                else dp[i%2][j]=0;
+            }
+        }
+        int t = Math.min(m,n);
+        if(res > 0.6f*t){
+            return true;
+        }
+        return false;
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            if (matches != null && !matches.isEmpty()) {
+                String spokenText = matches.get(0).toLowerCase();
+                Log.d("inside mic intent",spokenText+" "+speaklang+ouptutlang);
+                //here i will make the shake listener for changing the language
+                List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
+                boolean islanguage = false;
+                for(String str : wordList){
+                    int n = str.length();
+                    for(String str2 : Objects.requireNonNull(MainActivity.commandmap.get("Language"))){
+                        int m = str2.length();
+                        if(partialmatch(str,str2,n,m)){
+                            islanguage = true;
+                            break;
+                        }
+                    }
+                    if(islanguage){
+                        break;
+                    }
+                }
+                // islanguage is found now search for language
+                boolean islangdetected = false;
+                String defaultlang = spinnerDefaultLanguage.getSelectedItem().toString();
+                Log.d("inside mic intent",defaultlang);
+                for(Map.Entry<String, String> entry : Objects.requireNonNull(MainActivity.langnamemap.get(defaultlang)).entrySet()){
+                    String str = entry.getKey();
+
+                    int n =str.length();
+                    for(String currword : wordList){
+                        int m = currword.length();
+                        if (partialmatch(str.toLowerCase(),currword,n,m)) {
+                            defaultlang = Objects.requireNonNull(MainActivity.langnamemap.get(defaultlang)).get(str);
+                            islangdetected = true;
+                            break;
+                        }
+                    }
+                    if(islangdetected)break;
+                }
+                if(islangdetected && islanguage){
+                    spinnerDefaultLanguage.setSelection(languages.indexOf(languageMap.get(defaultlang)));
+                    applybtn.performClick();
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
 
     }
     public void initializetexttospeech(){
@@ -258,25 +359,7 @@ public class appsettings extends AppCompatActivity {
         }, 1500);
     }
 
-//    public void setdropdownheight(Spinner spinner){
-//        try {
-//            Field popup = Spinner.class.getDeclaredField("mPopup");
-//            popup.setAccessible(true);
-//
-//            // Get private mPopup member variable and try cast to ListPopupWindow
-//            android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinner);
-//            Log.d("height check"," happen"+popupWindow);
-//            popupWindow.setHeight(50);
-////            popupWindow.setVerticalOffset(10);
-////            popupWindow.setWidth(50);
-//            // Set popupWindow height to 500px
-//
-//        }
-//        catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
-//            // silently fail...
-//            Log.d("height check","can't happen");
-//        }
-//    }
+
     public void downloadLanguage(String language) {
 
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

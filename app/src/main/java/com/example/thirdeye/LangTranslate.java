@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -62,7 +63,7 @@ import java.util.Objects;
 public class LangTranslate extends AppCompatActivity {
 
     private EditText editTextLetters;
-    private ImageView backbtn;
+    private ImageView backbtn,micbtn,btnreplay,btnpauseplay;
     private CardView btnTranslate;
     private CardView btnVoiceInput;
     private Spinner sourceLanguageSpinner;
@@ -74,6 +75,8 @@ public class LangTranslate extends AppCompatActivity {
     private String outputlangugage = MainActivity.output_lang;
     private String trans_input = MainActivity.trans_input;
     private float speeh_rate = MainActivity.speech_rate;
+    private boolean isPaused = true;
+    private String translationlang = MainActivity.output_lang;
 
 
     // Map to map language codes to their full names
@@ -84,9 +87,13 @@ public class LangTranslate extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.langtranslate);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        Intent intent = getIntent();
+        translationlang = intent.getStringExtra("Translation lang");
+        Log.d("Lang translate intent", "onCreate: "+translationlang);
         editTextLetters = findViewById(R.id.editTextTranslate);
-        btnTranslate = findViewById(R.id.btnTranslate);
-        btnVoiceInput = findViewById(R.id.btnVoiceInput);
+        btnreplay = findViewById(R.id.btnReplay);
+        btnpauseplay = findViewById(R.id.btnPausePlay);
+        micbtn = findViewById(R.id.speakwords);
         sourceLanguageSpinner = findViewById(R.id.sourceLanguageSpinner);
 //        targetLanguageSpinner = findViewById(R.id.targetLanguageSpinner);
         spinnerll = findViewById(R.id.sourceLanguageSpinnerll);
@@ -117,51 +124,91 @@ public class LangTranslate extends AppCompatActivity {
 //        sourceLanguageSpinner.setDropDownVerticalOffset(dpToPx(26)-2);
 //        targetLanguageSpinner.setDropDownVerticalOffset(dpToPx(26)-2);
         sourceLanguageSpinner.setAdapter(adapter);
-//
         Log.d("Output lang : ",outputlangugage+" "+languageMap.values());
-        sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
+        sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(translationlang));
 //        targetLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
         initializetexttospeech();
+        btnpauseplay.setVisibility(View.GONE);
+        btnreplay.setVisibility(View.GONE);
+        btnreplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textToSpeech.stop();
+                isPaused = true;
+                MainActivity.vibe.vibrate(50);
+                btnpauseplay.setImageResource(R.drawable.stop_fill);
+                index = 0;
+                index2 = 0;
+                speakText(translatedTextView.getText().toString(), 0);
+            }
+        });
+        btnpauseplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.vibe.vibrate(50);
+                if (!isPaused) {
+                    isPaused = true;
+                    btnpauseplay.setImageResource(R.drawable.stop_fill);
+
+                    speakText(translatedTextView.getText().toString().substring(index), 0);
+
+                } else {
+                    isPaused = false;
+                    btnpauseplay.setImageResource(R.drawable.play_fill);
+                    index2 = index;
+                    if (textToSpeech != null) {
+                        textToSpeech.stop();
+                    }
+                }
+            }
+        });
         editTextLetters.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     Log.d("focus", "focus lost");
-                    // Do whatever you want here
                 } else {
                     Log.d("focus", "focused");
                 }
             }
         });
-
-
-        btnVoiceInput.setOnClickListener(new View.OnClickListener() {
+        micbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 index = 0;
                 index2 = 0;
+                textToSpeech.stop();
+                editTextLetters.setText("");
                 startSpeechRecognition();
             }
         });
+//        btnTranslate.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (TextUtils.isEmpty(editTextLetters.getText().toString())) {
+//                    Toast.makeText(LangTranslate.this, "No text allowed", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    String sourceText = editTextLetters.getText().toString();
+//
+//                    if (sourceText.equalsIgnoreCase("voice input")) {
+//                        startSpeechRecognition();
+//                    } else {
+//                        index = 0;
+//                        index2 = 0;
+//                        detectAndTranslateLanguage(sourceText);
+//                    }
+//                }
+//            }
+//        });
+    }
+    private void speakText(String text, int startPosition) {
 
-        btnTranslate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (TextUtils.isEmpty(editTextLetters.getText().toString())) {
-                    Toast.makeText(LangTranslate.this, "No text allowed", Toast.LENGTH_SHORT).show();
-                } else {
-                    String sourceText = editTextLetters.getText().toString();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceid");
+        } else {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        }
 
-                    if (sourceText.equalsIgnoreCase("voice input")) {
-                        startSpeechRecognition();
-                    } else {
-                        index = 0;
-                        index2 = 0;
-                        detectAndTranslateLanguage(sourceText);
-                    }
-                }
-            }
-        });
     }
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
@@ -205,6 +252,7 @@ public class LangTranslate extends AppCompatActivity {
         try {
             startActivityForResult(intent, SPEECH_REQUEST_CODE);
 
+
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
         }
@@ -227,6 +275,8 @@ public class LangTranslate extends AppCompatActivity {
             if (results != null && !results.isEmpty()) {
                 String spokenText = results.get(0);
                 editTextLetters.setText(spokenText);
+                btnpauseplay.setVisibility(View.VISIBLE);
+                btnreplay.setVisibility(View.VISIBLE);
                 detectAndTranslateLanguage(spokenText);
             }
         }
@@ -309,17 +359,12 @@ public class LangTranslate extends AppCompatActivity {
 
     }
     private void detectAndTranslateLanguage(String sourceText) {
-        LanguageIdentifier languageIdentifier = LanguageIdentification.getClient();
 
-        languageIdentifier.identifyLanguage(sourceText)
-                .addOnSuccessListener(new OnSuccessListener<String>() {
-                    @Override
-                    public void onSuccess(String sourceLanguage) {
                         // Get the selected language code from the map
 
 
                         TranslatorOptions options = new TranslatorOptions.Builder()
-                                .setSourceLanguage(sourceLanguage)
+                                .setSourceLanguage(outputlangugage)
                                 .setTargetLanguage(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem())))
                                 .build();
 
@@ -364,17 +409,11 @@ public class LangTranslate extends AppCompatActivity {
 
                                 }
                             });
-                        }
-
-
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(LangTranslate.this, "Language detection failed.", Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
+
+
+
+
 
     private void showExitDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(LangTranslate.this);

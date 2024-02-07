@@ -57,6 +57,13 @@
         android:textColor="@color/white"
         android:textColorHint="@color/backText"
         android:textSize="20dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Target Language"
+        android:textSize="20dp"
+        />
 
     <LinearLayout
         android:id="@+id/sourceLanguageSpinnerll"
@@ -72,6 +79,7 @@
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         android:textColor="#FFFFFF">
+
 
         <Spinner
             android:id="@+id/sourceLanguageSpinner"
@@ -116,13 +124,10 @@
     <TextView
         android:id="@+id/translatedText"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_100sdp"
-
+        android:layout_height="match_parent"
         android:layout_marginTop="15dp"
-
         android:layout_marginBottom="15dp"
         android:hint="Translated Text"
-
         android:paddingTop="22dp"
         android:paddingEnd="22dp"
         android:paddingBottom="27dp"
@@ -130,120 +135,134 @@
         android:textColor="@color/white"
         android:textColorHint="@color/backText"
         android:textSize="@dimen/_20sdp" />
-
-
 </LinearLayout>
     <LinearLayout
         android:id="@+id/llgridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+
         android:layout_marginBottom="5dp"
         android:layout_gravity="bottom"
-        android:gravity="bottom">
+        android:gravity="center_horizontal">
+<!--        <GridLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="bottom"-->
 
-        <GridLayout
-            android:layout_width="match_parent"
+<!--            android:layout_marginLeft="@dimen/_2sdp"-->
+<!--            android:layout_marginRight="@dimen/_2sdp"-->
+<!--            android:columnCount="3"-->
+<!--            android:padding="@dimen/_2sdp"-->
+<!--            android:rowCount="1">-->
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:id="@+id/btnVoiceInput"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_rowWeight="1"-->
+<!--                android:layout_column="0"-->
+<!--                android:layout_columnWeight="1"-->
+<!--                android:layout_gravity="fill"-->
+<!--                app:cardBackgroundColor="@android:color/transparent"-->
+<!--                app:cardCornerRadius="12dp"-->
+<!--                app:cardElevation="0dp"-->
+<!--                android:foreground="@drawable/ripple_card">-->
+<!--                <LinearLayout-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_gravity="center_vertical|center_horizontal"-->
+<!--                    android:gravity="center"-->
+<!--                    android:layout_marginTop="15dp"-->
+<!--                    android:orientation="vertical">-->
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/_100sdp"-->
+<!--                        android:layout_height="@dimen/_60sdp"-->
+<!--                        android:background="@drawable/background_card"-->
+<!--                        android:padding="@dimen/_10sdp"-->
+<!--                        android:src="@drawable/mic_fill11" />-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginTop="@dimen/_7sdp"-->
+<!--                        android:padding="@dimen/_5sdp"-->
+<!--                        android:textSize="20dp"-->
+<!--                        android:text="Speak"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textStyle="bold" />-->
+<!--                </LinearLayout>-->
+<!--            </androidx.cardview.widget.CardView>-->
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:id="@+id/btnTranslate"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_rowWeight="1"-->
+<!--                android:layout_column="1"-->
+<!--                android:layout_columnWeight="1"-->
+<!--                android:layout_gravity="fill"-->
+<!--                app:cardBackgroundColor="@android:color/transparent"-->
+<!--                app:cardCornerRadius="12dp"-->
+<!--                app:cardElevation="0dp"-->
+<!--                android:foreground="@drawable/ripple_card">-->
+<!--                <LinearLayout-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_gravity="center_horizontal|center_vertical"-->
+<!--                    android:gravity="center"-->
+<!--                    android:layout_marginTop="15dp"-->
+<!--                    android:orientation="vertical">-->
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/_100sdp"-->
+<!--                        android:layout_height="@dimen/_60sdp"-->
+<!--                        android:background="@drawable/background_card_translate"-->
+<!--                        android:padding="13dp"-->
+<!--                        android:src="@drawable/translate" />-->
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginTop="@dimen/_7sdp"-->
+<!--                        android:padding="@dimen/_5sdp"-->
+<!--                        android:textSize="20dp"-->
+<!--                        android:text="Translate"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textStyle="bold" />-->
+<!--                </LinearLayout>-->
+<!--            </androidx.cardview.widget.CardView>-->
+        <!--        </GridLayout>-->
+        <ImageButton
+            android:id="@+id/btnReplay"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
 
-            android:layout_marginLeft="@dimen/_2sdp"
-            android:layout_marginRight="@dimen/_2sdp"
-            android:columnCount="3"
-            android:padding="@dimen/_2sdp"
-            android:rowCount="1">
+            android:layout_marginRight="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_30sdp"
+            android:background="@drawable/imagebutton_background"
 
+            android:foreground="@drawable/ripple_card"
+            android:src="@drawable/replay_icon" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/btnVoiceInput"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_row="0"
-                android:layout_rowWeight="1"
-                android:layout_column="0"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                android:foreground="@drawable/ripple_card">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|center_horizontal"
-                    android:gravity="center"
-                    android:layout_marginTop="15dp"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/_100sdp"
-                        android:layout_height="@dimen/_60sdp"
-                        android:background="@drawable/background_card"
-                        android:padding="@dimen/_10sdp"
-                        android:src="@drawable/mic_fill11" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/_7sdp"
-                        android:padding="@dimen/_5sdp"
-                        android:textSize="20dp"
-                        android:text="Speak"
-                        android:textColor="@color/white"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
+        <ImageButton
+            android:id="@+id/speakwords"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="@drawable/ripple_card"
 
 
-            </androidx.cardview.widget.CardView>
+            android:layout_marginBottom="@dimen/_30sdp"
+            android:background="@drawable/imagebutton_background"
+            android:src="@drawable/mictranslate" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/btnTranslate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_row="0"
-                android:layout_rowWeight="1"
-                android:layout_column="1"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                android:foreground="@drawable/ripple_card">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|center_vertical"
-                    android:gravity="center"
-                    android:layout_marginTop="15dp"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/_100sdp"
-                        android:layout_height="@dimen/_60sdp"
-                        android:background="@drawable/background_card_translate"
-                        android:padding="13dp"
-                        android:src="@drawable/translate" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/_7sdp"
-                        android:padding="@dimen/_5sdp"
-                        android:textSize="20dp"
-                        android:text="Translate"
-                        android:textColor="@color/white"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-
-            </androidx.cardview.widget.CardView>
-
-        </GridLayout>
-
-
+        <ImageButton
+            android:id="@+id/btnPausePlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="@drawable/ripple_card"
+            android:layout_marginLeft="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_30sdp"
+            android:background="@drawable/imagebutton_background"
+            android:layout_toRightOf="@+id/btnTakePicture"
+            android:src="@drawable/stop_fill" />
     </LinearLayout>
 </RelativeLayout>

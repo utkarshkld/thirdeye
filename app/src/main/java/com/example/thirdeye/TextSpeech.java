@@ -96,7 +96,7 @@ import android.os.Looper;
 
 
 public class TextSpeech extends AppCompatActivity {
-    private CheckMainBinding textspeech;
+    private ProgressDialog progressprocessing;
     private int count = 0;
 
     private SurfaceHolder surfaceViewHolder;
@@ -163,6 +163,8 @@ public class TextSpeech extends AppCompatActivity {
         waiting = new ProgressDialog(TextSpeech.this);
         waiting.setCancelable(false);
         waiting.setMessage("please wait");
+        progressprocessing = new ProgressDialog(TextSpeech.this);
+        progressprocessing.setCancelable(false);
 
 
         index = 0;
@@ -467,7 +469,8 @@ public class TextSpeech extends AppCompatActivity {
             byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
             Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
             InputImage image = InputImage.fromBitmap(bitmap, CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), this));
-
+            progressprocessing.setMessage("Processing...");
+            progressprocessing.show();
             langcounter = 0;
             alltext = new StringBuilder("");
             StringBuilder expirydatebuilder = new StringBuilder();
@@ -596,6 +599,7 @@ public class TextSpeech extends AppCompatActivity {
                                                     alltext.insert(0,expirydatebuilder+"\n");
                                                     textView.setText(alltext.toString());
                                                     speakText(alltext.toString(), 0);
+                                                    progressprocessing.dismiss();
 //                                                    if(targetLanguage == "id"){
 //                                                        textToSpeech.setLanguage(new Locale("in"));
 //                                                    }else if(targetLanguage == "no"){
@@ -619,6 +623,7 @@ public class TextSpeech extends AppCompatActivity {
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
+                                                progressprocessing.dismiss();
                                                 Toast.makeText(TextSpeech.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                                             }
                                         });
@@ -626,6 +631,7 @@ public class TextSpeech extends AppCompatActivity {
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
+                                        progressprocessing.dismiss();
                                         myRunnable2.stop();
                                         progressDialog.dismiss();
                                     }

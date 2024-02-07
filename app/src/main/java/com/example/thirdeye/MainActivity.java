@@ -40,12 +40,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     public static Vibrator vibe;
     public static HashMap<String, String> translationMap = new HashMap<>();
     public static HashMap<String,String> languageMap = new HashMap<>();
+    public static HashMap<String,Map<String,String>> langnamemap = new HashMap<>();
     private static final int SPEECH_REQUEST_CODE = 1;
     private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
     public static TextToSpeech textToSpeech;
@@ -150,8 +152,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
+
                 textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+                intent.putExtra("Translation lang",output_lang);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
             }
@@ -369,7 +373,8 @@ public class MainActivity extends AppCompatActivity {
                 else dp[i%2][j]=0;
             }
         }
-        if(res > m/2){
+        int t = Math.min(m,n);
+        if(res > 0.6f*t){
             return true;
         }
         return false;
@@ -437,10 +442,8 @@ public class MainActivity extends AppCompatActivity {
                         for(String str2 : wordList) {
                             int m = str2.length();
                             if (partialmatch(str,str2,n,m)) {
-                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
-                                Intent intent = new Intent(MainActivity.this, LangTranslate.class);
-                                startActivity(intent);
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+
+
                                 ismatched = true;
                                 break;
                             }
@@ -448,6 +451,29 @@ public class MainActivity extends AppCompatActivity {
                         if(ismatched){
                             break;
                         }
+                    }
+                    if(ismatched){
+                        // before starting we have itertate over the map for detecting langugages
+                        String defaultlang = speaklang;
+
+                        for(Map.Entry<String, String> entry : Objects.requireNonNull(langnamemap.get(speaklang)).entrySet()){
+                            String str = entry.getKey();
+
+                            int n =str.length();
+                            for(String currword : wordList){
+                                int m = currword.length();
+                                if (partialmatch(str.toLowerCase(),currword,n,m)) {
+                                    defaultlang = langnamemap.get(speaklang).get(str);
+                                    break;
+                                }
+                            }
+                        }
+                        Log.d("Checking language ", "onActivityResult: "+defaultlang);
+                        textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate")+" "+defaultlang,TextToSpeech.QUEUE_FLUSH, null, null);
+                        Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+                        intent.putExtra("Translation lang",languageMap.get(defaultlang));
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                        startActivity(intent);
                     }
                 }
                 if(!ismatched){

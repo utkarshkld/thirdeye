@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+// Need to sync the tts and object detection properly
 
 public class ObjectDetectorHelper {
     public static final float THRESHOLD_DEFAULT = 0.5f;
@@ -153,31 +154,19 @@ public class ObjectDetectorHelper {
 
     public void setupObjectDetector() {
         BaseOptions.Builder baseOptionsBuilder = BaseOptions.builder();
-
-
         baseOptionsBuilder.setDelegate(Delegate.CPU);
-
-
         String modelName;
-
         modelName = "efficientdet-lite2.tflite";
-
-
         baseOptionsBuilder.setModelAssetPath(modelName);
-
-
         try {
             ObjectDetector.ObjectDetectorOptions.Builder optionsBuilder = ObjectDetector.ObjectDetectorOptions.builder()
                     .setBaseOptions(baseOptionsBuilder.build())
                     .setScoreThreshold(.55f)
                     .setRunningMode(runningMode)
                     .setMaxResults(3);
-
             imageProcessingOptions = ImageProcessingOptions.builder()
                     .setRotationDegrees(imageRotation)
                     .build();
-
-
                     optionsBuilder.setRunningMode(runningMode)
                             .setResultListener(this::returnLivestreamResult)
                             .setErrorListener(this::returnLivestreamError);

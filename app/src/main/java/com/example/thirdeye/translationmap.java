@@ -1,9 +1,12 @@
 package com.example.thirdeye;
 import static com.example.thirdeye.MainActivity.translationMap;
 import static com.example.thirdeye.MainActivity.commandmap;
+import static com.example.thirdeye.MainActivity.langnamemap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class translationmap {
 
@@ -224,7 +227,172 @@ public class translationmap {
              settingsTranslations.add("налаштування"); // Ukrainian
              settingsTranslations.add("ترتیبات"); // Urdu
              settingsTranslations.add("cài đặt"); // Vietnamese
+             List<String> languageTranslations = new ArrayList<>();
 
+             // Add translations for each language
+             languageTranslations.add("taal");         // अफ्रीकान्स (Afrikaans)
+             languageTranslations.add("gjuhë");        // अल्बेनियन (Albanian)
+             languageTranslations.add("لغة");          // अरबी (Arabic)
+             languageTranslations.add("ভাষা");        // बांग्लা (Bengali)
+             languageTranslations.add("език");         // बल्गेरियाई (Bulgarian)
+             languageTranslations.add("语言");         // चीनी (Chinese)
+             languageTranslations.add("jazyk");        // चेक (Czech)
+             languageTranslations.add("sprog");        // डेनिश (Danish)
+             languageTranslations.add("taal");         // डच (Dutch)
+             languageTranslations.add("language");     // अंग्रेज़ी (English)
+             languageTranslations.add("kieli");        // फ़िनिश (Finnish)
+             languageTranslations.add("langue");       // फ्रेंच (French)
+             languageTranslations.add("Sprache");      // जर्मन (German)
+             languageTranslations.add("γλώσσα");       // यूनानी (Greek)
+             languageTranslations.add("भाषा");        // गुजराती (Gujarati)
+             languageTranslations.add("हाईशियन");     // हाईशियन (Haitian)
+             languageTranslations.add("यहूदी");      // यहूदी (Hebrew)
+             languageTranslations.add("भाषा");        // हिन्दी (Hindi)
+             languageTranslations.add("भाषा");        // हंगेरियन (Hungarian)
+             languageTranslations.add("Íslenska");     // आइसलैंडिक (Icelandic)
+             languageTranslations.add("Bahasa");      // इंडोनेशियाई (Indonesian)
+             languageTranslations.add("lingua");       // इतालवी (Italian)
+             languageTranslations.add("言語");         // जापानी (Japanese)
+             languageTranslations.add("ಭಾಷೆ");       // कन्नड़ (Kannada)
+             languageTranslations.add("언어");         // कोरियाई (Korean)
+             languageTranslations.add("valoda");       // लातवियाई (Latvian)
+             languageTranslations.add("kalba");        // लिथुआनियन (Lithuanian)
+             languageTranslations.add("язык");         // मैसिडोनियन (Macedonian)
+             languageTranslations.add("Bahasa");       // मलय (Malay)
+             languageTranslations.add("ഭാഷ");         // मलयालम (Malayalam)
+             languageTranslations.add("ilsien");       // माल्टीज़ (Maltese)
+             languageTranslations.add("भाषा");        // मराठी (Marathi)
+             languageTranslations.add("språk");        // नॉर्वेजियन (Norwegian)
+             languageTranslations.add("język");        // पोलिश (Polish)
+             languageTranslations.add("língua");       // पुर्तगाली (Portuguese)
+             languageTranslations.add("limba");        // रोमानियाई (Romanian)
+             languageTranslations.add("язык");         // रूसी (Russian)
+             languageTranslations.add("jazyk");        // स्लोवाक (Slovak)
+             languageTranslations.add("jezik");        // स्लोवेनियन (Slovenian)
+             languageTranslations.add("idioma");       // स्पेनिश (Spanish)
+             languageTranslations.add("lugha");        // स्वाहिली (Swahili)
+             languageTranslations.add("språk");        // स्वीडिश (Swedish)
+             languageTranslations.add("wika");         // तागालोग (Tagalog)
+             languageTranslations.add("மொழி");       // तमिल (Tamil)
+             languageTranslations.add("భాషా");       // तेलुगु (Telugu)
+             languageTranslations.add("ภาษา");       // थाई (Thai)
+             languageTranslations.add("dil");          // तुर्की (Turkish)
+             languageTranslations.add("мова");        // यूक्रेनी (Ukrainian)
+             languageTranslations.add("زبان");        // उर्दू (Urdu)
+             languageTranslations.add("ngôn ngữ");    // वियतनामी (Vietnamese)
+             commandmap.put("Language",languageTranslations);
+             Map<String, String> languageNamesEnglishToEnglish = new HashMap<>();
+
+             // Adding language names with English as both keys and values to the map
+             languageNamesEnglishToEnglish.put("Afrikaans", "Afrikaans");
+             languageNamesEnglishToEnglish.put("Albanian", "Albanian");
+             languageNamesEnglishToEnglish.put("Arabic", "Arabic");
+             languageNamesEnglishToEnglish.put("Bengali", "Bengali");
+             languageNamesEnglishToEnglish.put("Bulgarian", "Bulgarian");
+             languageNamesEnglishToEnglish.put("Chinese", "Chinese");
+             languageNamesEnglishToEnglish.put("Czech", "Czech");
+             languageNamesEnglishToEnglish.put("Danish", "Danish");
+             languageNamesEnglishToEnglish.put("Dutch", "Dutch");
+             languageNamesEnglishToEnglish.put("English", "English");
+             languageNamesEnglishToEnglish.put("Finnish", "Finnish");
+             languageNamesEnglishToEnglish.put("French", "French");
+             languageNamesEnglishToEnglish.put("Galician", "Galician");
+             languageNamesEnglishToEnglish.put("Georgian", "Georgian");
+             languageNamesEnglishToEnglish.put("German", "German");
+             languageNamesEnglishToEnglish.put("Greek", "Greek");
+             languageNamesEnglishToEnglish.put("Gujarati", "Gujarati");
+             languageNamesEnglishToEnglish.put("Haitian", "Haitian");
+             languageNamesEnglishToEnglish.put("Hebrew", "Hebrew");
+             languageNamesEnglishToEnglish.put("Hindi", "Hindi");
+             languageNamesEnglishToEnglish.put("Hungarian", "Hungarian");
+             languageNamesEnglishToEnglish.put("Icelandic", "Icelandic");
+             languageNamesEnglishToEnglish.put("Indonesian", "Indonesian");
+             languageNamesEnglishToEnglish.put("Italian", "Italian");
+             languageNamesEnglishToEnglish.put("Japanese", "Japanese");
+             languageNamesEnglishToEnglish.put("Kannada", "Kannada");
+             languageNamesEnglishToEnglish.put("Korean", "Korean");
+             languageNamesEnglishToEnglish.put("Latvian", "Latvian");
+             languageNamesEnglishToEnglish.put("Lithuanian", "Lithuanian");
+             languageNamesEnglishToEnglish.put("Macedonian", "Macedonian");
+             languageNamesEnglishToEnglish.put("Malay", "Malay");
+             languageNamesEnglishToEnglish.put("Malayalam", "Malayalam");
+             languageNamesEnglishToEnglish.put("Maltese", "Maltese");
+             languageNamesEnglishToEnglish.put("Marathi", "Marathi");
+             languageNamesEnglishToEnglish.put("Norwegian", "Norwegian");
+             languageNamesEnglishToEnglish.put("Polish", "Polish");
+             languageNamesEnglishToEnglish.put("Portuguese", "Portuguese");
+             languageNamesEnglishToEnglish.put("Romanian", "Romanian");
+             languageNamesEnglishToEnglish.put("Russian", "Russian");
+             languageNamesEnglishToEnglish.put("Slovak", "Slovak");
+             languageNamesEnglishToEnglish.put("Slovenian", "Slovenian");
+             languageNamesEnglishToEnglish.put("Spanish", "Spanish");
+             languageNamesEnglishToEnglish.put("Swahili", "Swahili");
+             languageNamesEnglishToEnglish.put("Swedish", "Swedish");
+             languageNamesEnglishToEnglish.put("Tagalog", "Tagalog");
+             languageNamesEnglishToEnglish.put("Tamil", "Tamil");
+             languageNamesEnglishToEnglish.put("Telugu", "Telugu");
+             languageNamesEnglishToEnglish.put("Thai", "Thai");
+             languageNamesEnglishToEnglish.put("Turkish", "Turkish");
+             languageNamesEnglishToEnglish.put("Ukrainian", "Ukrainian");
+             languageNamesEnglishToEnglish.put("Urdu", "Urdu");
+             languageNamesEnglishToEnglish.put("Vietnamese", "Vietnamese");
+             langnamemap.put("English",languageNamesEnglishToEnglish);
+             Map<String, String> languageNamesHindiToEnglish = new HashMap<>();
+
+             // Adding language names with Hindi as keys and English as values to the map
+             languageNamesHindiToEnglish.put("अफ्रीकान्स", "Afrikaans");
+             languageNamesHindiToEnglish.put("अल्बेनियन", "Albanian");
+             languageNamesHindiToEnglish.put("अरबी", "Arabic");
+             languageNamesHindiToEnglish.put("बांग्ला", "Bengali");
+             languageNamesHindiToEnglish.put("बल्गेरियाई", "Bulgarian");
+             languageNamesHindiToEnglish.put("चीनी", "Chinese");
+             languageNamesHindiToEnglish.put("चेक", "Czech");
+             languageNamesHindiToEnglish.put("डेनिश", "Danish");
+             languageNamesHindiToEnglish.put("डच", "Dutch");
+             languageNamesHindiToEnglish.put("अंग्रेज़ी", "English");
+             languageNamesHindiToEnglish.put("फ़िनिश", "Finnish");
+             languageNamesHindiToEnglish.put("फ्रेंच", "French");
+             languageNamesHindiToEnglish.put("गैलिशियन", "Galician");
+             languageNamesHindiToEnglish.put("जॉर्जियन", "Georgian");
+             languageNamesHindiToEnglish.put("जर्मन", "German");
+             languageNamesHindiToEnglish.put("यूनानी", "Greek");
+             languageNamesHindiToEnglish.put("गुजराती", "Gujarati");
+             languageNamesHindiToEnglish.put("हाईशियन", "Haitian");
+             languageNamesHindiToEnglish.put("यहूदी", "Hebrew");
+             languageNamesHindiToEnglish.put("हिन्दी", "Hindi");
+             languageNamesHindiToEnglish.put("हंगेरियन", "Hungarian");
+             languageNamesHindiToEnglish.put("आइसलैंडिक", "Icelandic");
+             languageNamesHindiToEnglish.put("इंडोनेशियाई", "Indonesian");
+             languageNamesHindiToEnglish.put("इतालवी", "Italian");
+             languageNamesHindiToEnglish.put("जापानी", "Japanese");
+             languageNamesHindiToEnglish.put("कन्नड़", "Kannada");
+             languageNamesHindiToEnglish.put("कोरियाई", "Korean");
+             languageNamesHindiToEnglish.put("लातवियाई", "Latvian");
+             languageNamesHindiToEnglish.put("लिथुआनियन", "Lithuanian");
+             languageNamesHindiToEnglish.put("मैसिडोनियन", "Macedonian");
+             languageNamesHindiToEnglish.put("मलय", "Malay");
+             languageNamesHindiToEnglish.put("मलयालम", "Malayalam");
+             languageNamesHindiToEnglish.put("माल्टीज़", "Maltese");
+             languageNamesHindiToEnglish.put("मराठी", "Marathi");
+             languageNamesHindiToEnglish.put("नॉर्वेजियन", "Norwegian");
+             languageNamesHindiToEnglish.put("पोलिश", "Polish");
+             languageNamesHindiToEnglish.put("पुर्तगाली", "Portuguese");
+             languageNamesHindiToEnglish.put("रोमानियाई", "Romanian");
+             languageNamesHindiToEnglish.put("रूसी", "Russian");
+             languageNamesHindiToEnglish.put("स्लोवाक", "Slovak");
+             languageNamesHindiToEnglish.put("स्लोवेनियन", "Slovenian");
+             languageNamesHindiToEnglish.put("स्पेनिश", "Spanish");
+             languageNamesHindiToEnglish.put("स्वाहिली", "Swahili");
+             languageNamesHindiToEnglish.put("स्वीडिश", "Swedish");
+             languageNamesHindiToEnglish.put("तागालोग", "Tagalog");
+             languageNamesHindiToEnglish.put("तमिल", "Tamil");
+             languageNamesHindiToEnglish.put("तेलुगु", "Telugu");
+             languageNamesHindiToEnglish.put("थाई", "Thai");
+             languageNamesHindiToEnglish.put("तुर्की", "Turkish");
+             languageNamesHindiToEnglish.put("यूक्रेनी", "Ukrainian");
+             languageNamesHindiToEnglish.put("उर्दू", "Urdu");
+             languageNamesHindiToEnglish.put("वियतनामी", "Vietnamese");
+             langnamemap.put("Hindi",languageNamesHindiToEnglish);
              // Add translations list to the map
              commandmap.put("settings", settingsTranslations);
              translationMap.put("Hindi_opening setting", "शुरुआत सेटिंग");
