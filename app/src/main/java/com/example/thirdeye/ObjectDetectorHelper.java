@@ -17,10 +17,11 @@ package com.example.thirdeye;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.Handler;
-
+import androidx.navigation.fragment.NavHostFragment;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.SpannableString;
@@ -28,7 +29,11 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.camera.core.ImageProxy;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.thirdeye.databinding.CheckMainBinding;
+import com.example.thirdeye.fragments.CameraFragment;
 import com.google.mediapipe.framework.image.BitmapImageBuilder;
 import com.google.mediapipe.framework.image.MPImage;
 import com.google.mediapipe.tasks.components.containers.Detection;
@@ -74,7 +79,7 @@ public class ObjectDetectorHelper {
     public static TextToSpeech textToSpeech;
 //    private float speechrate = MainActivity.speech_rate;
     private final String output_lang = MainActivity.output_lang;
-    private boolean isWordspeaking = false;
+    public static boolean isfirstimedark = false;
 
     public ObjectDetectorHelper(float threshold, int maxResults, int currentDelegate, int currentModel,
                                 RunningMode runningMode, Context context, DetectorListener objectDetectorListener) {
@@ -167,9 +172,7 @@ public class ObjectDetectorHelper {
             imageProcessingOptions = ImageProcessingOptions.builder()
                     .setRotationDegrees(imageRotation)
                     .build();
-                    optionsBuilder.setRunningMode(runningMode)
-                            .setResultListener(this::returnLivestreamResult)
-                            .setErrorListener(this::returnLivestreamError);
+                    optionsBuilder.setRunningMode(runningMode).setResultListener(this::returnLivestreamResult).setErrorListener(this::returnLivestreamError);
 
 
             ObjectDetector.ObjectDetectorOptions options = optionsBuilder.build();
@@ -196,8 +199,10 @@ public class ObjectDetectorHelper {
         long frameTime = SystemClock.uptimeMillis();
         Bitmap bitmapBuffer = Bitmap.createBitmap(imageProxy.getWidth(), imageProxy.getHeight(), Bitmap.Config.ARGB_8888);
 
+
         try {
             bitmapBuffer.copyPixelsFromBuffer(imageProxy.getPlanes()[0].getBuffer());
+
         } catch (Exception e) {
             // handle the exception
         } finally {
@@ -210,6 +215,14 @@ public class ObjectDetectorHelper {
             setupObjectDetector();
             return;
         }
+
+        if(!isfirstimedark){
+            Log.d("Detecting Darkness",""+detectdarkness(bitmapBuffer));
+            if(detectdarkness(bitmapBuffer)){
+                isfirstimedark = true;
+
+            }
+        }
         MPImage mpImage = new BitmapImageBuilder(bitmapBuffer).build();
         detectAsync(mpImage, frameTime);
     }
@@ -219,6 +232,34 @@ public class ObjectDetectorHelper {
         if (cMainActivity.isPlay) {
             objectDetector.detectAsync(mpImage, imageProcessingOptions, frameTime);
         }
+    }
+    private boolean detectdarkness(Bitmap bitmap){
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int darkPixels = 0;
+
+        // Iterate through each pixel of the bitmap
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int pixel = bitmap.getPixel(x, y);
+
+                // Extract RGB components from the pixel
+                int red = Color.red(pixel);
+                int green = Color.green(pixel);
+                int blue = Color.blue(pixel);
+//                Log.d("Detecting Darkness",""+red+" "+green+" "+blue);
+
+                // Check if each primary color intensity is greater than 178
+                if (red < 100 && green < 100 && blue < 100) {
+                    darkPixels++;
+                }
+            }
+        }
+        float total = width*height;
+        float threshhold = (darkPixels/total);
+
+        return threshhold > 0.8;
     }
 
     private void returnLivestreamResult(ObjectDetectorResult result, MPImage input) {

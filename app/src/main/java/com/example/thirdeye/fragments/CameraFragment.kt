@@ -32,6 +32,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888
 import androidx.camera.core.Preview
+
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -283,7 +284,12 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 cameraProvider = cameraProviderFuture.get()
 
                 // Build and bind the camera use cases
-                bindCameraUseCases()
+                if(ObjectDetectorHelper.isfirstimedark){
+                    bindCameraUseCases2()
+                }else{
+                    bindCameraUseCases()
+                }
+
             },
             ContextCompat.getMainExecutor(requireContext())
         )
@@ -301,7 +307,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         // CameraSelector - makes assumption that we're only using the back camera
         val cameraSelector =
             CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build()
 
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview =
@@ -351,6 +358,75 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
+
+        } catch (exc: Exception) {
+            Log.e(TAG, "Use case binding failed", exc)
+        }
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    fun bindCameraUseCases2() {
+
+        // CameraProvider
+        val cameraProvider =
+            cameraProvider
+                ?: throw IllegalStateException("Camera initialization failed.")
+
+        // CameraSelector - makes assumption that we're only using the back camera
+        val cameraSelector =
+            CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build()
+
+        // Preview. Only using the 4:3 ratio because this is the closest to our models
+        preview =
+            Preview.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
+                .build()
+
+        // ImageAnalysis. Using RGBA 8888 to match how our models work
+        imageAnalyzer =
+            ImageAnalysis.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                .build()
+                // The analyzer can then be assigned to the instance
+                .also {
+                    it.setAnalyzer(
+                        backgroundExecutor,
+                        objectDetectorHelper::detectLivestreamFrame
+                    )
+                }
+//        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(imageAnalyzer)
+//        ext.setCaptureRequestOption(
+//            CaptureRequest.CONTROL_AE_MODE,
+//            CaptureRequest.CONTROL_AE_MODE_OFF
+//        )
+//        ext.setCaptureRequestOption(
+//            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+//            Range<Int>(60, 60)
+//        )
+
+        // Must unbind the use-cases before rebinding them
+        cameraProvider.unbindAll()
+
+        try {
+            // A variable number of use-cases can be passed here -
+            // camera provides access to CameraControl & CameraInfo
+            camera = cameraProvider.bindToLifecycle(
+                this,
+                cameraSelector,
+                preview,
+                imageAnalyzer
+            )
+
+
+            // Attach the viewfinder's surface provider to preview use case
+            preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
+            camera?.cameraControl?.enableTorch(true);
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }

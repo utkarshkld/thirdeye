@@ -121,11 +121,12 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
             // Create text to display alongside detected objects
             val category = results?.detections()!![index].categories()[0]
-            val drawableText =
-                ObjectDetectorHelper.translationMap.get(outputlang+"_"+category.categoryName()) + " " + String.format(
-                    "%.2f",
-                    category.score()
-                )
+            Log.d("Testing the objdet",""+category);
+            val drawableText = ""
+//                category.displayName() + " " + String.format(
+//                    "%.2f",
+//                    category.score()
+//                )
 //            currobject = category.categoryName()
 //            var curr_time = ((System.currentTimeMillis() / 1000)).toFloat();
 //            if(objectResolver[currobject] ?: 0.0f <= curr_time){
@@ -133,7 +134,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 //                objectResolver[currobject] = (curr_time+4)
 //            }
 
-            Log.d("object here",category.categoryName());
+//            Log.d("object here",category.);
             // Draw rect behind display text
             textBackgroundPaint.getTextBounds(
                 drawableText,
