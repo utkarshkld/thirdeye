@@ -89,6 +89,7 @@ public class appsettings extends AppCompatActivity {
     private String trans_input = MainActivity.trans_input;
     private boolean alreadydownloaded = false;
     private ImageView backbtn;
+    private Button feedbackBtn;
     private boolean buttonClickable = true;
     private String speaklang;
     private boolean toret = false;
@@ -114,6 +115,7 @@ public class appsettings extends AppCompatActivity {
         llsettings = findViewById(R.id.llsettings);
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
+        feedbackBtn = findViewById(R.id.buttonfeedback);
 //        cancelbtn = findViewById(R.id.buttonCancel);
         initializetexttospeech();
         getAllSettings(this::onSettingsListLoaded);
@@ -125,7 +127,12 @@ public class appsettings extends AppCompatActivity {
             }
         }
 
-
+        feedbackBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(appsettings.this, FeedbackActivity.class));
+            }
+        });
 
         seekBarSpeechRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -163,7 +170,9 @@ public class appsettings extends AppCompatActivity {
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                Intent intent = new Intent(appsettings.this,MainActivity.class);
+                startActivity(intent);
+
             }
         });
         applybtn.setOnClickListener(new View.OnClickListener() {

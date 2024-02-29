@@ -63,6 +63,7 @@ import java.util.Objects;
 public class LangTranslate extends AppCompatActivity {
 
     private EditText editTextLetters;
+    private MicHandler shakeListener;
     private ImageView backbtn,micbtn,btnreplay,btnpauseplay;
     private CardView btnTranslate;
     private CardView btnVoiceInput;
@@ -77,6 +78,7 @@ public class LangTranslate extends AppCompatActivity {
     private float speeh_rate = MainActivity.speech_rate;
     private boolean isPaused = true;
     private String translationlang = MainActivity.output_lang;
+    private long shaketime = 0;
 
 
     // Map to map language codes to their full names
@@ -130,6 +132,15 @@ public class LangTranslate extends AppCompatActivity {
         initializetexttospeech();
         btnpauseplay.setVisibility(View.GONE);
         btnreplay.setVisibility(View.GONE);
+        shakeListener = new MicHandler(this);
+        shakeListener.setOnShakeListener(() -> {
+            Toast.makeText(LangTranslate.this, "Shake detected!", Toast.LENGTH_SHORT).show();
+            if(System.currentTimeMillis()-shaketime >= 3000){
+                shaketime = System.currentTimeMillis();
+                startSpeechRecognition();
+            }
+
+        });
         btnreplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

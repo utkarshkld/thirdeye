@@ -35,7 +35,7 @@ public class SplashScreen extends AppCompatActivity {
                 try {
 
                     sleep(1500);
-                    Intent i=new Intent(SplashScreen.this , MainActivity.class);
+                    Intent i=new Intent(SplashScreen.this , Onboarding.class);
                     startActivity(i);
 
                     //Remove activity

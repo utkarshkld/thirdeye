@@ -16,14 +16,19 @@
 package com.example.thirdeye;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.app.Activity;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.Handler;
+
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.fragment.NavHostFragment;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+
 import android.text.SpannableString;
 import android.util.Log;
 
@@ -43,6 +48,7 @@ import com.google.mediapipe.tasks.vision.core.ImageProcessingOptions;
 import com.google.mediapipe.tasks.vision.core.RunningMode;
 import com.google.mediapipe.tasks.vision.objectdetector.ObjectDetector;
 import com.google.mediapipe.tasks.vision.objectdetector.ObjectDetectorResult;
+
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,7 +85,7 @@ public class ObjectDetectorHelper {
     public static TextToSpeech textToSpeech;
 //    private float speechrate = MainActivity.speech_rate;
     private final String output_lang = MainActivity.output_lang;
-    public static boolean isfirstimedark = false;
+
 
     public ObjectDetectorHelper(float threshold, int maxResults, int currentDelegate, int currentModel,
                                 RunningMode runningMode, Context context, DetectorListener objectDetectorListener) {
@@ -144,9 +150,9 @@ public class ObjectDetectorHelper {
     private void speakText(String text, int startPosition) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceId");
+            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, "myUtteranceId");
         } else {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceId");
+            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, "myUtteranceId");
         }
     }
 
@@ -216,20 +222,30 @@ public class ObjectDetectorHelper {
             return;
         }
 
-        if(!isfirstimedark){
+        if(!cMainActivity.flash){
             Log.d("Detecting Darkness",""+detectdarkness(bitmapBuffer));
             if(detectdarkness(bitmapBuffer)){
-                isfirstimedark = true;
+                cMainActivity.flash = true;
+                cMainActivity.isPlay=false;
+                Intent intent = new Intent(context, cMainActivity.class);
+                intent.putExtra("flash",true);
+                context.startActivity(intent);
 
             }
         }
-        MPImage mpImage = new BitmapImageBuilder(bitmapBuffer).build();
-        detectAsync(mpImage, frameTime);
+        if(cMainActivity.isPlay) {
+            MPImage mpImage = new BitmapImageBuilder(bitmapBuffer).build();
+            if(mpImage!=null)
+            detectAsync(mpImage, frameTime);
+        }
     }
+
+
 
     @VisibleForTesting
     public void detectAsync(MPImage mpImage, long frameTime) {
         if (cMainActivity.isPlay) {
+            if(objectDetector!=null)
             objectDetector.detectAsync(mpImage, imageProcessingOptions, frameTime);
         }
     }

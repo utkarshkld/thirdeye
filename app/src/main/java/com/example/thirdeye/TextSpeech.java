@@ -7,6 +7,7 @@ import static java.lang.Thread.sleep;
 
 import com.google.mlkit.nl.languageid.LanguageIdentification;
 import com.google.mlkit.nl.languageid.LanguageIdentifier;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -82,11 +83,13 @@ import android.speech.tts.UtteranceProgressListener;
 
 import java.io.IOException;
 
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,6 +122,7 @@ public class TextSpeech extends AppCompatActivity {
     private String outputlangugage = MainActivity.output_lang;
     private String input_lang = MainActivity.input_lang;
     private boolean blindness = MainActivity.blindness;
+    private boolean flash = false;
 
     private RelativeLayout rellayout;
     byte[] data2 = null;
@@ -147,10 +151,10 @@ public class TextSpeech extends AppCompatActivity {
     private boolean isSpeaking = false;
     private ArrayList<Integer> prefixArray = new ArrayList<>();
     private ProgressDialog waiting;
-    public static Bitmap currentframe;
+    public long shaketime = 0;
 
     boolean firsttime = true, nonflash = false;
-    private long lastpgdet = 0,lastpagedet2 = 0;
+    private long lastpgdet = 0,lastpagedet2 = 0,lastpage3=0;
     private boolean isCaptured = false;
 
 
@@ -236,7 +240,11 @@ public class TextSpeech extends AppCompatActivity {
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
             Toast.makeText(TextSpeech.this, "Shake detected!", Toast.LENGTH_SHORT).show();
-            startRecording();
+            if(System.currentTimeMillis()-shaketime >= 3000){
+                shaketime = System.currentTimeMillis();
+                startRecording();
+            }
+
         });
         micc.setOnClickListener(v -> {
             isSpeaking = true;
@@ -693,6 +701,14 @@ public class TextSpeech extends AppCompatActivity {
         camera = Camera.open();
         Camera.Parameters params = camera.getParameters();
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        PackageManager pm = getPackageManager();
+        boolean deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        if(deviceHasFlash && flash){
+            Toast.makeText(TextSpeech.this,"Flash ON",Toast.LENGTH_SHORT).show();
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        }else if(flash && !deviceHasFlash){
+            Toast.makeText(TextSpeech.this,"Device doesnt have flash Light",Toast.LENGTH_LONG).show();
+        }
         camera.setParameters(params);
         camera.setDisplayOrientation(CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), TextSpeech.this));
 
@@ -708,9 +724,20 @@ public class TextSpeech extends AppCompatActivity {
             public void onPreviewFrame(byte[] data, Camera camera) {
 
                 data2 = data;
+
                 if(!isCaptured) {
                     byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
+
+
+
+                    if(!flash && detectdarkness(bitmap)){
+                        flash = true;
+                        releaseCamera();
+                        startCamera();
+                        return;
+
+                    }
                     InputImage image = InputImage.fromBitmap(bitmap, CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), TextSpeech.this));
                     ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
                     labeler.process(image)
@@ -733,14 +760,21 @@ public class TextSpeech extends AppCompatActivity {
                                         float confidence = label.getConfidence();
                                         int index = label.getIndex();
                                         if (confidence >= 0.5 && text.equals("Paper")) {
+                                            // every 200ms vibrate for 50ms
+
                                             if (System.currentTimeMillis() - lastpgdet >= 5000) {
                                                 lastpagedet2 = 0;
                                                 lastpgdet = System.currentTimeMillis();
                                                 count = 0;
-                                                speaktext2("Document or Screen Detected. Hold Still");
                                             }
-                                            if (System.currentTimeMillis() - lastpagedet2 >= 1000) {
+                                            if (System.currentTimeMillis() - lastpagedet2 >= 1200 && System.currentTimeMillis() - lastpagedet2 <= (lastpagedet2 == 0 ? System.currentTimeMillis() : 1300) && !isCaptured) {
                                                 lastpagedet2 = System.currentTimeMillis();
+                                                if(count == 0){
+                                                    speaktext2("Capturing in"+Integer.valueOf(3-count).toString());
+                                                }else{
+                                                    speaktext2(Integer.valueOf(3-count).toString());
+                                                }
+
                                                 ++count;
                                             }
                                             if (count == 4) {
@@ -885,13 +919,41 @@ public class TextSpeech extends AppCompatActivity {
             }
         }
     }
+    private boolean detectdarkness(Bitmap bitmap){
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int darkPixels = 0;
+
+        // Iterate through each pixel of the bitmap
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int pixel = bitmap.getPixel(x, y);
+
+                // Extract RGB components from the pixel
+                int red = Color.red(pixel);
+                int green = Color.green(pixel);
+                int blue = Color.blue(pixel);
+//                Log.d("Detecting Darkness",""+red+" "+green+" "+blue);
+
+                // Check if each primary color intensity is greater than 178
+                if (red < 100 && green < 100 && blue < 100) {
+                    darkPixels++;
+                }
+            }
+        }
+        float total = width*height;
+        float threshhold = (darkPixels/total);
+
+        return threshhold > 0.8;
+    }
 
     public void speaktext2(String text) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech2.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+            textToSpeech2.speak(text, TextToSpeech.QUEUE_ADD, null, null);
         } else {
-            textToSpeech2.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+            textToSpeech2.speak(text, TextToSpeech.QUEUE_ADD, null);
         }
     }
 

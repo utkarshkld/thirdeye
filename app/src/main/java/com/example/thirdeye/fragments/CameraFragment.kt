@@ -16,6 +16,7 @@
 package com.example.thirdeye.fragments
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import com.example.thirdeye.cMainActivity
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
 import android.util.Log
@@ -34,6 +35,7 @@ import androidx.camera.core.ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888
 import androidx.camera.core.Preview
 
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.thirdeye.MainViewModel
@@ -49,6 +51,10 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import android.content.pm.PackageManager
+import android.hardware.camera2.CameraManager
+
+
 
 //import com.example.thirdeye.fragments
 class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
@@ -275,25 +281,28 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     // Initialize CameraX, and prepare to bind the camera use cases
-    private fun setUpCamera() {
-        val cameraProviderFuture =
-            ProcessCameraProvider.getInstance(requireContext())
-        cameraProviderFuture.addListener(
-            {
-                // CameraProvider
-                cameraProvider = cameraProviderFuture.get()
 
-                // Build and bind the camera use cases
-                if(ObjectDetectorHelper.isfirstimedark){
-                    bindCameraUseCases2()
-                }else{
-                    bindCameraUseCases()
-                }
 
-            },
-            ContextCompat.getMainExecutor(requireContext())
-        )
-    }
+
+    fun setUpCamera() {
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+            cameraProviderFuture.addListener(
+                {
+                    // CameraProvider
+                    cameraProvider = cameraProviderFuture.get()
+
+                    // Build and bind the camera use cases
+                    if (cMainActivity.flash) {
+                        bindCameraUseCases2()
+                    } else {
+                        bindCameraUseCases()
+                    }
+
+                },
+                ContextCompat.getMainExecutor(requireContext())
+            )
+        }
+
 
     // Declare and bind preview, capture and analysis use cases
     @SuppressLint("UnsafeOptInUsageError")
@@ -363,7 +372,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
-
+    fun checkFlashlightAvailability(packageManager: PackageManager): Boolean {
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
+    }
     @SuppressLint("UnsafeOptInUsageError")
     fun bindCameraUseCases2() {
 
@@ -426,7 +437,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
-            camera?.cameraControl?.enableTorch(true);
+            if (checkFlashlightAvailability(requireContext().packageManager)) {
+                camera?.cameraControl?.enableTorch(true)
+            } else {
+                // Handle flashlight not available scenario
+                Log.d(TAG, "Flashlight not available")
+            }
+
+
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }

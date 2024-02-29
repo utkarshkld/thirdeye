@@ -35,10 +35,13 @@ public class cMainActivity extends AppCompatActivity {
     public static boolean isPlay = true;
     private ImageView backbtn;
     private Button exitbtn;
+    public static boolean flash = false;
     private String outputlang = MainActivity.output_lang;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        flash = intent.getBooleanExtra("flash",false);
         activityMainBinding = CheckMainBinding.inflate(getLayoutInflater());
         setContentView(activityMainBinding.getRoot());
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

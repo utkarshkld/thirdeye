@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 vibe.vibrate(50);
                 textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent intent = new Intent(MainActivity.this, cMainActivity.class);
+                intent.putExtra("flash",false);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
             }
