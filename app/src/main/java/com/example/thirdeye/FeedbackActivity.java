@@ -1,11 +1,8 @@
 package com.example.thirdeye;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,36 +10,25 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
-import org.bson.Document;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class FeedbackActivity extends AppCompatActivity {
 
-    private static final String CONNECTION_STRING = "mongodb://utkarshkld:hX69wWc61x8uE6Rq@ac-exdyeul-shard-00-00.kvivsot.mongodb.net:27017,ac-exdyeul-shard-00-01.kvivsot.mongodb.net:27017,ac-exdyeul-shard-00-02.kvivsot.mongodb.net:27017/?replicaSet=atlas-suszb3-shard-0&ssl=true&authSource=admin";
+
 
 
     Button submit;

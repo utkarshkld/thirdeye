@@ -123,11 +123,12 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             val category = results?.detections()!![index].categories()[0]
             Log.d("Testing the objdet",""+category);
             val drawableText =
-                category.displayName() + " " + String.format(
+                category.categoryName() + " " + String.format(
                     "%.2f",
                     category.score()
                 )
-            currobject = category.categoryName()
+//            currobject = category.categoryName()
+            Log.d("Detected objects",category.toString())
 
 
 

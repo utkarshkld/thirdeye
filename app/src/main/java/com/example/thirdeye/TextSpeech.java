@@ -761,17 +761,20 @@ public class TextSpeech extends AppCompatActivity {
                                         int index = label.getIndex();
                                         if (confidence >= 0.5 && text.equals("Paper")) {
                                             // every 200ms vibrate for 50ms
+                                            Log.d("Current time",""+System.currentTimeMillis());
 
-                                            if (System.currentTimeMillis() - lastpgdet >= 5000) {
+                                            if (System.currentTimeMillis() - lastpgdet >= 10000) {
                                                 lastpagedet2 = 0;
                                                 lastpgdet = System.currentTimeMillis();
                                                 count = 0;
                                             }
-                                            if (System.currentTimeMillis() - lastpagedet2 >= 1200 && System.currentTimeMillis() - lastpagedet2 <= (lastpagedet2 == 0 ? System.currentTimeMillis() : 1300) && !isCaptured) {
+                                            if (System.currentTimeMillis() - lastpagedet2 >= 1200 && System.currentTimeMillis() - lastpagedet2 <= (lastpagedet2 == 0 ? System.currentTimeMillis() : 3200) && !isCaptured) {
                                                 lastpagedet2 = System.currentTimeMillis();
                                                 if(count == 0){
+                                                    Log.d("Capturing in", ""+Integer.valueOf(3-count).toString());
                                                     speaktext2("Capturing in"+Integer.valueOf(3-count).toString());
                                                 }else{
+                                                    Log.d("Capturing in", ""+Integer.valueOf(3-count).toString());
                                                     speaktext2(Integer.valueOf(3-count).toString());
                                                 }
 
