@@ -7,12 +7,16 @@ import java.util.Calendar;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontStyle;
 import androidx.appcompat.widget.SwitchCompat;
 
+import android.os.Build;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.os.AsyncTask;
@@ -28,10 +32,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -72,6 +79,7 @@ public class appsettings extends AppCompatActivity {
     private SeekBar seekBarSpeechRate;
     private MicHandler shakeListener;
     Calendar calendar;
+    private long currtime = 0;
     ProgressDialog progressDialog2;
     private Spinner spinnerDefaultLanguage;
     private SwitchCompat switchPartiallyBlind;
@@ -93,15 +101,19 @@ public class appsettings extends AppCompatActivity {
     private boolean buttonClickable = true;
     private String speaklang;
     private boolean toret = false;
+    private LinearLayout parentlayout;
 
     private List<Settings> finalset;
     private static final int SPEECH_REQUEST_CODE = 1;
+    private int width;
     private List<String> languages = new ArrayList<>();
+    private boolean open = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
+        parentlayout = findViewById(R.id.parentlayout);
 
         // Initialize views
         TextView textSpeechRate = findViewById(R.id.textSpeechRate);
@@ -208,7 +220,7 @@ public class appsettings extends AppCompatActivity {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
+        width = displayMetrics.widthPixels;
 
 
         Log.d("getting widht of ll",""+width+"pixels");
@@ -219,11 +231,11 @@ public class appsettings extends AppCompatActivity {
 
         List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
 
-        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, textDetList);
+//        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, textDetList);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,keys);
 
-        adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+        adapter.setDropDownViewResource(android.R.layout.simple_list_item_checked);
+//        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 //        spinnertranslanguage.setDropDownVerticalOffset(dpToPx(26));
 //        spinnerDefaultLanguage.setDropDownVerticalOffset(dpToPx(26));
         spinnerDefaultLanguage.setDropDownHorizontalOffset(dpToPx(-10));
@@ -240,7 +252,68 @@ public class appsettings extends AppCompatActivity {
 //        spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
         switchPartiallyBlind.setChecked(blindness);
         seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
+
+        spinnerDefaultLanguage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//                        if (!open) {
+                    // If the popup window is not open, show it
+
+                    showPopupWindow(spinnerDefaultLanguage, adapter);
+//                        } else {
+//                            // If the popup window is open, dismiss it
+//                            if (popupWindowtemp != null && popupWindowtemp.isShowing()) {
+//                                popupWindowtemp.dismiss();
+//                            }
+//                            open = false;
+//                        }
+                    return true;
+                }
+                return true;
+            }
+        });
+
+
+
+
         // Setup Switch for Partially Blind
+    }
+    private void showPopupWindow(Spinner spinnerDefaultLanguage, ArrayAdapter<String> adapter) {
+        // Create a ListView for the PopupWindow
+        ListView listView = new ListView(this);
+        listView.setAdapter(adapter);
+        int selectedPosition = spinnerDefaultLanguage.getSelectedItemPosition();
+        listView.setSelection(selectedPosition);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            listView.setVerticalScrollbarThumbDrawable(getResources().getDrawable(R.drawable.scrollbar));
+        }
+
+
+        // Create the PopupWindow
+        PopupWindow popupWindow = new PopupWindow(listView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        ; // Set background color
+        popupWindow.setOutsideTouchable(true);
+        // Allow the popup window to be dismissed when touched outside
+        popupWindow.setHeight(dpToPx(400));
+        popupWindow.setWidth(width-dpToPx(40));
+        popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_FROM_FOCUSABLE);
+        Drawable drawable = getResources().getDrawable(R.drawable.popupbackground);
+
+// Set the drawable as the background for the PopupWindow
+        popupWindow.setBackgroundDrawable(drawable);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Update the selected item of the Spinner
+                spinnerDefaultLanguage.setSelection(position);
+                // Dismiss the PopupWindow
+                popupWindow.dismiss();
+            }
+        });
+        // Show the PopupWindow below the Spinner
+        popupWindow.showAsDropDown(spinnerDefaultLanguage,dpToPx(-10),0);
     }
     private void startVoiceRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -529,6 +602,7 @@ public class appsettings extends AppCompatActivity {
         });
         thread.start();
     }
+
     private void initializelanguageMap(){
         WeekDays.put(1, "Sunday");
         WeekDays.put(2, "Monday");

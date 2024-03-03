@@ -1,0 +1,15 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="10dp" /> <!-- Adjust the radius as needed -->
+    <stroke
+        android:width="2dp"
+        android:color="@color/backText" /> <!-- Adjust the stroke width and color as needed -->
+    <solid android:color="#303030" /> <!-- Adjust the background color as needed -->
+
+    <!-- Add padding for margin -->
+    <padding
+        android:left="8dp"
+        android:right="8dp"
+        android:top="8dp"
+        android:bottom="8dp" />
+</shape>

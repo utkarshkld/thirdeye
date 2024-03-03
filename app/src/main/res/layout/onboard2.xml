@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="20dp"
     tools:context=".MainActivity"
     android:background="@color/backgroud">
 
@@ -18,7 +19,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:lineSpacingExtra="-10dp"
-        android:text="Welcome to \n ThirdEye"
+        android:text="Welcome to ThirdEye"
         android:textColor="@color/white"
         android:textSize="25dp"
         android:textStyle="bold"
@@ -48,7 +49,7 @@
         android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
+
         android:layout_marginTop="3dp"
         android:text="How to use our app"
         android:textColor="@color/white"
@@ -66,11 +67,8 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="200dp">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/dot_svgrepo_com" />
+
+
 
         <TextView
             android:id="@+id/textView5"
@@ -78,63 +76,12 @@
             android:padding="10dp"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="The main screen has three channels accessible to assist you in your everyday activities: read, object, and translate, which are represented by the buttons below."
+            android:text="•   The main screen has three channels accessible to assist you in your everyday activities: read, object, and translate, which are represented by the buttons below.\nOne microphone button is located in the middle of the app's main screen, and you may use it to open any channel you like. For example, say 'read' and it will take you there.\n•   One microphone button is located in the middle of the app's main screen, and you may use it to open any channel you like. For example, say 'read' and it will take you there.\n•   There is a setting button on the right side of the top navigation bar and clicking it will give you options to customize our app: Default Language, Speech Rate (how quickly you want the app to speak), and Partially Blind (enable it if you are not completely blind)."
             android:textColor="@color/white"
-            android:textSize="14dp" />
+            android:textSize="15dp" />
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="288dp">
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/dot_svgrepo_com" />
-
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:padding="10dp"
-            android:text="One microphone button is located in the middle of the app's main screen, and you may use it to open any channel you like. For example, say 'read' and it will take you there."
-            android:textColor="@color/white"
-            android:textSize="14dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/dot_svgrepo_com" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:padding="10dp"
-            android:text="There is a setting button on the right side of the top navigation bar and clicking it will give you options to customize our app: Default Language, Speech Rate (how quickly you want the app to speak), and Partially Blind (enable it if you are not completely blind)."
-            android:textColor="@color/white"
-            android:textSize="14dp" />
-
-    </LinearLayout>
 
 
 </LinearLayout>

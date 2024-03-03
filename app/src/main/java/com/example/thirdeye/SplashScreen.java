@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -18,10 +19,13 @@ import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SplashScreen extends AppCompatActivity {
     private int i = 0;
+
+    public static HashMap<String, String> translationsMap = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +33,7 @@ public class SplashScreen extends AppCompatActivity {
 
         //getSupportActionBar().hide();
 
-
+        instructionmap.makeinstruction();
         Thread background = new Thread() {
             public void run() {
                 try {

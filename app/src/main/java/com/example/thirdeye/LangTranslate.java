@@ -15,6 +15,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -33,12 +34,16 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,7 +72,9 @@ public class LangTranslate extends AppCompatActivity {
     private ImageView backbtn,micbtn,btnreplay,btnpauseplay;
     private CardView btnTranslate;
     private CardView btnVoiceInput;
+    private int width;
     private Spinner sourceLanguageSpinner;
+    private boolean open = false;
     private LinearLayout spinnerll;
     private Spinner targetLanguageSpinner;
     private TextToSpeech textToSpeech;
@@ -111,8 +118,7 @@ public class LangTranslate extends AppCompatActivity {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
+         width = displayMetrics.widthPixels;
 
         initializeMap();
         List<String> selectedLanguages = new ArrayList<>(languageMap.values()); // Get language names from the map
@@ -193,6 +199,27 @@ public class LangTranslate extends AppCompatActivity {
                 startSpeechRecognition();
             }
         });
+        sourceLanguageSpinner.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//                        if (!open) {
+                    // If the popup window is not open, show it
+
+                    showPopupWindow(sourceLanguageSpinner, adapter);
+//                        } else {
+//                            // If the popup window is open, dismiss it
+//                            if (popupWindowtemp != null && popupWindowtemp.isShowing()) {
+//                                popupWindowtemp.dismiss();
+//                            }
+//                            open = false;
+//                        }
+                    return true;
+                }
+                return true;
+            }
+
+        });
 //        btnTranslate.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
@@ -211,6 +238,38 @@ public class LangTranslate extends AppCompatActivity {
 //                }
 //            }
 //        });
+    }
+    private void showPopupWindow(Spinner spinnerDefaultLanguage, ArrayAdapter<String> adapter) {
+        // Create a ListView for the PopupWindow
+        ListView listView = new ListView(this);
+        listView.setAdapter(adapter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            listView.setVerticalScrollbarThumbDrawable(getResources().getDrawable(R.drawable.scrollbar));
+        }
+
+
+        // Create the PopupWindow
+        PopupWindow popupWindow = new PopupWindow(listView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        ; // Set background color
+        popupWindow.setOutsideTouchable(true); // Allow the popup window to be dismissed when touched outside
+        popupWindow.setHeight(dpToPx(350));
+        popupWindow.setWidth(width-dpToPx(40));
+        popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_FROM_FOCUSABLE);
+        Drawable drawable = getResources().getDrawable(R.drawable.popupbackground);
+
+// Set the drawable as the background for the PopupWindow
+        popupWindow.setBackgroundDrawable(drawable);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Update the selected item of the Spinner
+                spinnerDefaultLanguage.setSelection(position);
+                // Dismiss the PopupWindow
+                popupWindow.dismiss();
+            }
+        });
+        // Show the PopupWindow below the Spinner
+        popupWindow.showAsDropDown(spinnerDefaultLanguage,dpToPx(-10),0);
     }
     private void speakText(String text, int startPosition) {
 
