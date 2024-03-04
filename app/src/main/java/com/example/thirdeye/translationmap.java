@@ -227,8 +227,8 @@ public class translationmap {
              settingsTranslations.add("налаштування"); // Ukrainian
              settingsTranslations.add("ترتیبات"); // Urdu
              settingsTranslations.add("cài đặt"); // Vietnamese
+             commandmap.put("settings", settingsTranslations);
              List<String> languageTranslations = new ArrayList<>();
-
              // Add translations for each language
              languageTranslations.add("taal");         // अफ्रीकान्स (Afrikaans)
              languageTranslations.add("gjuhë");        // अल्बेनियन (Albanian)
@@ -281,6 +281,61 @@ public class translationmap {
              languageTranslations.add("زبان");        // उर्दू (Urdu)
              languageTranslations.add("ngôn ngữ");    // वियतनामी (Vietnamese)
              commandmap.put("Language",languageTranslations);
+             List<String> directionTranslations = new ArrayList<>();
+             directionTranslations.add("richting"); // Afrikaans
+             directionTranslations.add("drejtim"); // Albanian
+             directionTranslations.add("الاتجاه"); // Arabic
+             directionTranslations.add("দিশা"); // Bengali
+             directionTranslations.add("насока"); // Bulgarian
+             directionTranslations.add("方向"); // Chinese
+             directionTranslations.add("směr"); // Czech
+             directionTranslations.add("retning"); // Danish
+             directionTranslations.add("richting"); // Dutch
+             directionTranslations.add("direction"); // English
+             directionTranslations.add("suunta"); // Finnish
+             directionTranslations.add("direction"); // French
+             directionTranslations.add("drección"); // Galician
+             directionTranslations.add("მიმართულება"); // Georgian
+             directionTranslations.add("Richtung"); // German
+             directionTranslations.add("κατεύθυνση"); // Greek
+             directionTranslations.add("દિશા"); // Gujarati
+             directionTranslations.add("diksyon"); // Haitian
+             directionTranslations.add("כיוון"); // Hebrew
+             directionTranslations.add("दिशा"); // Hindi
+             directionTranslations.add("irány"); // Hungarian
+             directionTranslations.add("átt"); // Icelandic
+             directionTranslations.add("arahan"); // Indonesian
+             directionTranslations.add("direzione"); // Italian
+             directionTranslations.add("方向"); // Japanese
+             directionTranslations.add("ದಿಕ್ಕು"); // Kannada
+             directionTranslations.add("방향"); // Korean
+             directionTranslations.add("virziens"); // Latvian
+             directionTranslations.add("kryptys"); // Lithuanian
+             directionTranslations.add("насоки"); // Macedonian
+             directionTranslations.add("arah"); // Malay
+             directionTranslations.add("ദിശ"); // Malayalam
+             directionTranslations.add("direzzjoni"); // Maltese
+             directionTranslations.add("दिशा"); // Marathi
+             directionTranslations.add("retning"); // Norwegian
+             directionTranslations.add("kierunek"); // Polish
+             directionTranslations.add("direção"); // Portuguese
+             directionTranslations.add("direcție"); // Romanian
+             directionTranslations.add("направление"); // Russian
+             directionTranslations.add("smer"); // Slovak
+             directionTranslations.add("smer"); // Slovenian
+             directionTranslations.add("dirección"); // Spanish
+             directionTranslations.add("mwelekeo"); // Swahili
+             directionTranslations.add("riktning"); // Swedish
+             directionTranslations.add("direksyon"); // Tagalog
+             directionTranslations.add("அமைப்பு"); // Tamil
+             directionTranslations.add("దిశ"); // Telugu
+             directionTranslations.add("ทิศทาง"); // Thai
+             directionTranslations.add("yön"); // Turkish
+             directionTranslations.add("напрямок"); // Ukrainian
+             directionTranslations.add("سمت"); // Urdu
+             directionTranslations.add("hướng"); // Vietnamese
+
+             commandmap.put("direction", directionTranslations);
              Map<String, String> languageNamesEnglishToEnglish = new HashMap<>();
 
              // Adding language names with English as both keys and values to the map
@@ -394,7 +449,19 @@ public class translationmap {
              languageNamesHindiToEnglish.put("वियतनामी", "Vietnamese");
              langnamemap.put("Hindi",languageNamesHindiToEnglish);
              // Add translations list to the map
-             commandmap.put("settings", settingsTranslations);
+
+
+             translationMap.put("English_North","You are heading towards North");
+             translationMap.put("English_East","You are heading towards East");
+             translationMap.put("English_South","You are heading towards South");
+             translationMap.put("English_West","You are heading towards West");
+             translationMap.put("English_North-East","You are heading towards North-East");
+             translationMap.put("English_South-East","You are heading towards South-East");
+             translationMap.put("English_South-West","You are heading towards South-West");
+             translationMap.put("English_North-West","You are heading towards North-West");
+
+
+
              translationMap.put("Hindi_opening setting", "शुरुआत सेटिंग");
 
              translationMap.put("English_opening setting", "opening setting");
