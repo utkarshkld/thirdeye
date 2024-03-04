@@ -40,6 +40,8 @@
             </intent-filter>
         </activity>
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
+        <activity android:name=".Magnifying"
+            android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"></activity>

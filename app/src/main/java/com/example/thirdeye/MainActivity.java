@@ -84,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
         requestPermission();
         eyebtn = findViewById(R.id.eyebtn);
         Log.d("hello_testing",UserDeafultLanguage);
+        eyebtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,Magnifying.class);
+                startActivity(intent);
+            }
+        });
 
 
         // Initialize Text-to-Speech

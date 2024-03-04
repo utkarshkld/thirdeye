@@ -141,6 +141,8 @@ public class TextSpeech extends AppCompatActivity {
     private static final int SPEECH_REQUEST_CODE = 1;
     private HashMap<String, String> languageMap = new HashMap<>(), text_det_map = new HashMap<>();
     private boolean isPlaying = false;
+    private PackageManager pm;
+    private boolean deviceHasFlash = false;
     private int endingIndex = 0;
     private static int index = 0;
     private static int index2 = 0;
@@ -169,7 +171,8 @@ public class TextSpeech extends AppCompatActivity {
         waiting.setMessage("please wait");
         progressprocessing = new ProgressDialog(TextSpeech.this);
         progressprocessing.setCancelable(false);
-
+        pm = getPackageManager();
+        deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 
         index = 0;
         initViews();
@@ -701,8 +704,7 @@ public class TextSpeech extends AppCompatActivity {
         camera = Camera.open();
         Camera.Parameters params = camera.getParameters();
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        PackageManager pm = getPackageManager();
-        boolean deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+
         if(deviceHasFlash && flash){
             Toast.makeText(TextSpeech.this,"Flash ON",Toast.LENGTH_SHORT).show();
             params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
@@ -731,10 +733,11 @@ public class TextSpeech extends AppCompatActivity {
 
 
 
-                    if(!flash && detectdarkness(bitmap)){
+                    if(!flash && detectdarkness(bitmap) && deviceHasFlash){
                         flash = true;
-                        releaseCamera();
-                        startCamera();
+                        Camera.Parameters params = camera.getParameters();
+                        params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                        camera.setParameters(params);
                         return;
 
                     }
