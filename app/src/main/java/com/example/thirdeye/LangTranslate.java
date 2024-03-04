@@ -1,23 +1,15 @@
 package com.example.thirdeye;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,7 +20,6 @@ import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,7 +29,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,12 +38,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.mlkit.nl.languageid.LanguageIdentification;
-import com.google.mlkit.nl.languageid.LanguageIdentifier;
-import com.google.mlkit.nl.translate.TranslateLanguage;
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
@@ -62,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 public class LangTranslate extends AppCompatActivity {
@@ -74,14 +64,14 @@ public class LangTranslate extends AppCompatActivity {
     private CardView btnVoiceInput;
     private int width;
     private Spinner sourceLanguageSpinner;
-    private boolean open = false;
-    private LinearLayout spinnerll;
-    private Spinner targetLanguageSpinner;
+
+
+
     private TextToSpeech textToSpeech;
     private static final int SPEECH_REQUEST_CODE = 123;
     private TextView translatedTextView; // Added TextView to display translated text
     private String outputlangugage = MainActivity.output_lang;
-    private String trans_input = MainActivity.trans_input;
+
     private float speeh_rate = MainActivity.speech_rate;
     private boolean isPaused = true;
     private String translationlang = MainActivity.output_lang;
@@ -104,8 +94,6 @@ public class LangTranslate extends AppCompatActivity {
         btnpauseplay = findViewById(R.id.btnPausePlay);
         micbtn = findViewById(R.id.speakwords);
         sourceLanguageSpinner = findViewById(R.id.sourceLanguageSpinner);
-//        targetLanguageSpinner = findViewById(R.id.targetLanguageSpinner);
-        spinnerll = findViewById(R.id.sourceLanguageSpinnerll);
         translatedTextView = findViewById(R.id.translatedText); // Initialize TextView
         backbtn = findViewById(R.id.backbtn);
         backbtn.setOnClickListener(new View.OnClickListener() {
@@ -114,15 +102,11 @@ public class LangTranslate extends AppCompatActivity {
                 onBackPressed();
             }
         });
-
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-         width = displayMetrics.widthPixels;
-
+        width = displayMetrics.widthPixels;
         initializeMap();
         List<String> selectedLanguages = new ArrayList<>(languageMap.values()); // Get language names from the map
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, languageMap.keySet().toArray(new String[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
         sourceLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
@@ -145,7 +129,6 @@ public class LangTranslate extends AppCompatActivity {
                 shaketime = System.currentTimeMillis();
                 startSpeechRecognition();
             }
-
         });
         btnreplay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -203,51 +186,22 @@ public class LangTranslate extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        if (!open) {
-                    // If the popup window is not open, show it
-
                     showPopupWindow(sourceLanguageSpinner, adapter);
-//                        } else {
-//                            // If the popup window is open, dismiss it
-//                            if (popupWindowtemp != null && popupWindowtemp.isShowing()) {
-//                                popupWindowtemp.dismiss();
-//                            }
-//                            open = false;
-//                        }
                     return true;
                 }
                 return true;
             }
-
         });
-//        btnTranslate.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (TextUtils.isEmpty(editTextLetters.getText().toString())) {
-//                    Toast.makeText(LangTranslate.this, "No text allowed", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    String sourceText = editTextLetters.getText().toString();
-//
-//                    if (sourceText.equalsIgnoreCase("voice input")) {
-//                        startSpeechRecognition();
-//                    } else {
-//                        index = 0;
-//                        index2 = 0;
-//                        detectAndTranslateLanguage(sourceText);
-//                    }
-//                }
-//            }
-//        });
     }
     private void showPopupWindow(Spinner spinnerDefaultLanguage, ArrayAdapter<String> adapter) {
         // Create a ListView for the PopupWindow
         ListView listView = new ListView(this);
         listView.setAdapter(adapter);
+        int selectedPosition = spinnerDefaultLanguage.getSelectedItemPosition();
+        listView.setSelection(selectedPosition);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             listView.setVerticalScrollbarThumbDrawable(getResources().getDrawable(R.drawable.scrollbar));
         }
-
-
         // Create the PopupWindow
         PopupWindow popupWindow = new PopupWindow(listView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         ; // Set background color
@@ -302,12 +256,6 @@ public class LangTranslate extends AppCompatActivity {
     {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
-
-    public static int pxToDp(int px)
-    {
-        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
-    }
-
     private void startSpeechRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -327,17 +275,6 @@ public class LangTranslate extends AppCompatActivity {
             Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
         }
     }
-
-    // Helper function to get a key from a value in a map
-//    private String getKeyByValue(Map<String, String> map, String value) {
-//        for (Map.Entry<String, String> entry : map.entrySet()) {
-//            if (value.equals(entry.getValue())) {
-//                return entry.getKey();
-//            }
-//        }
-//        return null;
-//    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
@@ -429,23 +366,15 @@ public class LangTranslate extends AppCompatActivity {
 
     }
     private void detectAndTranslateLanguage(String sourceText) {
-
-                        // Get the selected language code from the map
-
-
                         TranslatorOptions options = new TranslatorOptions.Builder()
                                 .setSourceLanguage(outputlangugage)
                                 .setTargetLanguage(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem())))
                                 .build();
-
                         Translator translator = Translation.getClient(options);
-
-
                         ProgressDialog progressDialog = new ProgressDialog(LangTranslate.this);
                         progressDialog.setMessage("Downloading the translation model...");
                         progressDialog.setCancelable(false);
                         progressDialog.show();
-
                         MyRunnable myRunnable = new MyRunnable(LangTranslate.this,new Handler(),progressDialog);
                         myRunnable.start();
                             translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -479,20 +408,6 @@ public class LangTranslate extends AppCompatActivity {
 
                                 }
                             });
-    }
-
-
-
-
-
-    private void showExitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(LangTranslate.this);
-        builder.setMessage("Do you want to exit ?");
-        builder.setTitle("Alert !");
-        builder.setCancelable(false);
-        builder.setPositiveButton("Yes", (dialog, which) -> onBackPressed());
-        // Show the AlertDialog
-        builder.create().show();
     }
     private void showNoInternetDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(LangTranslate.this);
@@ -599,5 +514,4 @@ public class LangTranslate extends AppCompatActivity {
         languageMap.put("Urdu", "ur");
         languageMap.put("Vietnamese", "vi");
     }
-
 }

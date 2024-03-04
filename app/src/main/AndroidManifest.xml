@@ -3,17 +3,13 @@
     xmlns:dist="http://schemas.android.com/apk/distribution"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.thirdeye">
-
     <dist:module dist:instant="true" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.INTERNET" /> <!-- Declare features -->
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.flash" /> <!-- Declare permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-feature android:name="android.hardware.camera.autofocus" />
-
     <application
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
@@ -44,20 +40,19 @@
             android:exported="true"/>
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity>
+            android:exported="true"/>
         <activity
             android:name=".TextSpeech"
-            android:exported="true"></activity>
+            android:exported="true"/>
         <activity
             android:name=".cMainActivity"
-            android:exported="true"></activity>
+            android:exported="true"/>
         <activity
             android:name=".LangTranslate"
-            android:exported="true"></activity>
+            android:exported="true"/>
         <activity
             android:name=".appsettings"
-            android:exported="true"></activity>
-
+            android:exported="true"/>
         <meta-data
             android:name="android.notch_support"
             android:value="true" />
@@ -68,5 +63,4 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
     </application>
-
 </manifest>

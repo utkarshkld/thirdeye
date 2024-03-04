@@ -123,16 +123,12 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             val category = results?.detections()!![index].categories()[0]
             Log.d("Testing the objdet",""+category);
             val drawableText =
-                category.categoryName() + " " + String.format(
+                ObjectDetectorHelper.translationMap.get(ObjectDetectorHelper.language+"_"+category.categoryName()) + " " + String.format(
                     "%.2f",
                     category.score()
                 )
-//            currobject = category.categoryName()
-            Log.d("Detected objects",category.toString())
+//            Log.d("Detected objects",category.toString())
 
-
-
-//            Log.d("object here",category.);
             // Draw rect behind display text
             textBackgroundPaint.getTextBounds(
                 drawableText,

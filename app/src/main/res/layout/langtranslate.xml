@@ -87,7 +87,6 @@
             android:layout_height="52dp"
             android:layout_centerHorizontal="true"
             android:overlapAnchor="false"
-            android:popupBackground="@drawable/spinner_popup"
             android:textColor="#FFFFFF"
 
             />

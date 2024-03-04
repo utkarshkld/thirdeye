@@ -2,30 +2,23 @@ package com.example.thirdeye;
 
 //import static androidx.appcompat.graphics.drawable.DrawableContainerCompat.Api21Impl.getResources;
 //import static com.example.thirdeye.Onboarding.showPopupWindow;
+
 import static com.example.thirdeye.appsettings.dpToPx;
 
-
-import static java.security.AccessController.getContext;
-
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.AdapterView;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.DisplayMetrics;
-import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -39,13 +32,10 @@ import java.util.Map;
 
 public class OnboardingAdapter extends PagerAdapter {
     private Context context;
-    private PopupWindow popupWindowtemp;
-    private boolean isSpinnerEnabled = true;;
     public static Spinner languageSpinner;
     public static Map<String, String> languageMap;
-    private boolean open = false;
-    private static long currtime = 0;
-    public static TextView tx;
+
+
     private String UserDeafultLanguage = Locale.getDefault().getLanguage();
 
     private static int[] onboardingLayouts = {
@@ -129,29 +119,15 @@ public class OnboardingAdapter extends PagerAdapter {
             languageMap.put("Ukrainian", "uk");
             languageMap.put("Urdu", "ur");
             languageMap.put("Vietnamese", "vi");
-            Handler handler = new Handler();
-
-
-            // Populate Spinner with languages from the map
             List<String> languages = new ArrayList<>(languageMap.keySet());
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.spinner_item, languages);
             languageSpinner.setAdapter(adapter);
-
 //        Log.d("Spinner",languageSpinner.toString());
             languageSpinner.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        if (!open) {
-                            // If the popup window is not open, show it
-
-                            showPopupWindow(languageSpinner, adapter);
-//                        } else {
-//                            // If the popup window is open, dismiss it
-//                            if (popupWindowtemp != null && popupWindowtemp.isShowing()) {
-//                                popupWindowtemp.dismiss();
-//                            }
-//                            open = false;
+                        showPopupWindow(languageSpinner, adapter);
 //                        }
                         return true;
                     }
@@ -186,12 +162,10 @@ public class OnboardingAdapter extends PagerAdapter {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             listView.setVerticalScrollbarThumbDrawable(ContextCompat.getDrawable(context, R.drawable.scrollbar));
         }
-
-
         // Create the PopupWindow
         PopupWindow popupWindow = new PopupWindow(listView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         ; // Set background color
-        popupWindowtemp = popupWindow;
+
         popupWindow.setOutsideTouchable(true); // Allow the popup window to be dismissed when touched outside
         popupWindow.setHeight(dpToPx(200));
         popupWindow.setWidth(Onboarding.width-dpToPx(40));
@@ -223,8 +197,6 @@ public class OnboardingAdapter extends PagerAdapter {
                 return R.layout.onboard1;
             case 1:
                 return R.layout.onboard2;
-            case 2:
-                return R.layout.onboard3;
             default:
                 return -1;
         }

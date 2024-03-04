@@ -75,22 +75,14 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
-//    implementation ("org.mongodb:mongodb-driver-sync:4.2.3")
-//    implementation("org.mongodb:mongodb-driver:3.4.2")
-    implementation(files("libs/mongo-java-driver-3.4.0-SNAPSHOT.jar"))
-
-
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.0.0")
     implementation("androidx.fragment:fragment-ktx:1.5.4")
     implementation("com.intuit.ssp:ssp-android:1.1.0")
     implementation ("org.apache.httpcomponents:httpclient:4.5.13")
-
-
 // Navigation library
     val nav_version = "2.3.5"
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
-
 // CameraX core library
     val camerax_version = "1.1.0"
     implementation("androidx.camera:camera-core:$camerax_version")

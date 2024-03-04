@@ -1,52 +1,38 @@
 package com.example.thirdeye;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.media.Image;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
     public static Vibrator vibe;
@@ -68,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static String input_lang;
     public static String trans_input;
     public static List<Settings> finalset;
-    public boolean first,second,third;
+
     public static Map<String, List<String>> commandmap = new HashMap<>();
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -76,12 +62,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float[] accelerometerData = new float[3];
     private float[] magnetometerData = new float[3];
-
-
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -108,9 +88,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-
-        // Initialize Text-to-Speech
-        // we
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 int result;
@@ -149,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startActivity(intent);
             }
         });
-
         objectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -183,15 +159,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
             }
-
-
-
         });
         getAllSettings(this::onSettingsListLoaded);// loading all settings
-
-
-
-
     }
     public void insertSingleTodo(String language,String inputlang,String trans_input,boolean blindness,float speech_rate) {
         Settings settings = new Settings(language,inputlang,trans_input,blindness,speech_rate);
@@ -199,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         insertAsyncTask.execute(settings);
     }
     class InsertAsyncTask extends AsyncTask<Settings, Void, Void> {
-
         @Override
         protected Void doInBackground(Settings... settings) {
 
@@ -241,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         Log.d("test", "onSettingsListLoaded: "+finalset);
     }
-
     public void getAllSettings(final SettingsListCallback callback) {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -550,25 +517,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } else if (event.sensor == magnetometer) {
             System.arraycopy(event.values, 0, magnetometerData, 0, magnetometerData.length);
         }
-
         float[] rotationMatrix = new float[9];
         SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerData, magnetometerData);
-
         float[] orientation = new float[3];
         SensorManager.getOrientation(rotationMatrix, orientation);
-
         float azimuthInDegrees = (float) Math.toDegrees(orientation[0]);
         azimuthInDegrees = (azimuthInDegrees + 360) % 360;
-
         String compassDirection = getCompassDirection(azimuthInDegrees);
         currdirection = compassDirection;
         Log.d("Compass Direction", ""+compassDirection);
-        // Do something with compassDirection, such as updating UI
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Do nothing
+        // Do nothing Eat Five Star
     }
 
     private String getCompassDirection(float azimuth) {

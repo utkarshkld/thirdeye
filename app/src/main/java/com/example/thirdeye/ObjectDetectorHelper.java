@@ -18,27 +18,16 @@ package com.example.thirdeye;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.app.Activity;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.SystemClock;
-import android.os.Handler;
-
-import androidx.fragment.app.FragmentManager;
-import androidx.navigation.fragment.NavHostFragment;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
-
-import android.text.SpannableString;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.camera.core.ImageProxy;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.thirdeye.databinding.CheckMainBinding;
-import com.example.thirdeye.fragments.CameraFragment;
 import com.google.mediapipe.framework.image.BitmapImageBuilder;
 import com.google.mediapipe.framework.image.MPImage;
 import com.google.mediapipe.tasks.components.containers.Detection;
@@ -48,7 +37,6 @@ import com.google.mediapipe.tasks.vision.core.ImageProcessingOptions;
 import com.google.mediapipe.tasks.vision.core.RunningMode;
 import com.google.mediapipe.tasks.vision.objectdetector.ObjectDetector;
 import com.google.mediapipe.tasks.vision.objectdetector.ObjectDetectorResult;
-
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,6 +73,7 @@ public class ObjectDetectorHelper {
     public static TextToSpeech textToSpeech;
 //    private float speechrate = MainActivity.speech_rate;
     private final String output_lang = MainActivity.output_lang;
+    public static String language;
 
 
     public ObjectDetectorHelper(float threshold, int maxResults, int currentDelegate, int currentModel,
@@ -281,7 +270,7 @@ public class ObjectDetectorHelper {
     private void returnLivestreamResult(ObjectDetectorResult result, MPImage input) {
         long finishTimeMs = SystemClock.uptimeMillis();
         long inferenceTime = finishTimeMs - result.timestampMs();
-        String language = cMainActivity.languageMap.get(output_lang);
+        language = cMainActivity.languageMap.get(output_lang);
         Log.d("objectdetector helper",language);
         for (Detection t : result.detections()) {
             long currTime = System.currentTimeMillis();

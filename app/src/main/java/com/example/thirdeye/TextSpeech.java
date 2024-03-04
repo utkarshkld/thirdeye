@@ -1,13 +1,6 @@
 package com.example.thirdeye;
 
 
-
-
-import static java.lang.Thread.sleep;
-
-import com.google.mlkit.nl.languageid.LanguageIdentification;
-import com.google.mlkit.nl.languageid.LanguageIdentifier;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -16,17 +9,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -40,13 +33,10 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,16 +46,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.thirdeye.databinding.CheckMainBinding;
-
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
-
-
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.label.ImageLabel;
 import com.google.mlkit.vision.label.ImageLabeler;
@@ -79,23 +65,13 @@ import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions;
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
-import android.speech.tts.UtteranceProgressListener;
-
 import java.io.IOException;
-
-import java.security.Policy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-import android.os.Handler;
-import android.os.Looper;
 
 
 public class TextSpeech extends AppCompatActivity {
@@ -116,7 +92,7 @@ public class TextSpeech extends AppCompatActivity {
     private boolean s = false;
     private TextView textView;
     private Camera camera;
-    public static final int REQUEST_CODE = 100;
+
     private static final String TAG = "ScanVoucherFragment";
     private float speechrate = MainActivity.speech_rate;
     private String outputlangugage = MainActivity.output_lang;
@@ -133,29 +109,27 @@ public class TextSpeech extends AppCompatActivity {
     TextRecognizer koreanrecog = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 101;
     private TextToSpeech textToSpeech, textToSpeech2;
-    private Spinner spinnerLanguages, text_det_spinner;
     private boolean isPaused = true;
-    private int lastSpokenTextPosition = 0;
     private MicHandler shakeListener;
 
     private static final int SPEECH_REQUEST_CODE = 1;
-    private HashMap<String, String> languageMap = new HashMap<>(), text_det_map = new HashMap<>();
+    private HashMap<String, String> languageMap = new HashMap<>();
     private boolean isPlaying = false;
     private PackageManager pm;
     private boolean deviceHasFlash = false;
-    private int endingIndex = 0;
+
     private static int index = 0;
     private static int index2 = 0;
     private StringBuilder alltext;
-    private List<String> selectedLanguages;
-    private ArrayAdapter<String> languageAdapter, text_det_adapter;
+
+
     private ImageView back;
-    private boolean isSpeaking = false;
-    private ArrayList<Integer> prefixArray = new ArrayList<>();
+
+
     private ProgressDialog waiting;
     public long shaketime = 0;
 
-    boolean firsttime = true, nonflash = false;
+
     private long lastpgdet = 0,lastpagedet2 = 0,lastpage3=0;
     private boolean isCaptured = false;
 
@@ -177,7 +151,6 @@ public class TextSpeech extends AppCompatActivity {
         index = 0;
         initViews();
         words = new ArrayList<>();
-        prefixArray = new ArrayList<>();
         requestPermission();
         initializeTextToSpeech();
         rellayout = findViewById(R.id.rellayout);
@@ -187,7 +160,6 @@ public class TextSpeech extends AppCompatActivity {
         btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
         Handler handler = new Handler();
         MyRunnable myRunnable = new MyRunnable(this, handler);
-
 
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -200,7 +172,6 @@ public class TextSpeech extends AppCompatActivity {
                     index = 0;
                     index2 = 0;
                     words = new ArrayList<>();
-                    prefixArray = new ArrayList<>();
                     isCaptured = true;
                     textView.setText("");
                     takePictureAndRecognizeText();
@@ -250,7 +221,7 @@ public class TextSpeech extends AppCompatActivity {
 
         });
         micc.setOnClickListener(v -> {
-            isSpeaking = true;
+
             startVoiceRecognition();
         });
         btnPausePlay.setOnClickListener(new View.OnClickListener() {
@@ -317,16 +288,6 @@ public class TextSpeech extends AppCompatActivity {
 //        spinnerLanguages.setSelection(selectedLanguages.indexOf(outputlangugage));
 
     }
-    public static int dpToPx(int dp)
-    {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    public static int pxToDp(int px)
-    {
-        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
-    }
-
 
     @Override
     protected void onPause() {
@@ -360,10 +321,8 @@ public class TextSpeech extends AppCompatActivity {
     }
 
     public void speaknextword() {
-        if (index < words.size()) {
-//
+        if (index < words.size()) {//
             speakText(words.get(index), 0);
-
         }
     }
 
@@ -521,34 +480,19 @@ public class TextSpeech extends AppCompatActivity {
                 StringBuilder stringBuilder = new StringBuilder(),stringBuilder1 = new StringBuilder();
 
                 for (Text.TextBlock block : result.getTextBlocks()) {
-//                    String blockText = block.getText();
-//                    Point[] blockCornerPoints = block.getCornerPoints();
-////                    stringBuilder.append("\n");
-//                    Rect blockFrame = block.getBoundingBox();
                     for (Text.Line line : block.getLines()) {
-
-//                        String lineText = line.getText();
-//                        Point[] lineCornerPoints = line.getCornerPoints();
-//                        Rect lineFrame = line.getBoundingBox();
-
                         for (Text.Element element : line.getElements()) {
-                            String elementText = element.getText();
-//                            Point[] elementCornerPoints = element.getCornerPoints();
-//                            Rect elementFrame = element.getBoundingBox();
-//                            Log.e(TAG, "onSuccess: " + elementText);
-//                            Toast.makeText(TextSpeech.this, elementText, Toast.LENGTH_SHORT);
+                            String elementText = element.getText();//
                             stringBuilder1.append(elementText + " ");
                         }
                     }
                 }
-
                 // will get identified text here have to modify here
                 String x = stringBuilder1.toString();
                 String temp = x.toLowerCase();
 //                "(use[ ]*by|best[ ]*before|exp|expiry|mfg|mfd|manufacturing)(date)*[. /-:]*(date)*[. /-:]*((([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7](20\\d{2}))|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7]\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/\\d{2})|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./7 ]*(20[0-9]{2}))|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ 7]*([0-9]{2}))$)"
                 Pattern expiryDatePattern = Pattern.compile("([uj]se *by|best *before|exp|expiry|mfg|mfd|manufacturing)[., /-:(date)]*((([0O][1-9]|[12]\\d|3[01])[-,./]*([0O][1-9]|1[0-2])[-,./]*(20\\d{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\.([0O][1-9]|1[O0-2])\\.(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\/([0O][1-9]|1[O0-2])\\/(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])[-./,]*([0O][1-9]|1[O0-2])[-./,]*\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\.([0O][1-9]|1[O0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\/([0O][1-9]|1[O0-2])\\/\\d{2})|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*(2[0O][O0-9]{2}))|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*([O0-9]{2}))$)", Pattern.CASE_INSENSITIVE);
-                Matcher matcher = expiryDatePattern.matcher(temp);
-//
+                Matcher matcher = expiryDatePattern.matcher(temp);//
                 if(language.equals("English")) {
                     while (matcher.find()) {
                         // If the line contains the expiry date, append it to the expiryDateBuilder
@@ -611,14 +555,6 @@ public class TextSpeech extends AppCompatActivity {
                                                     textView.setText(alltext.toString());
                                                     speakText(alltext.toString(), 0);
                                                     progressprocessing.dismiss();
-//                                                    if(targetLanguage == "id"){
-//                                                        textToSpeech.setLanguage(new Locale("in"));
-//                                                    }else if(targetLanguage == "no"){
-//                                                        textToSpeech.setLanguage(new Locale("nb"));
-//                                                    }
-//                                                    else {
-//                                                        textToSpeech.setLanguage(new Locale(targetLanguage));
-//                                                    }
 
                                                 }
                                                 else{
@@ -650,16 +586,6 @@ public class TextSpeech extends AppCompatActivity {
 
                             }
                         });
-
-
-//                else {
-//
-//                    textView.setText(stringBuilder.toString());
-//                    alltext =
-//                    textToSpeech.setLanguage(new Locale(languageMap.get(language)));
-//
-//                    speakText(stringBuilder.toString(), 0);
-//                }
 
 
             }
@@ -706,7 +632,7 @@ public class TextSpeech extends AppCompatActivity {
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 
         if(deviceHasFlash && flash){
-            Toast.makeText(TextSpeech.this,"Flash ON",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(TextSpeech.this,"Flash ON",Toast.LENGTH_SHORT).show();
             params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         }else if(flash && !deviceHasFlash){
             Toast.makeText(TextSpeech.this,"Device doesnt have flash Light",Toast.LENGTH_LONG).show();
@@ -726,13 +652,9 @@ public class TextSpeech extends AppCompatActivity {
             public void onPreviewFrame(byte[] data, Camera camera) {
 
                 data2 = data;
-
                 if(!isCaptured) {
                     byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
-
-
-
                     if(!flash && detectdarkness(bitmap) && deviceHasFlash){
                         flash = true;
                         Camera.Parameters params = camera.getParameters();
@@ -762,7 +684,7 @@ public class TextSpeech extends AppCompatActivity {
                                         String text = label.getText();
                                         float confidence = label.getConfidence();
                                         int index = label.getIndex();
-                                        if (confidence >= 0.5 && text.equals("Paper")) {
+                                        if (confidence >= 0.65 && text.equals("Paper")) {
                                             // every 200ms vibrate for 50ms
                                             Log.d("Current time",""+System.currentTimeMillis());
 

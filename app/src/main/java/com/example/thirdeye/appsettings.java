@@ -1,37 +1,26 @@
 package com.example.thirdeye;
 
-import static android.provider.Telephony.TextBasedSmsColumns.STATUS;
-import static java.util.Arrays.stream;
-import java.util.Calendar;
-
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.fonts.Font;
-import android.graphics.fonts.FontStyle;
-import androidx.appcompat.widget.SwitchCompat;
-
-import android.os.Build;
-import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -41,38 +30,27 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
-import java.lang.reflect.Field;
+import com.google.mlkit.common.model.RemoteModelManager;
+import com.google.mlkit.nl.translate.TranslateRemoteModel;
+import com.google.mlkit.nl.translate.Translation;
+import com.google.mlkit.nl.translate.Translator;
+import com.google.mlkit.nl.translate.TranslatorOptions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-
-import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.mlkit.common.model.RemoteModelManager;
-import com.google.mlkit.nl.translate.TranslateRemoteModel;
-
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
 
 public class appsettings extends AppCompatActivity {
 
@@ -80,45 +58,43 @@ public class appsettings extends AppCompatActivity {
     private MicHandler shakeListener;
     Calendar calendar;
     private long currtime = 0;
-    ProgressDialog progressDialog2;
+
     private Spinner spinnerDefaultLanguage;
     private SwitchCompat switchPartiallyBlind;
     private LinearLayout llsettings;
     private Button applybtn;
     private TextToSpeech textToSpeech;
-    private Button cancelbtn;
+
     private HashMap<String, String> languageMap = new HashMap<>();
     private HashMap<Integer, String> WeekDays = new HashMap<>();
     private ProgressDialog progressDialog;
     private String ouptutlang = MainActivity.output_lang;
     private boolean blindness = MainActivity.blindness;
     private float rate = MainActivity.speech_rate;
-    private String inputlang = MainActivity.input_lang;
-    private String trans_input = MainActivity.trans_input;
-    private boolean alreadydownloaded = false;
+
+
+
     private ImageView backbtn;
     private Button feedbackBtn;
     private boolean buttonClickable = true;
     private String speaklang;
     private boolean toret = false;
-    private LinearLayout parentlayout;
+
 
     private List<Settings> finalset;
     private static final int SPEECH_REQUEST_CODE = 1;
     private int width;
     private List<String> languages = new ArrayList<>();
-    private boolean open = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
-        parentlayout = findViewById(R.id.parentlayout);
+
 
         // Initialize views
-        TextView textSpeechRate = findViewById(R.id.textSpeechRate);
-        TextView textDefaultLanguage = findViewById(R.id.textDefaultLanguage);
-        TextView textPartiallyBlind = findViewById(R.id.textPartiallyBlind);
+
 //        spinnerinputlang = findViewById(R.id.spinnerDefaultinputlanguage);
 //        spinnertranslanguage = findViewById(R.id.spinnertransinputlanguage);
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
@@ -128,7 +104,6 @@ public class appsettings extends AppCompatActivity {
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
         feedbackBtn = findViewById(R.id.buttonfeedback);
-//        cancelbtn = findViewById(R.id.buttonCancel);
         initializetexttospeech();
         getAllSettings(this::onSettingsListLoaded);
         initializelanguageMap();
@@ -138,17 +113,13 @@ public class appsettings extends AppCompatActivity {
                 break;
             }
         }
-
         feedbackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(appsettings.this, FeedbackActivity.class));
             }
         });
-
         seekBarSpeechRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            boolean check = true;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // This method is called when the progress of the seek bar changes
@@ -177,8 +148,6 @@ public class appsettings extends AppCompatActivity {
             Toast.makeText(appsettings.this, "Shake detected!", Toast.LENGTH_SHORT).show();
             startVoiceRecognition();
         });
-
-
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,10 +169,6 @@ public class appsettings extends AppCompatActivity {
 
                     applybtn.setEnabled(false); // Disable the button
                     buttonClickable = false;
-    //                    applyProgressDialog();
-
-
-                    // Re-enable the button after 1 second
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -219,66 +184,42 @@ public class appsettings extends AppCompatActivity {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
-
-
-        Log.d("getting widht of ll",""+width+"pixels");
-
+//        Log.d("getting widht of ll",""+width+"pixels");
         languages = new ArrayList<>(languageMap.values());
         List<String> keys = new ArrayList<>(languageMap.keySet());
-
-
-        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
-
+//        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi","Japanese","Korean"));
 //        ArrayAdapter<String> text_det_adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, textDetList);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,keys);
-
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_checked);
+        spinnerDefaultLanguage.setDropDownHorizontalOffset(dpToPx(-10));
+        spinnerDefaultLanguage.setDropDownWidth(width-dpToPx(40));
+        spinnerDefaultLanguage.setAdapter(adapter);
+        spinnerDefaultLanguage.setSelection(languages.indexOf(ouptutlang));
 //        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 //        spinnertranslanguage.setDropDownVerticalOffset(dpToPx(26));
 //        spinnerDefaultLanguage.setDropDownVerticalOffset(dpToPx(26));
-        spinnerDefaultLanguage.setDropDownHorizontalOffset(dpToPx(-10));
 //        spinnerinputlang.setDropDownHorizontalOffset(dpToPx(-10));
 //        spinnertranslanguage.setDropDownHorizontalOffset(dpToPx(-10));
 //        spinnertranslanguage.setDropDownWidth(width-dpToPx(40));
 //        spinnerinputlang.setDropDownWidth(width-dpToPx(40));
-        spinnerDefaultLanguage.setDropDownWidth(width-dpToPx(40));
-        spinnerDefaultLanguage.setAdapter(adapter);
 //        spinnertranslanguage.setAdapter(adapter);
 //        spinnerinputlang.setAdapter(text_det_adapter);
-        spinnerDefaultLanguage.setSelection(languages.indexOf(ouptutlang));
 //        spinnertranslanguage.setSelection(languages.indexOf(trans_input)); // this is for translation model have to update the database
 //        spinnerinputlang.setSelection(textDetList.indexOf(inputlang));
         switchPartiallyBlind.setChecked(blindness);
         seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
-
         spinnerDefaultLanguage.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        if (!open) {
-                    // If the popup window is not open, show it
-
-                    showPopupWindow(spinnerDefaultLanguage, adapter);
-//                        } else {
-//                            // If the popup window is open, dismiss it
-//                            if (popupWindowtemp != null && popupWindowtemp.isShowing()) {
-//                                popupWindowtemp.dismiss();
-//                            }
-//                            open = false;
-//                        }
+                    showPopupWindow(spinnerDefaultLanguage, adapter);//
                     return true;
                 }
                 return true;
             }
         });
-
-
-
-
-        // Setup Switch for Partially Blind
     }
     private void showPopupWindow(Spinner spinnerDefaultLanguage, ArrayAdapter<String> adapter) {
         // Create a ListView for the PopupWindow
@@ -289,8 +230,6 @@ public class appsettings extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             listView.setVerticalScrollbarThumbDrawable(getResources().getDrawable(R.drawable.scrollbar));
         }
-
-
         // Create the PopupWindow
         PopupWindow popupWindow = new PopupWindow(listView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         ; // Set background color
@@ -300,7 +239,6 @@ public class appsettings extends AppCompatActivity {
         popupWindow.setWidth(width-dpToPx(40));
         popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_FROM_FOCUSABLE);
         Drawable drawable = getResources().getDrawable(R.drawable.popupbackground);
-
 // Set the drawable as the background for the PopupWindow
         popupWindow.setBackgroundDrawable(drawable);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -319,10 +257,8 @@ public class appsettings extends AppCompatActivity {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
-
         // Get the selected language code from the map
         String selectedSourceLanguage = languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString());
-
         if (selectedSourceLanguage != null) {
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
         }
@@ -363,7 +299,6 @@ public class appsettings extends AppCompatActivity {
             if (matches != null && !matches.isEmpty()) {
                 String spokenText = matches.get(0).toLowerCase();
                 Log.d("inside mic intent",spokenText+" "+speaklang+ouptutlang);
-                //here i will make the shake listener for changing the language
                 List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
                 boolean islanguage = false;
                 for(String str : wordList){
@@ -422,28 +357,7 @@ public class appsettings extends AppCompatActivity {
     {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
-
-    public static int pxToDp(int px)
-    {
-        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
-    }
-    private void applyProgressDialog() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Applying all the changes...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }, 1500);
-    }
-
-
     public void downloadLanguage(String language) {
-
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         toret = false;
@@ -519,16 +433,12 @@ public class appsettings extends AppCompatActivity {
                             return null;
 
                         }
-
                         @Override
                         protected void onPostExecute(Void aVoid) {
                             // Update UI or perform any post-execution tasks here
 
                         }
                     }.execute();
-
-                    ; // Callback indicating completion
-
                 })
                 .addOnFailureListener(e -> {
                     progressDialog.dismiss();
@@ -537,8 +447,6 @@ public class appsettings extends AppCompatActivity {
                 });
         Log.d("returning", "downloadlanguage: "+toret);
     }
-
-
     private void showProgressDialog() {
         progressDialog = new ProgressDialog(appsettings.this);
         progressDialog.setMessage("Downloading the translation model...");
@@ -567,7 +475,6 @@ public class appsettings extends AppCompatActivity {
         insertAsyncTask.execute(settings);
     }
     class InsertAsyncTask extends AsyncTask<Settings, Void, Void> {
-
         @Override
         protected Void doInBackground(Settings... settings) {
 
@@ -577,18 +484,11 @@ public class appsettings extends AppCompatActivity {
 
             return null;
         }
-
-
     }
-    public interface SettingsListCallback {
-        void onSettingsListLoaded(List<Settings> settingsList);
-    }
-
     public void onSettingsListLoaded(List<Settings> settingsList) {
         finalset = settingsList;
         Log.d("test", "onSettingsListLoaded: "+finalset);
     }
-
     public void getAllSettings(final MainActivity.SettingsListCallback callback) {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -602,7 +502,6 @@ public class appsettings extends AppCompatActivity {
         });
         thread.start();
     }
-
     private void initializelanguageMap(){
         WeekDays.put(1, "Sunday");
         WeekDays.put(2, "Monday");
@@ -665,6 +564,5 @@ public class appsettings extends AppCompatActivity {
         languageMap.put("Ukrainian", "uk");
         languageMap.put("Urdu", "ur");
         languageMap.put("Vietnamese", "vi");
-
     }
 }

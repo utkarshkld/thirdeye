@@ -2,24 +2,18 @@ package com.example.thirdeye;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
+
 import com.example.thirdeye.databinding.CheckMainBinding;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -28,15 +22,13 @@ public class cMainActivity extends AppCompatActivity {
     private CheckMainBinding activityMainBinding;
     public static Map<String, Long> objectResolver = new HashMap<>();
     public static HashMap<String, String> languageMap = new HashMap<>();
-    public static Spinner spinnerLanguages;
-    private ArrayAdapter<String> languageAdapter;
-    private List<String> selectedLanguages;
+
     private MainViewModel viewModel;
     public static boolean isPlay = true;
     private ImageView backbtn;
     private Button exitbtn;
     public static boolean flash = false;
-    private String outputlang = MainActivity.output_lang;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,9 +41,6 @@ public class cMainActivity extends AppCompatActivity {
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
         assert navHostFragment != null;
-//        NavController navController = navHostFragment.getNavController();
-
-
         // Initialize ViewModel using ViewModelProvider
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         backbtn = findViewById(R.id.backbtn_);
@@ -68,16 +57,16 @@ public class cMainActivity extends AppCompatActivity {
             }
         });
         exitbtn.setOnClickListener(new View.OnClickListener() {
-                                       @Override
-                                       public void onClick(View v) {
-                                           isPlay = false;
-                                           if(ObjectDetectorHelper.textToSpeech!=null) {
-                                               ObjectDetectorHelper.textToSpeech.stop();
-                                               ObjectDetectorHelper.textToSpeech.shutdown();
-                                           }
-                                           onBackPressed();
-                                       }
-                                   });
+            @Override
+            public void onClick(View v) {
+                isPlay = false;
+                if(ObjectDetectorHelper.textToSpeech!=null) {
+                   ObjectDetectorHelper.textToSpeech.stop();
+                   ObjectDetectorHelper.textToSpeech.shutdown();
+                }
+                onBackPressed();
+            }
+        });
 
         initializeLanguageMap();
 //        spinnerLanguages = findViewById(R.id.objdetspinnerlang);
@@ -89,16 +78,6 @@ public class cMainActivity extends AppCompatActivity {
 //        spinnerLanguages.setAdapter(languageAdapter);
 //        spinnerLanguages.setSelection(selectedLanguages.indexOf(outputlang));
     }
-    public static int dpToPx(int dp)
-    {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    public static int pxToDp(int px)
-    {
-        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
-    }
-
     private void initializeLanguageMap() {
         // Add languages and their Locale codes to the HashMap
         languageMap.put("bn", "Bengali");
@@ -176,6 +155,5 @@ public class cMainActivity extends AppCompatActivity {
             ObjectDetectorHelper.textToSpeech.shutdown();
         }
         super.onBackPressed();
-
     }
 }

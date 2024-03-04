@@ -1,103 +1,39 @@
 package com.example.thirdeye;
 
 
-
-
-import static java.lang.Thread.sleep;
-
-import com.google.mlkit.nl.languageid.LanguageIdentification;
-import com.google.mlkit.nl.languageid.LanguageIdentifier;
-
 import android.Manifest;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.method.ScrollingMovementMethod;
-import android.text.style.ForegroundColorSpan;
-import android.transition.Slide;
-import android.transition.Transition;
-import android.transition.TransitionManager;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.thirdeye.databinding.CheckMainBinding;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
-
-
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.label.ImageLabel;
-import com.google.mlkit.vision.label.ImageLabeler;
-import com.google.mlkit.vision.label.ImageLabeling;
-import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
-import com.google.mlkit.vision.text.Text;
-import com.google.mlkit.vision.text.TextRecognition;
-import com.google.mlkit.vision.text.TextRecognizer;
-import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions;
-import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions;
-import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
-
-import android.speech.tts.UtteranceProgressListener;
-
 import java.io.IOException;
-
-import java.security.Policy;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-
-import android.os.Handler;
-import android.os.Looper;
 
 
 public class Magnifying extends AppCompatActivity {
@@ -132,28 +68,8 @@ public class Magnifying extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 101;
     private TextToSpeech textToSpeech, textToSpeech2;
-    private Spinner spinnerLanguages, text_det_spinner;
-    private boolean isPaused = true;
-
-    private MicHandler shakeListener;
-
-    private static final int SPEECH_REQUEST_CODE = 1;
-
-    private boolean isPlaying = false;
-    private int endingIndex = 0;
-    private static int index = 0;
-    private static int index2 = 0;
-    private StringBuilder alltext;
-    private List<String> selectedLanguages;
-    private ArrayAdapter<String> languageAdapter, text_det_adapter;
     private ImageView back;
-    private boolean isSpeaking = false;
-    private ArrayList<Integer> prefixArray = new ArrayList<>();
     private ImageView imageView;
-    private ProgressDialog waiting;
-    public long shaketime = 0;
-
-    boolean firsttime = true, nonflash = false;
 
     private boolean isCaptured = false;
 
@@ -238,14 +154,6 @@ public class Magnifying extends AppCompatActivity {
             }
         }
             });
-
-
-
-
-
-
-
-
         back = findViewById(R.id.exitbtntexttospeech);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,33 +167,17 @@ public class Magnifying extends AppCompatActivity {
 
 
     }
-    public static int dpToPx(int dp)
-    {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    public static int pxToDp(int px)
-    {
-        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
-    }
 
 
     @Override
     protected void onPause() {
-        // Stop or pause speech synthesis when the activity is paused
-
         releaseCamera();
-
-
-
         super.onPause();
     }
 
     @Override
     protected void onResume() {
-        if(!isPaused){
-            startCamera();
-        }
+        startCamera();
         super.onResume();
     }
 
@@ -293,9 +185,6 @@ public class Magnifying extends AppCompatActivity {
         surfaceView = findViewById(R.id.surfaceView);
         btnTakePicture = findViewById(R.id.btnTakePicture);
     }
-
-
-
     private void requestPermission() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -392,19 +281,6 @@ public class Magnifying extends AppCompatActivity {
 
 
 
-
-
-    private void speakText(String text, int startPosition) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "word");
-        } else {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-        }
-
-    }
-
-
     private void setupSurfaceHolder() {
         surfaceViewHolder = surfaceView.getHolder();
         surfaceViewHolder.addCallback(new SurfaceHolder.Callback() {
@@ -426,7 +302,6 @@ public class Magnifying extends AppCompatActivity {
             }
         });
     }
-
     private void startCamera() {
 
         camera = Camera.open();
@@ -517,80 +392,7 @@ public class Magnifying extends AppCompatActivity {
                 throw new IllegalStateException("Unexpected value: " + requestCode);
         }
     }
-
-//    private void startVoiceRecognition() {
-//        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-//        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-//        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a command...");
-//        try {
-//            startActivityForResult(intent, SPEECH_REQUEST_CODE);
-//        } catch (ActivityNotFoundException e) {
-//            Toast.makeText(this, "Speech recognition is not available on your device.", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//
-//    private void startRecording() {
-//        Button mic1 = findViewById(R.id.micButton1);
-//        mic1.performClick();
-//    }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//
-//        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-//            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-//            if (matches != null && !matches.isEmpty()) {
-//                String spokenText = matches.get(0).toLowerCase();
-//
-//
-//                if (spokenText.contains("click") || spokenText.contains("capture")) {
-//                    if (isPlaying) {
-////                        speaktext2("Go to capture mode first.");
-//                    } else {
-//                        btnTakePicture.performClick();
-//                    }
-//                } else if (spokenText.contains("replay")) {
-//                    if (isPlaying) {
-//                        btnReplay.performClick();
-//                    } else {
-////                        speaktext2("Capture the photo first");
-//                    }
-//                } else if (spokenText.contains("pause") || spokenText.contains("stop")) {
-//                    if (isPlaying) {
-//                        if (textToSpeech != null) {
-//                            textToSpeech.stop();
-//                        }
-//                        isPaused = false;
-//                        btnPausePlay.setBackgroundResource(R.drawable.play_fill);
-//                    } else {
-////                        speaktext2("Capture the photo first");
-//                    }
-//
-//                } else if (spokenText.contains("play")) {
-//                    if (isPlaying) {
-//                        isPaused = true;
-//                        btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
-//                        speaknextword();
-//                    } else {
-////                        speaktext2("Capture the photo first.");
-//                    }
-//                } else if (spokenText.contains("re take") || spokenText.contains("re-capture") || spokenText.contains("retake") || spokenText.contains("recapture")) {
-//                    if (isPlaying) {
-////                        speaktext2("Getting in Capture Mode");
-//                        btnTakePicture.performClick();
-//                    } else {
-////                        speaktext2("Already In capture Mode, Say capture for capturing");
-//                    }
-//                } else {
-//                    Toast.makeText(this, "Command not recognized", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        }
-//    }
     private boolean detectdarkness(Bitmap bitmap){
-
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int darkPixels = 0;
@@ -614,7 +416,6 @@ public class Magnifying extends AppCompatActivity {
         }
         float total = width*height;
         float threshhold = (darkPixels/total);
-
         return threshhold > 0.8;
     }
 
@@ -623,24 +424,14 @@ public class Magnifying extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         releaseCamera();
-
         super.onDestroy();
 
     }
-
     @Override
     public void onBackPressed() {
         releaseCamera();
-
         super.onBackPressed();
-
     }
-
-
-
-
-
-
 }
 
 

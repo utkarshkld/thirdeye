@@ -1,48 +1,25 @@
 package com.example.thirdeye;
 
 //import static androidx.appcompat.graphics.drawable.DrawableContainerCompat.Api21Impl.getResources;
-import static com.example.thirdeye.OnboardingAdapter.languageSpinner;
-import static com.example.thirdeye.appsettings.dpToPx;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import com.example.thirdeye.appsettings;
-import androidx.viewpager.widget.ViewPager;
+import static com.example.thirdeye.OnboardingAdapter.languageSpinner;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
 
-import com.example.thirdeye.MainActivity;
-import com.example.thirdeye.OnboardingAdapter;
-import com.example.thirdeye.R;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import android.speech.tts.TextToSpeech;
-import android.widget.Toast;
 
 public class Onboarding extends AppCompatActivity {
 
@@ -149,7 +126,7 @@ public class Onboarding extends AppCompatActivity {
     @Override
     public void onDestroy(){
         textToSpeech.shutdown();
-        super.onPause();
+        super.onDestroy();
     }
     public void insertSingleTodo(String language,String inputlang,String trans_input,boolean blindness,float speech_rate) {
         Settings settings = new Settings(language,inputlang,trans_input,blindness,speech_rate);

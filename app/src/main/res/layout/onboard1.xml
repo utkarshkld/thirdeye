@@ -60,7 +60,6 @@
             android:scrollbarStyle="insideInset"
             android:scrollbarThumbVertical="@drawable/scrollbar"
             android:layout_height="match_parent"
-            android:popupBackground="@drawable/spinner_popup_settings"
             android:overlapAnchor="false" />
 
     </LinearLayout>

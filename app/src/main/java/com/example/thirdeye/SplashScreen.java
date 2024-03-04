@@ -29,9 +29,6 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splashscreen);
-
-        //getSupportActionBar().hide();
 
         instructionmap.makeinstruction();
         Thread background = new Thread() {
