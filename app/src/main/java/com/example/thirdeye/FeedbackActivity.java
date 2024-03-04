@@ -1,6 +1,8 @@
 package com.example.thirdeye;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,7 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
-
+import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.apache.http.HttpResponse;
@@ -35,7 +37,7 @@ public class FeedbackActivity extends AppCompatActivity {
     ImageView backbtnfeedback;
 //    MongoClient mongoClient;
 //    MongoDatabase database;
-    RadioButton x,x1,x2,x3,x11,x12,x13,x14;
+    RadioButton x,x1,x2,x3,x11,x12,x13,x14,x21,x22,x23,x24;
 
 
     @Override
@@ -48,7 +50,7 @@ public class FeedbackActivity extends AppCompatActivity {
         backbtnfeedback = findViewById(R.id.backbtnfeedback);
         x = findViewById(R.id.radia_id1);x1 = findViewById(R.id.radia_id2); x2 = findViewById(R.id.radia_id3);x3 = findViewById(R.id.radia_id4);
         x11 = findViewById(R.id.radia_id11);x12 = findViewById(R.id.radia_id12); x13 = findViewById(R.id.radia_id13);x14 = findViewById(R.id.radia_id14);
-
+        x21 = findViewById(R.id.radia_id21);x22 = findViewById(R.id.radia_id22); x23 = findViewById(R.id.radia_id23);x24 = findViewById(R.id.radia_id24);
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,11 +75,19 @@ public class FeedbackActivity extends AppCompatActivity {
 //       mongoClient.close();
        super.onBackPressed();
     }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+        return false;
+    }
     public class InsertFeedbackAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            String q1 = "", q2 = "";
+            String q1 = "", q2 = "",q3 = "";
 
             if (x.isChecked()) {
                 q1 = x.getText().toString();
@@ -98,8 +108,19 @@ public class FeedbackActivity extends AppCompatActivity {
             } else if (x14.isChecked()) {
                 q2 = x14.getText().toString();
             }
-            Log.d("check feedback", q1 + " " + q2);
-            if (q1.length() > 0 && q2.length() > 0) {
+            if (x21.isChecked()) {
+                q3 = x21.getText().toString();
+            } else if (x22.isChecked()) {
+                q3 = x22.getText().toString();
+            } else if (x23.isChecked()) {
+                q3 = x23.getText().toString();
+            } else if (x24.isChecked()) {
+                q3 = x24.getText().toString();
+            }
+            Log.d("check feedback", q1 + " " + q2+" "+q3);
+
+
+
                 try {
                     // Add your data
                     HttpClient httpclient = new DefaultHttpClient();
@@ -108,19 +129,19 @@ public class FeedbackActivity extends AppCompatActivity {
                     JSONObject json = new JSONObject();
                     json.put("question1", q1);
                     json.put("question2", q2);
+                    json.put("question3",q3);
 
                     // Set the JSON object as the entity of the request
                     StringEntity se = new StringEntity(json.toString());
                     httppost.setEntity(se);
                     Log.d("feedback answer", json.toString());
-
                     // Set content type of the request body
                     se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-
                     // Execute HTTP Post Request
 
                     HttpResponse response = httpclient.execute(httppost);
-                    Log.d("feedback answer", response.toString());
+//                    Log.d("feedback answer", response.toString());
+
 
 
 
@@ -133,15 +154,23 @@ public class FeedbackActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
-            }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Toast.makeText(FeedbackActivity.this, "Data submitted.", Toast.LENGTH_SHORT).show();
-            Toast.makeText(FeedbackActivity.this, "Thanks for your feedback.", Toast.LENGTH_SHORT).show();
+            if(isNetworkAvailable()) {
+                Toast.makeText(FeedbackActivity.this, "Data submitted.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(FeedbackActivity.this, "Thanks for your feedback.", Toast.LENGTH_SHORT).show();
+            }else{
+
+                    Toast.makeText(FeedbackActivity.this,"No Internet Connection", Toast.LENGTH_LONG).show();
+
+
+            }
+
         }
     }
 

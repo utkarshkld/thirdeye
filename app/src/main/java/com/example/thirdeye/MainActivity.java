@@ -437,7 +437,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             int m = str2.length();
                             if (partialmatch(str2,str, m, n)) {
                                 ismatched = true;
-                                textToSpeech.speak(translationMap.get("English"+"_"+currdirection),TextToSpeech.QUEUE_FLUSH,null,null);
+                                Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
+                                textToSpeech.speak(translationMap.get(speaklang+"_"+currdirection),TextToSpeech.QUEUE_FLUSH,null,null);
                                 break;
                             }
                         }
