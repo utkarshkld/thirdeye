@@ -87,7 +87,7 @@ public class Magnifying extends AppCompatActivity {
         initializeTextToSpeech();
         imageView = findViewById(R.id.viewimage);
         rellayout = findViewById(R.id.rellayout);
-        btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
+//        btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
         seekBar = findViewById(R.id.vertical_seekbar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -120,40 +120,40 @@ public class Magnifying extends AppCompatActivity {
                 }
             }
         });
-        btnTakePicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.vibe.vibrate(50);
-                if (!isCaptured){
-                    isCaptured = true;
-                takePicture();
-                btnTakePicture.setImageResource(R.drawable.retake_icon);
-                seekBar.setVisibility(View.GONE);
-                imageView.setVisibility(View.VISIBLE);
-
-
-//                    Transition transition2 = new Slide(Gravity.TOP);
-//                    transition2.setDuration(500);
-//                    transition2.addTarget(R.id.textView);
-//                    TransitionManager.beginDelayedTransition(rellayout, transition2);
-                surfaceView.setVisibility(View.GONE);
-                releaseCamera();
-
-            } else
-            {
-                imageView.setVisibility(View.GONE);
-                seekBar.setVisibility(View.VISIBLE);
-                btnTakePicture.setImageResource(R.drawable.camera_icon);
-                isCaptured = false;
-//                    Transition transition2 = new Slide();
-//                    transition2.setDuration(500);
-//                    transition2.addTarget(R.id.textView);
-//                    TransitionManager.beginDelayedTransition(rellayout, transition2);
-                surfaceView.setVisibility(View.VISIBLE);
-
-            }
-        }
-            });
+//        btnTakePicture.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                MainActivity.vibe.vibrate(50);
+//                if (!isCaptured){
+//                    isCaptured = true;
+//                takePicture();
+//                btnTakePicture.setImageResource(R.drawable.retake_icon);
+//                seekBar.setVisibility(View.GONE);
+//                imageView.setVisibility(View.VISIBLE);
+//
+//
+////                    Transition transition2 = new Slide(Gravity.TOP);
+////                    transition2.setDuration(500);
+////                    transition2.addTarget(R.id.textView);
+////                    TransitionManager.beginDelayedTransition(rellayout, transition2);
+//                surfaceView.setVisibility(View.GONE);
+//                releaseCamera();
+//
+//            } else
+//            {
+//                imageView.setVisibility(View.GONE);
+//                seekBar.setVisibility(View.VISIBLE);
+//                btnTakePicture.setImageResource(R.drawable.camera_icon);
+//                isCaptured = false;
+////                    Transition transition2 = new Slide();
+////                    transition2.setDuration(500);
+////                    transition2.addTarget(R.id.textView);
+////                    TransitionManager.beginDelayedTransition(rellayout, transition2);
+//                surfaceView.setVisibility(View.VISIBLE);
+//
+//            }
+//        }
+//            });
         back = findViewById(R.id.exitbtntexttospeech);
         back.setOnClickListener(new View.OnClickListener() {
             @Override

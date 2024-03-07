@@ -145,9 +145,7 @@ public class TextSpeech extends AppCompatActivity {
         waiting.setMessage("please wait");
         progressprocessing = new ProgressDialog(TextSpeech.this);
         progressprocessing.setCancelable(false);
-        pm = getPackageManager();
-        deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
-
+        deviceHasFlash = MainActivity.deviceHasFlash;
         index = 0;
         initViews();
         words = new ArrayList<>();

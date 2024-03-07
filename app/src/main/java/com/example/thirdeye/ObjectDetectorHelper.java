@@ -213,19 +213,19 @@ public class ObjectDetectorHelper {
 
         if(!cMainActivity.flash){
             Log.d("Detecting Darkness",""+detectdarkness(bitmapBuffer));
-            if(detectdarkness(bitmapBuffer)){
+            if(detectdarkness(bitmapBuffer) && MainActivity.deviceHasFlash){
                 cMainActivity.flash = true;
                 cMainActivity.isPlay=false;
                 Intent intent = new Intent(context, cMainActivity.class);
                 intent.putExtra("flash",true);
                 context.startActivity(intent);
-
             }
         }
         if(cMainActivity.isPlay) {
             MPImage mpImage = new BitmapImageBuilder(bitmapBuffer).build();
-            if(mpImage!=null)
-            detectAsync(mpImage, frameTime);
+            if(mpImage!=null) {
+                detectAsync(mpImage, frameTime);
+            }
         }
     }
 

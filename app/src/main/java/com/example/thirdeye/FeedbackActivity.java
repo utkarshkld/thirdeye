@@ -134,7 +134,7 @@ public class FeedbackActivity extends AppCompatActivity {
                     // Set the JSON object as the entity of the request
                     StringEntity se = new StringEntity(json.toString());
                     httppost.setEntity(se);
-                    Log.d("feedback answer", json.toString());
+//                    Log.d("feedback answer", json.toString());
                     // Set content type of the request body
                     se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
                     // Execute HTTP Post Request

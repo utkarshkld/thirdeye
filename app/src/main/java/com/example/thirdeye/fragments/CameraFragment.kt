@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.camera.camera2.interop.Camera2Interop
+import com.example.thirdeye.MainActivity.deviceHasFlash;
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -171,119 +172,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 //        initBottomSheetControls()
         fragmentCameraBinding.overlay.setRunningMode(RunningMode.LIVE_STREAM)
     }
-
-//    private fun initBottomSheetControls() {
-//        // Init bottom sheet settings
-////        fragmentCameraBinding.bottomSheetLayout.maxResultsValue.text =
-////            viewModel.currentMaxResults.toString()
-////        fragmentCameraBinding.bottomSheetLayout.thresholdValue.text =
-////            String.format("%.2f", viewModel.currentThreshold)
-//
-//        // When clicked, lower detection score threshold floor
-//        fragmentCameraBinding.bottomSheetLayout.thresholdMinus.setOnClickListener {
-//            if (objectDetectorHelper.threshold >= 0.1) {
-//                objectDetectorHelper.threshold -= 0.1f
-//                updateControlsUi()
-//            }
-//        }
-//
-//        // When clicked, raise detection score threshold floor
-//        fragmentCameraBinding.bottomSheetLayout.thresholdPlus.setOnClickListener {
-//            if (objectDetectorHelper.threshold <= 0.8) {
-//                objectDetectorHelper.threshold += 0.1f
-//                updateControlsUi()
-//            }
-//        }
-//
-//        // When clicked, reduce the number of objects that can be detected at a time
-//        fragmentCameraBinding.bottomSheetLayout.maxResultsMinus.setOnClickListener {
-//            if (objectDetectorHelper.maxResults > 1) {
-//                objectDetectorHelper.maxResults--
-//                updateControlsUi()
-//            }
-//        }
-//
-//        // When clicked, increase the number of objects that can be detected at a time
-//        fragmentCameraBinding.bottomSheetLayout.maxResultsPlus.setOnClickListener {
-//            if (objectDetectorHelper.maxResults < 5) {
-//                objectDetectorHelper.maxResults++
-//                updateControlsUi()
-//            }
-//        }
-
-        // When clicked, change the underlying hardware used for inference. Current options are CPU
-        // GPU, and NNAPI
-//        fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.setSelection(
-//            viewModel.currentDelegate,
-//            false
-//        )
-//        fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.onItemSelectedListener =
-//            object : AdapterView.OnItemSelectedListener {
-//                override fun onItemSelected(
-//                    p0: AdapterView<*>?,
-//                    p1: View?,
-//                    p2: Int,
-//                    p3: Long
-//                ) {
-//                    try {
-//                        objectDetectorHelper.currentDelegate = p2
-//                        updateControlsUi()
-//                    } catch(e: UninitializedPropertyAccessException) {
-//                        Log.e(TAG, "ObjectDetectorHelper has not been initialized yet.")
-//                    }
-//                }
-
-//                override fun onNothingSelected(p0: AdapterView<*>?) {
-//                    /* no op */
-//                }
-//            }
-
-        // When clicked, change the underlying model used for object detection
-//        fragmentCameraBinding.bottomSheetLayout.spinnerModel.setSelection(
-//            viewModel.currentModel,
-//            false
-//        )
-//        fragmentCameraBinding.bottomSheetLayout.spinnerModel.onItemSelectedListener =
-//            object : AdapterView.OnItemSelectedListener {
-//                override fun onItemSelected(
-//                    p0: AdapterView<*>?,
-//                    p1: View?,
-//                    p2: Int,
-//                    p3: Long
-//                ) {
-//                    try {
-//                        objectDetectorHelper.currentDelegate = p2
-//                        updateControlsUi()
-//                    } catch(e: UninitializedPropertyAccessException) {
-//                        Log.e(TAG, "ObjectDetectorHelper has not been initialized yet.")
-//                    }
-//                }
-//
-//                override fun onNothingSelected(p0: AdapterView<*>?) {
-//                    /* no op */
-//                }
-//            }
-//    }
-
-    // Update the values displayed in the bottom sheet. Reset detector.
-    private fun updateControlsUi() {
-//        fragmentCameraBinding.bottomSheetLayout.maxResultsValue.text =
-//            objectDetectorHelper.maxResults.toString()
-//        fragmentCameraBinding.bottomSheetLayout.thresholdValue.text =
-//            String.format("%.2f", objectDetectorHelper.threshold)
-
-        backgroundExecutor.execute {
-            objectDetectorHelper.clearObjectDetector()
-            objectDetectorHelper.setupObjectDetector()
-        }
-
-        fragmentCameraBinding.overlay.clear()
-    }
-
-    // Initialize CameraX, and prepare to bind the camera use cases
-
-
-
     fun setUpCamera() {
             val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
             cameraProviderFuture.addListener(
@@ -411,16 +299,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                         objectDetectorHelper::detectLivestreamFrame
                     )
                 }
-//        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(imageAnalyzer)
-//        ext.setCaptureRequestOption(
-//            CaptureRequest.CONTROL_AE_MODE,
-//            CaptureRequest.CONTROL_AE_MODE_OFF
-//        )
-//        ext.setCaptureRequestOption(
-//            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-//            Range<Int>(60, 60)
-//        )
-
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
 
@@ -437,10 +315,10 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
-            if (checkFlashlightAvailability(requireContext().packageManager)) {
+            if (deviceHasFlash) {
                 camera?.cameraControl?.enableTorch(true)
             } else {
-                // Handle flashlight not available scenario
+
                 Log.d(TAG, "Flashlight not available")
             }
 

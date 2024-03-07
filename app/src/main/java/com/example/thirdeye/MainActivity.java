@@ -12,6 +12,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
@@ -36,6 +37,7 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
     public static Vibrator vibe;
+    public static boolean deviceHasFlash = false;
     public static HashMap<String, String> translationMap = new HashMap<>();
     private String currdirection;
     public static HashMap<String,String> languageMap = new HashMap<>();
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
+    private PackageManager pm;
 
     private float[] accelerometerData = new float[3];
     private float[] magnetometerData = new float[3];
@@ -68,9 +71,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        pm = getPackageManager();
+        deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
+            // Accelerometer sensor is available on this device
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        } else {
+            accelerometer = null;
+        }
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS)) {
+            // Magnetometer sensor is available on this device
+            magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        } else {
+            // Magnetometer sensor is not available on this device
+            magnetometer = null;
+        }
         initializeLanguageMap();
         translationmap.initializetransMap();
         //Commands are Translated
@@ -242,15 +258,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+
         // Start the shake listener when the activity is resumed
         shakeListener.registerShakeListener();
     }
     @Override
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(this);
+
         // Stop the shake listener when the activity is paused
         shakeListener.unregisterShakeListener();
     }
@@ -437,8 +452,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             int m = str2.length();
                             if (partialmatch(str2,str, m, n)) {
                                 ismatched = true;
-                                Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
-                                textToSpeech.speak(translationMap.get(speaklang+"_"+currdirection),TextToSpeech.QUEUE_FLUSH,null,null);
+                                if(magnetometer != null){
+                                    if(accelerometer!=null) {
+                                        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                                    }
+                                    sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // Speak direction
+                                            textToSpeech.speak(translationMap.get(speaklang + "_" + currdirection), TextToSpeech.QUEUE_FLUSH, null, null);
+                                            Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
+
+                                            sensorManager.unregisterListener(MainActivity.this); // Assuming MyAsyncTask is the AsyncTask instance
+                                        }
+                                    }, 200);
+//                                    Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
+//
+//                                    textToSpeech.speak(translationMap.get(speaklang+"_"+currdirection),TextToSpeech.QUEUE_FLUSH,null,null);
+//                                    sensorManager.unregisterListener(this);
+                                }else{
+                                    Toast.makeText(MainActivity.this,"Compass is not supported with your device",Toast.LENGTH_LONG).show();
+                                }
                                 break;
                             }
                         }

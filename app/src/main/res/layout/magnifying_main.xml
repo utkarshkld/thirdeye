@@ -60,16 +60,16 @@
         android:thumb="@drawable/custom_seekbar_thumb"
 
          />
-    <ImageButton
-        android:id="@+id/btnTakePicture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:foreground="@drawable/ripple_card"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/_30sdp"
-        android:background="@drawable/imagebutton_background"
-        android:src="@drawable/camera_icon" />
+<!--    <ImageButton-->
+<!--        android:id="@+id/btnTakePicture"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:foreground="@drawable/ripple_card"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_marginBottom="@dimen/_30sdp"-->
+<!--        android:background="@drawable/imagebutton_background"-->
+<!--        android:src="@drawable/camera_icon" />-->
 
 
 
