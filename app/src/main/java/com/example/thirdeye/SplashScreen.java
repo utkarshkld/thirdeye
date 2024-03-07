@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import android.os.Handler;
 import android.provider.Settings;
 
 import android.Manifest;
@@ -27,6 +29,15 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splashscreen);
         instructionmap.makeinstruction();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                start();
+            }
+        }, 1500);
+    }
+    private void start(){
 
         // Check camera permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
