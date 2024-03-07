@@ -145,7 +145,6 @@ public class OnboardingAdapter extends PagerAdapter {
             languageSpinner.setSelection(languages.indexOf(temp));
         }else if(position == 1){
             TextView tx = view.findViewById(R.id.textView5);
-
             tx.setText(SplashScreen.translationsMap.get(Onboarding.output_lang));
             Onboarding.textToSpeech.setLanguage(new Locale(Onboarding.output_lang));
             Log.d("Checking Instruction", ""+Onboarding.output_lang+" "+tx.getText().toString());
