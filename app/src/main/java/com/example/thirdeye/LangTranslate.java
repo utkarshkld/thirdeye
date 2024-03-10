@@ -62,8 +62,7 @@ public class LangTranslate extends AppCompatActivity {
     private MicHandler shakeListener;
     private ImageButton btnreplay;
     private ImageButton btnpauseplay;
-    private CardView btnTranslate;
-    private CardView btnVoiceInput;
+    private ImageButton donebtn;
     private int width;
     private Spinner sourceLanguageSpinner;
 
@@ -94,6 +93,7 @@ public class LangTranslate extends AppCompatActivity {
         editTextLetters = findViewById(R.id.editTextTranslate);
         btnreplay = findViewById(R.id.btnReplay);
         btnpauseplay = findViewById(R.id.btnPausePlay);
+        donebtn = findViewById(R.id.donebtn);
         ImageButton micbtn = findViewById(R.id.speakwords);
         ImageButton backbtn = findViewById(R.id.backbtn);
         sourceLanguageSpinner = findViewById(R.id.sourceLanguageSpinner);
@@ -186,6 +186,14 @@ public class LangTranslate extends AppCompatActivity {
                     return true;
                 }
                 return true;
+            }
+        });
+        donebtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.vibe.vibrate(50);
+                detectAndTranslateLanguage(editTextLetters.getText().toString());
+
             }
         });
     }

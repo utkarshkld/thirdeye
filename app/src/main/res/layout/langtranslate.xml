@@ -42,25 +42,45 @@
     android:orientation="vertical"
     android:padding="20dp"
     android:layout_above="@+id/llgridView">
-    <EditText
-        android:id="@+id/editTextTranslate"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:contentDescription="Text Input"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginBottom="@dimen/_10sdp"
-        android:background="@drawable/textbackground"
-        android:hint="Write what you want to translate"
-        android:imeOptions="actionDone"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextTranslate"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:contentDescription="Text Input"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:background="@drawable/textbackground"
+            android:hint="What you want to translate"
+            android:imeOptions="actionDone"
+            android:paddingStart="15dp"
+            android:paddingEnd="10dp"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textColorHint="@color/backText"
+            android:textSize="20dp" />
+
+        <ImageButton
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:id="@+id/donebtn"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:contentDescription="Done"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:foreground="@drawable/doneripple"
+            android:src="@drawable/tick"
+            android:background="@drawable/donebutton"
+             />
+
+    </LinearLayout>
 
 
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:singleLine="true"
-        android:textColor="@color/white"
-        android:textColorHint="@color/backText"
-        android:textSize="20dp" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
