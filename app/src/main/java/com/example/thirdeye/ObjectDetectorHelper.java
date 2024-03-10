@@ -15,6 +15,9 @@
  */
 package com.example.thirdeye;
 
+import static android.app.PendingIntent.getActivity;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -24,6 +27,7 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.camera.core.ImageProxy;
@@ -88,61 +92,19 @@ public class ObjectDetectorHelper {
         objectResolver = new HashMap<>();
         currobject = "";
         setupObjectDetector();
-        initializeTextToSpeech();
+//        initializeTextToSpeech();
         initializemap();
     }
 
-    private void initializeTextToSpeech() {
-        textToSpeech = new TextToSpeech(context, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                int result;
-                if(output_lang.equals("id")){
-                    result = textToSpeech.setLanguage(new Locale("in"));
-                }else if(output_lang.equals("no")){
-                    result = textToSpeech.setLanguage(new Locale("nb"));
-                }
-                else {
-                    result = textToSpeech.setLanguage(new Locale(output_lang));
-                }
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e(TAG, "TextToSpeech: Language not supported.");
-                }else{
-
-                        // Set up utterance progress listener
-                        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                            @Override
-                            public void onStart(String utteranceId) {
-                                // Set your flag to true when speech starts isWordspeaking = true;
-                            }
-
-                            @Override
-                            public void onDone(String utteranceId) {
-                                // Set your flag to false when speech is completed
 
 
-                            }
-
-                            @Override
-                            public void onError(String utteranceId) {
-                                // Handle errors if needed
-                            }
-                        });
-
-                }
-            } else {
-                Log.e(TAG, "TextToSpeech initialization failed.");
+    private void speakText(final String text, final int startPosition) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "word");
             }
-        }, "com.google.android.tts");
-        textToSpeech.setSpeechRate(1.2f);
-    }
-
-    private void speakText(String text, int startPosition) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, "myUtteranceId");
-        } else {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, "myUtteranceId");
-        }
+        }).start();
     }
 
     public void clearObjectDetector() {
@@ -187,14 +149,22 @@ public class ObjectDetectorHelper {
 
 
     public void detectLivestreamFrame(ImageProxy imageProxy) {
+        ((Activity) context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(!cMainActivity.hidescreen && !cMainActivity.partialblind){
+                    cMainActivity.hidescreen = true;
+                    cMainActivity.fragmentContainerView.setVisibility(View.GONE);
+                }
+            }
+        });
+
         if (runningMode != RunningMode.LIVE_STREAM) {
             throw new IllegalArgumentException("Attempting to call detectLivestreamFrame while not using RunningMode.LIVE_STREAM");
         }
 
         long frameTime = SystemClock.uptimeMillis();
         Bitmap bitmapBuffer = Bitmap.createBitmap(imageProxy.getWidth(), imageProxy.getHeight(), Bitmap.Config.ARGB_8888);
-
-
         try {
             bitmapBuffer.copyPixelsFromBuffer(imageProxy.getPlanes()[0].getBuffer());
 
@@ -215,10 +185,7 @@ public class ObjectDetectorHelper {
             Log.d("Detecting Darkness",""+detectdarkness(bitmapBuffer));
             if(detectdarkness(bitmapBuffer) && MainActivity.deviceHasFlash){
                 cMainActivity.flash = true;
-                cMainActivity.isPlay=false;
-                Intent intent = new Intent(context, cMainActivity.class);
-                intent.putExtra("flash",true);
-                context.startActivity(intent);
+                CameraControlHelper.cameraControl.enableTorch(true);
             }
         }
         if(cMainActivity.isPlay) {
@@ -228,9 +195,6 @@ public class ObjectDetectorHelper {
             }
         }
     }
-
-
-
     @VisibleForTesting
     public void detectAsync(MPImage mpImage, long frameTime) {
         if (cMainActivity.isPlay) {
@@ -290,14 +254,11 @@ public class ObjectDetectorHelper {
                 input.getWidth(),
                 imageRotation
         ));
-
-
     }
 
     private void returnLivestreamError(RuntimeException error) {
         objectDetectorListener.onError(error.getMessage() != null ? error.getMessage() : "An unknown error has occurred", OTHER_ERROR);
     }
-
 
     public interface DetectorListener {
         void onError(String error, int errorCode);

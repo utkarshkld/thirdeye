@@ -1,6 +1,8 @@
 package com.example.thirdeye;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -8,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
@@ -31,30 +34,32 @@ import java.io.IOException;
 public class FeedbackActivity extends AppCompatActivity {
 
 
-
-
+    private boolean isData = false;
     Button submit;
-    ImageView backbtnfeedback;
-//    MongoClient mongoClient;
-//    MongoDatabase database;
+    ImageButton backbtnfeedback;
     RadioButton x,x1,x2,x3,x11,x12,x13,x14,x21,x22,x23,x24;
+    private ProgressDialog progressDialog;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
-//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//        StrictMode.setThreadPolicy(policy);
+
         submit = findViewById(R.id.buttonsubmit);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         backbtnfeedback = findViewById(R.id.backbtnfeedback);
         x = findViewById(R.id.radia_id1);x1 = findViewById(R.id.radia_id2); x2 = findViewById(R.id.radia_id3);x3 = findViewById(R.id.radia_id4);
         x11 = findViewById(R.id.radia_id11);x12 = findViewById(R.id.radia_id12); x13 = findViewById(R.id.radia_id13);x14 = findViewById(R.id.radia_id14);
         x21 = findViewById(R.id.radia_id21);x22 = findViewById(R.id.radia_id22); x23 = findViewById(R.id.radia_id23);x24 = findViewById(R.id.radia_id24);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Submitting Feedback...");
 
+        progressDialog.setCancelable(false);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                MainActivity.vibe.vibrate(50);
                 new InsertFeedbackAsyncTask().execute();
             }
         });
@@ -63,6 +68,7 @@ public class FeedbackActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 //                mongoClient.close();
+                MainActivity.vibe.vibrate(50);
 
                 startActivity(new Intent(FeedbackActivity.this, appsettings.class));
             }
@@ -84,6 +90,12 @@ public class FeedbackActivity extends AppCompatActivity {
         return false;
     }
     public class InsertFeedbackAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Show ProgressDialog
+            progressDialog.show();
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -118,11 +130,10 @@ public class FeedbackActivity extends AppCompatActivity {
                 q3 = x24.getText().toString();
             }
             Log.d("check feedback", q1 + " " + q2+" "+q3);
-
-
-
+            if(q1.length()>0 && q2.length()>0 && q3.length()>0){
                 try {
                     // Add your data
+                    isData = true;
                     HttpClient httpclient = new DefaultHttpClient();
                     HttpPost httppost = new HttpPost("https://answers-td8w.onrender.com/add");
 
@@ -140,6 +151,7 @@ public class FeedbackActivity extends AppCompatActivity {
                     // Execute HTTP Post Request
 
                     HttpResponse response = httpclient.execute(httppost);
+
 //                    Log.d("feedback answer", response.toString());
 
 
@@ -154,6 +166,7 @@ public class FeedbackActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
+            }
 
             return null;
         }
@@ -161,18 +174,19 @@ public class FeedbackActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if(isNetworkAvailable()) {
-                Toast.makeText(FeedbackActivity.this, "Data submitted.", Toast.LENGTH_SHORT).show();
-                Toast.makeText(FeedbackActivity.this, "Thanks for your feedback.", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            if(!isData){
+                Toast.makeText(FeedbackActivity.this, "Please Mark answers for all the questions ", Toast.LENGTH_SHORT).show();
             }else{
-
+                if(isNetworkAvailable()) {
+                    Toast.makeText(FeedbackActivity.this, "Data submitted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FeedbackActivity.this, "Thanks for your feedback.", Toast.LENGTH_SHORT).show();
+                }else{
                     Toast.makeText(FeedbackActivity.this,"No Internet Connection", Toast.LENGTH_LONG).show();
-
-
+                }
             }
 
         }
     }
-
 }
 // hX69wWc61x8uE6Rq

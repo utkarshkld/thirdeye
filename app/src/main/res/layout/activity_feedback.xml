@@ -13,18 +13,24 @@
         android:layout_alignParentTop="true"
         android:background="@drawable/background"
         android:orientation="horizontal"
-        android:padding="@dimen/_8sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/backbtnfeedback"
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginStart="@dimen/_22sdp"
-            android:src="@drawable/previous" />
+            android:id="@+id/backbtnfeedback"
+            android:contentDescription="Back"
+            android:background="@drawable/imagebutton_background"
+            android:padding="10dp"
+            android:foreground="@drawable/ripple_card"
+            android:src="@drawable/previous"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"/>
     </LinearLayout>
 
     <ScrollView

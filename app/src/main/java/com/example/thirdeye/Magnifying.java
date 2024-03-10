@@ -1,402 +1,218 @@
 package com.example.thirdeye;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.AspectRatio;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraControl;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.hardware.Camera;
-import android.os.Build;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+import android.media.Image;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import com.example.thirdeye.R;
+import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class Magnifying extends AppCompatActivity {
 
-    private int count = 0;
-    private int camerazoom = 0;
-    private PackageManager pm;
-    private boolean deviceHasFlash = false;
-    private SurfaceHolder surfaceViewHolder;
-    private SurfaceView surfaceView;
+    private ProcessCameraProvider cameraProvider;
+    private ImageButton exitbtn;
 
-    public List<String> words = new ArrayList<>();
-    //    private ImageView imageView;
-    private ImageButton btnTakePicture;
-    private SeekBar seekBar;
-    private Button micc;
-    private int langcounter = 0;
-
-    private boolean s = false;
-
+    boolean isFlashon = false;
+    private CameraControl cameraControl;
+    private CameraSelector cameraSelector;
+    private SeekBar zoomSeekBar;
     private Camera camera;
-    public static final int REQUEST_CODE = 100;
-    private static final String TAG = "ScanVoucherFragment";
-    private float speechrate = MainActivity.speech_rate;
-    private String outputlangugage = MainActivity.output_lang;
-    private String input_lang = MainActivity.input_lang;
-    private boolean blindness = MainActivity.blindness;
-    private boolean flash = false;
-
-    private RelativeLayout rellayout;
-    byte[] data2 = null;
-
-    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 101;
-    private TextToSpeech textToSpeech, textToSpeech2;
-    private ImageView back;
-    private ImageView imageView;
-
-    private boolean isCaptured = false;
-
-
+    private PreviewView previewView;
+    int cameraFacing = CameraSelector.LENS_FACING_BACK;
+    private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+        @Override
+        public void onActivityResult(Boolean result) {
+            if (result) {
+                startCamera(cameraFacing);
+            }
+        }
+    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.magnifying_main);
+        zoomSeekBar = findViewById(R.id.zoombar);
+        previewView = findViewById(R.id.cameraPreview);
+        exitbtn = findViewById(R.id.exitbtn);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        flash = false;
-        pm = getPackageManager();
-        deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
-        initViews();
-        requestPermission();
-        initializeTextToSpeech();
-        imageView = findViewById(R.id.viewimage);
-        rellayout = findViewById(R.id.rellayout);
-//        btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
-        seekBar = findViewById(R.id.vertical_seekbar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser){
-                    if (camera != null) {
-
-                        camerazoom = seekBar.getProgress();
-//                    startCamera();
-                        Camera.Parameters params = camera.getParameters();
-                        params.setZoom(camerazoom);
-                        camera.setParameters(params);
-                    }
-                }
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (camera != null) {
-
-                    camerazoom = seekBar.getProgress();
-//                    startCamera();
-                    Camera.Parameters params = camera.getParameters();
-                    params.setZoom(camerazoom);
-                    camera.setParameters(params);
-                }
-            }
-        });
-//        btnTakePicture.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                MainActivity.vibe.vibrate(50);
-//                if (!isCaptured){
-//                    isCaptured = true;
-//                takePicture();
-//                btnTakePicture.setImageResource(R.drawable.retake_icon);
-//                seekBar.setVisibility(View.GONE);
-//                imageView.setVisibility(View.VISIBLE);
-//
-//
-////                    Transition transition2 = new Slide(Gravity.TOP);
-////                    transition2.setDuration(500);
-////                    transition2.addTarget(R.id.textView);
-////                    TransitionManager.beginDelayedTransition(rellayout, transition2);
-//                surfaceView.setVisibility(View.GONE);
-//                releaseCamera();
-//
-//            } else
-//            {
-//                imageView.setVisibility(View.GONE);
-//                seekBar.setVisibility(View.VISIBLE);
-//                btnTakePicture.setImageResource(R.drawable.camera_icon);
-//                isCaptured = false;
-////                    Transition transition2 = new Slide();
-////                    transition2.setDuration(500);
-////                    transition2.addTarget(R.id.textView);
-////                    TransitionManager.beginDelayedTransition(rellayout, transition2);
-//                surfaceView.setVisibility(View.VISIBLE);
-//
-//            }
-//        }
-//            });
-        back = findViewById(R.id.exitbtntexttospeech);
-        back.setOnClickListener(new View.OnClickListener() {
+        if (ContextCompat.checkSelfPermission(Magnifying.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            activityResultLauncher.launch(Manifest.permission.CAMERA);
+        } else {
+            startCamera(cameraFacing);
+        }
+        exitbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Magnifying.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
-
-
-
-
-    }
-
-
-    @Override
-    protected void onPause() {
-        releaseCamera();
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        startCamera();
-        super.onResume();
-    }
-
-    private void initViews() {
-        surfaceView = findViewById(R.id.surfaceView);
-        btnTakePicture = findViewById(R.id.btnTakePicture);
-    }
-    private void requestPermission() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_CAMERA);
-            onBackPressed();
-        } else {
-            setupSurfaceHolder();
-        }
-    }
-
-    private void initializeTextToSpeech() {
-        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    int result;
-                    if(outputlangugage == "id"){
-                        result = textToSpeech.setLanguage(new Locale("in"));
-                    }else if(outputlangugage == "no"){
-                        result = textToSpeech.setLanguage(new Locale("nb"));
-                    }
-                    else {
-                        result = textToSpeech.setLanguage(new Locale(outputlangugage));
-                    }
-                    if (result == TextToSpeech.LANG_MISSING_DATA ||
-                            result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e(TAG, "TextToSpeech: Language not supported.");
-                    }else {
-
-                        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                            @Override
-                            public void onStart(String utteranceId) {
-                                Log.i("TTS", "utterance started");
-                            }
-
-                            @Override
-                            public void onDone(String utteranceId) {
-                                Log.i("TTS", "utterance done");
-                            }
-
-                            @Override
-                            public void onError(String utteranceId) {
-                                Log.i("TTS", "utterance error");
-                            }
-
-
-                        });
-                    }
-
-                } else {
-                    Log.e(TAG, "TextToSpeech initialization failed.");
-                }
-            }
-
-        }, "com.google.android.tts");
-        textToSpeech2 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-//                for(Locale t : textToSpeech2.getAvailableLanguages()){
-//                    Log.d("hui",t.toString());
-//                }
-                if (status == TextToSpeech.SUCCESS) {
-                    int result = textToSpeech2.setLanguage(new Locale("en","IN"));
-                    if (result == TextToSpeech.LANG_MISSING_DATA ||
-                            result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e(TAG, "TextToSpeech: Language not supported.");
-                    }
-                } else {
-                    Log.e(TAG, "TextToSpeech initialization failed.");
-                }
-            }
-
-        }, "com.google.android.tts");
-        textToSpeech2.setSpeechRate(1.3f);
-        textToSpeech.setSpeechRate(speechrate);
-
-
-    }
-
-    private void takePicture() {
-        try {
-            byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-            Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-            imageView.setImageBitmap(rotatedBitmap);
-
-        } catch (Exception e) {
-            Log.e(TAG, "ERROR");
-        }
-    }
-
-
-
-    private void setupSurfaceHolder() {
-        surfaceViewHolder = surfaceView.getHolder();
-        surfaceViewHolder.addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                startCamera();
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-
-                Log.e(TAG, "surfaceChanged: Changing");
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-//
+                MainActivity.vibe.vibrate(50);
+                onBackPressed();
             }
         });
     }
-    private void startCamera() {
-
-        camera = Camera.open();
-        Camera.Parameters params = camera.getParameters();
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        params.setZoom(seekBar.getProgress());
-
-        if(deviceHasFlash && flash){
-            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-        }else if(flash && !deviceHasFlash){
-            Toast.makeText(Magnifying.this,"Device doesnt have flash Light",Toast.LENGTH_LONG).show();
-        }
-        camera.setParameters(params);
-        camera.setDisplayOrientation(CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), Magnifying.this));
-
-        try {
-            camera.setPreviewDisplay(surfaceViewHolder);
-            camera.startPreview();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        camera.setPreviewCallback(new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] data, Camera camera) {
-
-                data2 = data;
-                    byte[] imgBytes = CameraUtils.convertYuvToJpeg(data2, camera);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
-                    if(!flash && detectdarkness(bitmap) && camera!=null && deviceHasFlash){
-                        flash = true;
-                        Camera.Parameters params = camera.getParameters();
-                        params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                        camera.setParameters(params);
-                    }
-                }
-
-        });
-    }
-
-    public void resetCamera() {
-        if (surfaceViewHolder.getSurface() == null) {
-            return;
-        }
-        if (camera != null) {
-            camera.stopPreview();
+    public void startCamera(int cameraFacing) {
+        int aspectRatio = aspectRatio(previewView.getWidth(), previewView.getHeight());
+        ListenableFuture<ProcessCameraProvider> listenableFuture = ProcessCameraProvider.getInstance(this);
+        listenableFuture.addListener(() -> {
             try {
-                camera.setPreviewDisplay(surfaceViewHolder);
-//
-            } catch (IOException e) {
+                cameraProvider = (ProcessCameraProvider) listenableFuture.get();
+                Preview preview = new Preview.Builder().setTargetAspectRatio(aspectRatio).build();
+                ImageCapture imageCapture = new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()).build();
+                cameraSelector = new CameraSelector.Builder()
+                        .requireLensFacing(cameraFacing).build();
+                cameraProvider.unbindAll();
+                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+
+                imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
+                    @Override
+                    public void analyze(@NonNull ImageProxy image) {
+                        // Decode the image to a Bitmap4
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Decode the image to a Bitmap
+                                ;
+                                if ((!isFlashon)) {
+
+                                    Bitmap bitmap = decodeSampledBitmapFromImageProxy(image);
+                                    // Calculate average brightness of the image
+                                    boolean temp = detectdarkness(bitmap);
+                                    Log.d("Flash", "" + temp + " " + image);
+
+                                    // Enable or disable flash based on brightness level
+                                    if (temp) {
+                                        isFlashon = true;
+                                        enableFlash();
+                                    } else {
+                                        disableFlash();
+                                    }
+                                    Log.d("Flash", "" + isFlashon + " " + System.currentTimeMillis());
+
+                                    // Close the image proxy to release its resources
+                                    image.close();
+                                }
+                            }
+                        }).start();
+                    }
+                });
+                camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture,imageAnalysis);
+                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+                cameraControl = camera.getCameraControl();
+                cameraControl.enableTorch(isFlashon);
+                cameraControl.setLinearZoom(zoomSeekBar.getProgress()/100f);
+                zoomSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        // Calculate zoom level from seekbar progress
+                        float zoomLevel = (float) progress / 100f;
+
+                        // Set zoom level
+                        cameraControl.setLinearZoom(zoomLevel);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        // Not needed in this implementation
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        // Not needed in this implementation
+                        float zoomLevel = (float) seekBar.getProgress() / 100f;
+
+                        // Set zoom level
+                        cameraControl.setLinearZoom(zoomLevel);
+                    }
+                });
+            } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
-            camera.startPreview();
-        }
+        }, ContextCompat.getMainExecutor(this));
     }
 
-    private void releaseCamera() {
-        if (camera != null) {
-            camera.stopPreview();
-            camera.setPreviewCallback(null);
-            camera.release();
-            camera = null;
+    @OptIn(markerClass = ExperimentalGetImage.class) public static Bitmap decodeSampledBitmapFromImageProxy(ImageProxy imageProxy) {
+        Image image = imageProxy.getImage();
+        if (image == null) {
+            return null;
         }
+
+        Image.Plane[] planes = image.getPlanes();
+        ByteBuffer yBuffer = planes[0].getBuffer();
+        ByteBuffer uBuffer = planes[1].getBuffer();
+        ByteBuffer vBuffer = planes[2].getBuffer();
+
+        int ySize = yBuffer.remaining();
+        int uSize = uBuffer.remaining();
+        int vSize = vBuffer.remaining();
+
+        byte[] nv21 = new byte[ySize + uSize + vSize];
+        //U and V are swapped
+        yBuffer.get(nv21, 0, ySize);
+        vBuffer.get(nv21, ySize, vSize);
+        uBuffer.get(nv21, ySize + vSize, uSize);
+        YuvImage yuvImage = new YuvImage(nv21, ImageFormat.NV21, image.getWidth(), image.getHeight(), null);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        yuvImage.compressToJpeg(new Rect(0, 0, yuvImage.getWidth(), yuvImage.getHeight()), 75, out);
+
+        byte[] imageBytes = out.toByteArray();
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    }
+    private void enableFlash() {
+
+        cameraControl.enableTorch(true);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Log.e(TAG, "onRequestPermissionsResult: Permission check");
+    private void disableFlash() {
 
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.e(TAG, "onRequestPermissionsResult: Permission Granted");
-                    setupSurfaceHolder();
-                    startCamera();
-                } else {
-                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                                != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, "You need to allow access permissions", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + requestCode);
-        }
+        cameraControl.enableTorch(false);
     }
     private boolean detectdarkness(Bitmap bitmap){
+        if(bitmap == null){
+            return false;
+        }
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int darkPixels = 0;
-
         // Iterate through each pixel of the bitmap
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -420,19 +236,16 @@ public class Magnifying extends AppCompatActivity {
     }
 
 
-
-    @Override
-    protected void onDestroy() {
-        releaseCamera();
-        super.onDestroy();
-
+    private int aspectRatio(int width, int height) {
+        double previewRatio = (double) Math.max(width, height) / Math.min(width, height);
+        if (Math.abs(previewRatio - 4.0 / 3.0) <= Math.abs(previewRatio - 16.0 / 9.0)) {
+            return AspectRatio.RATIO_4_3;
+        }
+        return AspectRatio.RATIO_16_9;
     }
     @Override
-    public void onBackPressed() {
-        releaseCamera();
-        super.onBackPressed();
+    public void onRestart(){
+        startCamera(cameraFacing);
+        super.onRestart();
     }
 }
-
-
-

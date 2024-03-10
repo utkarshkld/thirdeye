@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -59,7 +60,8 @@ public class LangTranslate extends AppCompatActivity {
 
     private EditText editTextLetters;
     private MicHandler shakeListener;
-    private ImageView backbtn,micbtn,btnreplay,btnpauseplay;
+    private ImageButton btnreplay;
+    private ImageButton btnpauseplay;
     private CardView btnTranslate;
     private CardView btnVoiceInput;
     private int width;
@@ -79,7 +81,7 @@ public class LangTranslate extends AppCompatActivity {
 
 
     // Map to map language codes to their full names
-    private HashMap<String, String> languageMap = new HashMap<>();
+    private HashMap<String, String> languageMap = MainActivity.languageMap;
     private int index = 0,index2 = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,20 +94,22 @@ public class LangTranslate extends AppCompatActivity {
         editTextLetters = findViewById(R.id.editTextTranslate);
         btnreplay = findViewById(R.id.btnReplay);
         btnpauseplay = findViewById(R.id.btnPausePlay);
-        micbtn = findViewById(R.id.speakwords);
+        ImageButton micbtn = findViewById(R.id.speakwords);
+        ImageButton backbtn = findViewById(R.id.backbtn);
         sourceLanguageSpinner = findViewById(R.id.sourceLanguageSpinner);
         translatedTextView = findViewById(R.id.translatedText); // Initialize TextView
-        backbtn = findViewById(R.id.backbtn);
+
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MainActivity.vibe.vibrate(50);
                 onBackPressed();
             }
         });
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         width = displayMetrics.widthPixels;
-        initializeMap();
+//        initializeMap();
         List<String> selectedLanguages = new ArrayList<>(languageMap.values()); // Get language names from the map
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, languageMap.keySet().toArray(new String[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
@@ -124,8 +128,8 @@ public class LangTranslate extends AppCompatActivity {
         btnreplay.setVisibility(View.GONE);
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
-            Toast.makeText(LangTranslate.this, "Shake detected!", Toast.LENGTH_SHORT).show();
             if(System.currentTimeMillis()-shaketime >= 3000){
+                MainActivity.vibe.vibrate(50);
                 shaketime = System.currentTimeMillis();
                 startSpeechRecognition();
             }
@@ -162,19 +166,11 @@ public class LangTranslate extends AppCompatActivity {
                 }
             }
         });
-        editTextLetters.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    Log.d("focus", "focus lost");
-                } else {
-                    Log.d("focus", "focused");
-                }
-            }
-        });
+
         micbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                MainActivity.vibe.vibrate(50);
                 index = 0;
                 index2 = 0;
                 textToSpeech.stop();
@@ -225,14 +221,13 @@ public class LangTranslate extends AppCompatActivity {
         // Show the PopupWindow below the Spinner
         popupWindow.showAsDropDown(spinnerDefaultLanguage,dpToPx(-10),0);
     }
-    private void speakText(String text, int startPosition) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceid");
-        } else {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-        }
-
+    private void speakText(final String text, final int startPosition) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "word");
+            }
+        }).start();
     }
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
@@ -344,6 +339,16 @@ public class LangTranslate extends AppCompatActivity {
                                         translatedTextView.setText(textWithHighlights);
                                         // Calculate line start for the 'end' offset
                                         int lineStart = translatedTextView.getLayout().getLineForOffset(a);
+                                        if(index+1 == translatedTextView.getText().toString().length()) {
+                                            new Handler().postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    // Code to be executed after 1 second
+                                                    // This will be executed on the main (UI) thread
+                                                    btnpauseplay.performClick();
+                                                }
+                                            }, 500);
+                                        }
                                         // Scroll to the calculated line
 //                                        translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)-5));
 //                                        textView.setText(textWithHighlights);
@@ -457,61 +462,5 @@ public class LangTranslate extends AppCompatActivity {
                 }
             });
         }
-    }
-    public void initializeMap(){
-        languageMap.put("Afrikaans", "af");
-        //languageMap.put("Albanian", "sq");
-        languageMap.put("Arabic", "ar");
-        languageMap.put("Bengali", "bn");
-        languageMap.put("Bulgarian", "bg");
-        //languageMap.put("Catalan", "ca");
-        languageMap.put("Chinese", "zh");
-        //languageMap.put("Croatian", "hr");
-        languageMap.put("Czech", "cs");
-        languageMap.put("Danish", "da");
-        languageMap.put("Dutch", "nl");
-        languageMap.put("English", "en");
-        languageMap.put("Finnish", "fi");
-        languageMap.put("French", "fr");
-        languageMap.put("Galician", "gl");
-        //languageMap.put("Georgian", "ka");
-        languageMap.put("German", "de");
-        languageMap.put("Greek", "el");
-        languageMap.put("Gujarati", "gu");
-        //languageMap.put("Haitian", "ht");
-        //languageMap.put("Hebrew", "he");
-        languageMap.put("Hindi", "hi");
-        languageMap.put("Hungarian", "hu");
-        languageMap.put("Icelandic", "is");
-        languageMap.put("Indonesian", "id");
-        languageMap.put("Italian", "it");
-        languageMap.put("Japanese", "ja");
-        languageMap.put("Kannada", "kn");
-        languageMap.put("Korean", "ko");
-        languageMap.put("Latvian", "lv");
-        languageMap.put("Lithuanian", "lt");
-        //languageMap.put("Macedonian", "mk");
-        languageMap.put("Malay", "ms");
-        languageMap.put("Malayalam", "ml");
-        //languageMap.put("Maltese", "mt");
-        languageMap.put("Marathi", "mr");
-        languageMap.put("Norwegian", "no");
-        languageMap.put("Polish", "pl");
-        languageMap.put("Portuguese", "pt");
-        languageMap.put("Romanian", "ro");
-        languageMap.put("Russian", "ru");
-        languageMap.put("Slovak", "sk");
-        //languageMap.put("Slovenian", "sl");
-        languageMap.put("Spanish", "es");
-        //languageMap.put("Swahili", "sw");
-        languageMap.put("Swedish", "sv");
-        //languageMap.put("Tagalog", "tl");
-        languageMap.put("Tamil", "ta");
-        languageMap.put("Telugu", "te");
-        languageMap.put("Thai", "th");
-        languageMap.put("Turkish", "tr");
-        languageMap.put("Ukrainian", "uk");
-        languageMap.put("Urdu", "ur");
-        languageMap.put("Vietnamese", "vi");
     }
 }

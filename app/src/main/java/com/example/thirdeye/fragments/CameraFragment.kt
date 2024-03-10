@@ -17,6 +17,7 @@ package com.example.thirdeye.fragments
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import com.example.thirdeye.cMainActivity
+import com.example.thirdeye.Magnifying;
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
 import android.util.Log
@@ -53,8 +54,18 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.ImageFormat
+import android.graphics.Rect
+import android.graphics.YuvImage
 import android.hardware.camera2.CameraManager
-
+import androidx.camera.core.CameraControl
+import androidx.camera.core.ImageProxy
+import com.example.thirdeye.MainActivity
+import java.io.ByteArrayOutputStream
+import com.example.thirdeye.CameraControlHelper;
 
 
 //import com.example.thirdeye.fragments
@@ -70,6 +81,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private lateinit var objectDetectorHelper: ObjectDetectorHelper
     private val viewModel: MainViewModel by activityViewModels()
     private var preview: Preview? = null
+
+
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
@@ -178,13 +191,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 {
                     // CameraProvider
                     cameraProvider = cameraProviderFuture.get()
-
                     // Build and bind the camera use cases
-                    if (cMainActivity.flash) {
-                        bindCameraUseCases2()
-                    } else {
-                        bindCameraUseCases()
-                    }
+                    bindCameraUseCases()
+
 
                 },
                 ContextCompat.getMainExecutor(requireContext())
@@ -229,16 +238,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                         objectDetectorHelper::detectLivestreamFrame
                     )
                 }
-//        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(imageAnalyzer)
-//        ext.setCaptureRequestOption(
-//            CaptureRequest.CONTROL_AE_MODE,
-//            CaptureRequest.CONTROL_AE_MODE_OFF
-//        )
-//        ext.setCaptureRequestOption(
-//            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-//            Range<Int>(60, 60)
-//        )
-
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
 
@@ -252,7 +251,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 imageAnalyzer
             )
 
-
+            CameraControlHelper.cameraControl  = camera!!.cameraControl
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
 
@@ -260,73 +259,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
-    fun checkFlashlightAvailability(packageManager: PackageManager): Boolean {
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
-    }
-    @SuppressLint("UnsafeOptInUsageError")
-    fun bindCameraUseCases2() {
-
-        // CameraProvider
-        val cameraProvider =
-            cameraProvider
-                ?: throw IllegalStateException("Camera initialization failed.")
-
-        // CameraSelector - makes assumption that we're only using the back camera
-        val cameraSelector =
-            CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                .build()
-
-        // Preview. Only using the 4:3 ratio because this is the closest to our models
-        preview =
-            Preview.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
-                .build()
-
-        // ImageAnalysis. Using RGBA 8888 to match how our models work
-        imageAnalyzer =
-            ImageAnalysis.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-                // The analyzer can then be assigned to the instance
-                .also {
-                    it.setAnalyzer(
-                        backgroundExecutor,
-                        objectDetectorHelper::detectLivestreamFrame
-                    )
-                }
-        // Must unbind the use-cases before rebinding them
-        cameraProvider.unbindAll()
-
-        try {
-            // A variable number of use-cases can be passed here -
-            // camera provides access to CameraControl & CameraInfo
-            camera = cameraProvider.bindToLifecycle(
-                this,
-                cameraSelector,
-                preview,
-                imageAnalyzer
-            )
 
 
-            // Attach the viewfinder's surface provider to preview use case
-            preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
-            if (deviceHasFlash) {
-                camera?.cameraControl?.enableTorch(true)
-            } else {
 
-                Log.d(TAG, "Flashlight not available")
-            }
-
-
-        } catch (exc: Exception) {
-            Log.e(TAG, "Use case binding failed", exc)
-        }
-    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)

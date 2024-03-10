@@ -20,43 +20,48 @@
         android:background="@color/black"
         android:layout_alignParentTop="true">
 
-        <ImageView
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:padding="10dp"
             android:id="@+id/exitbtntexttospeech"
+            android:background="@drawable/imagebutton_background"
+            android:foreground="@drawable/ripple_card"
             android:src="@drawable/previous"
-            android:layout_marginTop="@dimen/_15sdp"
-            android:layout_marginBottom="@dimen/_15sdp"
-            android:layout_marginStart="@dimen/_22sdp"
-            android:layout_marginEnd="@dimen/_10sdp"/>
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:contentDescription="Back" />
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
         <Button
             android:id="@+id/micButton1"
+            android:contentDescription="Mic"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_gravity="center"
             android:background="@drawable/mic_ripple" />
-
     </LinearLayout>
 
-
-
-    <SurfaceView
-        android:id="@+id/surfaceView"
-
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/llTitleBar"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/llTitleBar"/>
 
-        android:layout_marginBottom="0dp" />
+<!--    <SurfaceView-->
+<!--        android:id="@+id/surfaceView"-->
+
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_alignParentStart="true"-->
+<!--        android:layout_alignParentEnd="true"-->
+<!--        android:layout_below="@+id/llTitleBar"-->
+<!--        android:layout_marginBottom="0dp" />-->
 <!--    <LinearLayout-->
 <!--        android:layout_width="wrap_content"-->
 <!--        android:layout_height="wrap_content"-->
@@ -119,6 +124,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@id/btnTakePicture"
+        android:contentDescription="Replay"
         android:layout_marginRight="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_30sdp"
         android:background="@drawable/imagebutton_background"
@@ -133,6 +139,7 @@
         android:foreground="@drawable/ripple_card"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:contentDescription="Capture or Retake"
         android:layout_marginBottom="@dimen/_30sdp"
         android:background="@drawable/imagebutton_background"
         android:src="@drawable/camera_icon" />
@@ -141,7 +148,7 @@
         android:id="@+id/btnPausePlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:contentDescription="Pause Or Play"
         android:layout_alignParentBottom="true"
         android:foreground="@drawable/ripple_card"
         android:layout_marginLeft="@dimen/_10sdp"

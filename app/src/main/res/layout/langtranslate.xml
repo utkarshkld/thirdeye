@@ -17,15 +17,19 @@
         android:background="@drawable/background"
         android:layout_alignParentTop="true">
 
-        <ImageView
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:padding="10dp"
+            android:contentDescription="Back"
             android:id="@+id/backbtn"
+            android:background="@drawable/imagebutton_background"
+            android:foreground="@drawable/ripple_card"
             android:src="@drawable/previous"
-            android:layout_marginTop="@dimen/_15sdp"
-            android:layout_marginBottom="@dimen/_15sdp"
-            android:layout_marginStart="@dimen/_22sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_10sdp"
             android:layout_marginEnd="@dimen/_10sdp"/>
 
 
@@ -42,7 +46,7 @@
         android:id="@+id/editTextTranslate"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-
+        android:contentDescription="Text Input"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_10sdp"
@@ -85,6 +89,7 @@
             android:id="@+id/sourceLanguageSpinner"
             android:layout_width="match_parent"
             android:layout_height="52dp"
+            android:contentDescription="Target Language Selector"
             android:layout_centerHorizontal="true"
             android:overlapAnchor="false"
             android:textColor="#FFFFFF"
@@ -234,12 +239,11 @@
             android:id="@+id/btnReplay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:layout_marginRight="@dimen/_10sdp"
             android:layout_marginBottom="@dimen/_30sdp"
             android:background="@drawable/imagebutton_background"
-
             android:foreground="@drawable/ripple_card"
+            android:contentDescription="Replay"
             android:src="@drawable/replay_icon" />
 
         <ImageButton
@@ -247,10 +251,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:foreground="@drawable/ripple_card"
-
-
             android:layout_marginBottom="@dimen/_30sdp"
             android:background="@drawable/imagebutton_background"
+            android:contentDescription="Mic"
             android:src="@drawable/mictranslate" />
 
         <ImageButton
@@ -260,6 +263,7 @@
             android:foreground="@drawable/ripple_card"
             android:layout_marginLeft="@dimen/_10sdp"
             android:layout_marginBottom="@dimen/_30sdp"
+            android:contentDescription="Play or Pause"
             android:background="@drawable/imagebutton_background"
             android:layout_toRightOf="@+id/btnTakePicture"
             android:src="@drawable/stop_fill" />

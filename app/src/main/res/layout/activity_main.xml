@@ -19,23 +19,26 @@
         <ImageView
             android:id="@+id/eyebtn"
             android:layout_width="60dp"
+            android:foreground="@drawable/ripple_card"
             android:layout_height="60dp"
             android:src="@drawable/rdeye"
+            android:contentDescription="Magnifier"
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/_30sdp"/>
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
-        <ImageView
+        <ImageButton
             android:id="@+id/settings"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="2dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:contentDescription="Settings"
+            android:foreground="@drawable/ripple_card"
+            android:background="@drawable/imagebutton_background"
             android:src="@drawable/settings"
+            android:padding="10dp"
             android:layout_gravity="center"
-
-
             android:layout_marginRight="@dimen/_30sdp"
             />
 
@@ -47,8 +50,7 @@
         android:id="@+id/micButton"
         android:layout_width="300dp"
         android:layout_height="300dp"
-
-
+        android:contentDescription="Mic"
         android:foreground="@drawable/mic_ripple_big"
         android:layout_centerVertical="true"
         android:padding="30dp"
@@ -102,6 +104,7 @@
                         android:layout_width="@dimen/_76sdp"
                         android:layout_height="@dimen/_76sdp"
                         android:padding="@dimen/_10sdp"
+                        android:contentDescription="Read"
                         android:background="@drawable/background_card"
 
                         android:src="@drawable/file" />
@@ -147,6 +150,7 @@
                     <ImageView
                         android:layout_width="@dimen/_76sdp"
                         android:layout_height="@dimen/_76sdp"
+                        android:contentDescription="Object"
                         android:background="@drawable/background_card"
                         android:padding="@dimen/_13sdp"
                         android:src="@drawable/object" />
@@ -192,6 +196,7 @@
                     <ImageView
                         android:layout_width="@dimen/_76sdp"
                         android:layout_height="@dimen/_76sdp"
+                        android:contentDescription="Translate"
                         android:background="@drawable/background_card"
                         android:paddingBottom="@dimen/_4sdp"
                         android:src="@drawable/speech_to_text" />

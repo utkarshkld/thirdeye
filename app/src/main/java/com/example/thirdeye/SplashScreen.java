@@ -1,9 +1,11 @@
 package com.example.thirdeye;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.example.thirdeye.MainActivity;
 
 import android.os.Handler;
 import android.provider.Settings;
@@ -15,28 +17,37 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 public class SplashScreen extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 1;
+
     private static final int MICROPHONE_PERMISSION_REQUEST_CODE = 2;
+    public static TextToSpeech textToSpeech;
     public static HashMap<String, String> translationsMap = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splashscreen);
-        instructionmap.makeinstruction();
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                initializeTTS();
+                instructionmap.makeinstruction();
+                initializelanguageMap();
+                translationmap.initializetransMap();
                 start();
             }
         }, 1500);
     }
+
     private void start(){
 
         // Check camera permission
@@ -60,6 +71,19 @@ public class SplashScreen extends AppCompatActivity {
         } else {
             proceedToNextActivity();
         }
+    }
+    public void initializeTTS() {
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    textToSpeech.setLanguage(new Locale("en"));
+                } else {
+                    Toast.makeText(SplashScreen.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        },"com.google.android.tts");
+        textToSpeech.setSpeechRate(1.2f);
     }
     private void proceedToNextActivity() {
         Intent intent = new Intent(SplashScreen.this, Onboarding.class);
@@ -129,5 +153,63 @@ public class SplashScreen extends AppCompatActivity {
             checkMicrophonePermission();
         }
         super.onRestart();
+    }
+    private void initializelanguageMap() {
+        // Add languages and their Locale codes to the HashMap
+        MainActivity.languageMap.put("Afrikaans", "af");
+        //MainActivity.languageMap.put("Albanian", "sq");
+        MainActivity.languageMap.put("Arabic", "ar");
+        MainActivity.languageMap.put("Bengali", "bn");
+        MainActivity.languageMap.put("Bulgarian", "bg");
+        //MainActivity.languageMap.put("Catalan", "ca");
+        MainActivity.languageMap.put("Chinese", "zh");
+        //MainActivity.languageMap.put("Croatian", "hr");
+        MainActivity.languageMap.put("Czech", "cs");
+        MainActivity.languageMap.put("Danish", "da");
+        MainActivity.languageMap.put("Dutch", "nl");
+        MainActivity.languageMap.put("English", "en");
+        MainActivity.languageMap.put("Finnish", "fi");
+        MainActivity.languageMap.put("French", "fr");
+        MainActivity.languageMap.put("Galician", "gl");
+        //MainActivity.languageMap.put("Georgian", "ka");
+        MainActivity.languageMap.put("German", "de");
+        MainActivity.languageMap.put("Greek", "el");
+        MainActivity.languageMap.put("Gujarati", "gu");
+        //MainActivity.languageMap.put("Haitian", "ht");
+        //MainActivity.languageMap.put("Hebrew", "he");
+        MainActivity.languageMap.put("Hindi", "hi");
+        MainActivity.languageMap.put("Hungarian", "hu");
+        MainActivity.languageMap.put("Icelandic", "is");
+        MainActivity.languageMap.put("Indonesian", "id");
+        MainActivity.languageMap.put("Italian", "it");
+        MainActivity.languageMap.put("Japanese", "ja");
+        MainActivity.languageMap.put("Kannada", "kn");
+        MainActivity.languageMap.put("Korean", "ko");
+        MainActivity.languageMap.put("Latvian", "lv");
+        MainActivity.languageMap.put("Lithuanian", "lt");
+        //MainActivity.languageMap.put("Macedonian", "mk");
+        MainActivity.languageMap.put("Malay", "ms");
+        MainActivity.languageMap.put("Malayalam", "ml");
+        //MainActivity.languageMap.put("Maltese", "mt");
+        MainActivity.languageMap.put("Marathi", "mr");
+        MainActivity.languageMap.put("Norwegian", "no");
+        MainActivity.languageMap.put("Polish", "pl");
+        MainActivity.languageMap.put("Portuguese", "pt");
+        MainActivity.languageMap.put("Romanian", "ro");
+        MainActivity.languageMap.put("Russian", "ru");
+        MainActivity.languageMap.put("Slovak", "sk");
+        //MainActivity.languageMap.put("Slovenian", "sl");
+        MainActivity.languageMap.put("Spanish", "es");
+        //MainActivity.languageMap.put("Swahili", "sw");
+        MainActivity.languageMap.put("Swedish", "sv");
+        //MainActivity.languageMap.put("Tagalog", "tl");
+        MainActivity.languageMap.put("Tamil", "ta");
+        MainActivity.languageMap.put("Telugu", "te");
+        MainActivity.languageMap.put("Thai", "th");
+        MainActivity.languageMap.put("Turkish", "tr");
+        MainActivity.languageMap.put("Ukrainian", "uk");
+        MainActivity.languageMap.put("Urdu", "ur");
+        MainActivity.languageMap.put("Vietnamese", "vi");
+
     }
 }

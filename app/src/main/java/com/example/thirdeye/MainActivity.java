@@ -18,6 +18,7 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static String speaklang;
     private MicHandler shakeListener;
     private int i = 0;
-    private ImageView eyebtn,settingbtn;
+    private ImageView eyebtn;
+    private ImageButton settingbtn;
     private String UserDeafultLanguage = Locale.getDefault().getLanguage();
     public static String output_lang = null;
     public static float speech_rate;
@@ -87,8 +89,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Magnetometer sensor is not available on this device
             magnetometer = null;
         }
-        initializeLanguageMap();
-        translationmap.initializetransMap();
+//        initializeLanguageMap();
+//        translationmap.initializetransMap();
         //Commands are Translated
         // Check and request RECORD_AUDIO permission
         checkRecordAudioPermission();
@@ -99,27 +101,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         eyebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                vibe.vibrate(50);
                 Intent intent = new Intent(MainActivity.this,Magnifying.class);
                 startActivity(intent);
             }
         });
 
         textToSpeech = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                int result;
-                if(output_lang == null) {
-                    result = textToSpeech.setLanguage(Locale.getDefault());
-                }
-                else{
-                    result = textToSpeech.setLanguage(new Locale(output_lang));
-                }
-
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+             if (status == TextToSpeech.SUCCESS) {
+                 int result;
+                 if(output_lang == null) {
+                   result = textToSpeech.setLanguage(Locale.getDefault());
+                 }
+                 else{
+                   result = textToSpeech.setLanguage(new Locale(output_lang));
+                 }
+                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     // Handle language initialization errors here
-                }
-            } else {
-                // Handle Text-to-Speech initialization error
-            }
+                 }
+                 } else {
+                     // Handle Text-to-Speech initialization error
+                 }
         });
 
         // Initialize ShakeListener
@@ -133,11 +135,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         CardView wordsButton = findViewById(R.id.wordsButton);
         CardView st = findViewById(R.id.btnspeechtotext);
         settingbtn = findViewById(R.id.settings);
-        micButton.setOnClickListener(v -> startVoiceRecognition());
+        micButton.setOnClickListener(v -> {
+            vibe.vibrate(50);
+            startVoiceRecognition();
+        });
         settingbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
+                vibe.vibrate(50);
+                speaktext(translationMap.get(speaklang+"_"+"opening setting"));
                 Intent intent = new Intent(MainActivity.this,appsettings.class);
                 startActivity(intent);
             }
@@ -145,9 +151,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         objectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 vibe.vibrate(50);
-                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
+                speaktext(translationMap.get(speaklang+"_"+"opening object"));
                 Intent intent = new Intent(MainActivity.this, cMainActivity.class);
                 intent.putExtra("flash",false);
                 startActivity(intent);
@@ -158,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 @Override
                 public void onClick(View view) {
                     vibe.vibrate(50);
-                    textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
+                    speaktext(translationMap.get(speaklang+"_"+"opening read text"));
                     Intent intent = new Intent(MainActivity.this, TextSpeech.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -168,8 +173,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
-
-                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate"),TextToSpeech.QUEUE_FLUSH, null, null);
+                speaktext(translationMap.get(speaklang+"_"+"opening translate"));
                 Intent intent = new Intent(MainActivity.this, LangTranslate.class);
                 intent.putExtra("Translation lang",output_lang);
                 startActivity(intent);
@@ -329,6 +333,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         return false;
     }
+    private void speaktext(String text){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                textToSpeech.speak(text,TextToSpeech.QUEUE_FLUSH,null,null);
+            }
+        }).start();
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -351,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         for(String str2 : wordList) {
                             int m = str2.length();
                             if (partialmatch(str2,str,m, n)) {
-                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening object"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                speaktext(translationMap.get(speaklang+"_"+"opening object"));
                                 Intent intent = new Intent(MainActivity.this, cMainActivity.class);
                                 startActivity(intent);
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -373,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             int m = str2.length();
                             if (partialmatch(str2,str,m, n)) {
                                 Log.d("Checking read text",""+str+" "+str2);
-                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening read text"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                speaktext(translationMap.get(speaklang+"_"+"opening read text"));
                                 Intent intent = new Intent(MainActivity.this, TextSpeech.class);
                                 startActivity(intent);;
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -419,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             }
                         }
                         Log.d("Checking language ", "onActivityResult: "+defaultlang);
-                        textToSpeech.speak(translationMap.get(speaklang+"_"+"opening translate")+" "+defaultlang,TextToSpeech.QUEUE_FLUSH, null, null);
+                        speaktext(translationMap.get(speaklang+"_"+"opening translate")+" "+defaultlang);
                         Intent intent = new Intent(MainActivity.this, LangTranslate.class);
                         intent.putExtra("Translation lang",languageMap.get(defaultlang));
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -432,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         for(String str2 : wordList) {
                             int m = str2.length();
                             if (partialmatch(str2,str,m, n)) {
-                                textToSpeech.speak(translationMap.get(speaklang+"_"+"opening setting"),TextToSpeech.QUEUE_FLUSH, null, null);
+                                speaktext(translationMap.get(speaklang+"_"+"opening setting"));
                                 Intent intent = new Intent(MainActivity.this, appsettings.class);
                                 startActivity(intent);
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -461,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                         @Override
                                         public void run() {
                                             // Speak direction
-                                            textToSpeech.speak(translationMap.get(speaklang + "_" + currdirection), TextToSpeech.QUEUE_FLUSH, null, null);
+                                            speaktext(translationMap.get(speaklang + "_" + currdirection));
                                             Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
 
                                             sensorManager.unregisterListener(MainActivity.this); // Assuming MyAsyncTask is the AsyncTask instance
@@ -488,64 +500,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
     }
-    private void initializeLanguageMap() {
-        // Add languages and their Locale codes to the HashMap
-        languageMap.put("Afrikaans", "af");
-        //languageMap.put("Albanian", "sq");
-        languageMap.put("Arabic", "ar");
-        languageMap.put("Bengali", "bn");
-        languageMap.put("Bulgarian", "bg");
-        //languageMap.put("Catalan", "ca");
-        languageMap.put("Chinese", "zh");
-        //languageMap.put("Croatian", "hr");
-        languageMap.put("Czech", "cs");
-        languageMap.put("Danish", "da");
-        languageMap.put("Dutch", "nl");
-        languageMap.put("English", "en");
-        languageMap.put("Finnish", "fi");
-        languageMap.put("French", "fr");
-        languageMap.put("Galician", "gl");
-        //languageMap.put("Georgian", "ka");
-        languageMap.put("German", "de");
-        languageMap.put("Greek", "el");
-        languageMap.put("Gujarati", "gu");
-        //languageMap.put("Haitian", "ht");
-        //languageMap.put("Hebrew", "he");
-        languageMap.put("Hindi", "hi");
-        languageMap.put("Hungarian", "hu");
-        languageMap.put("Icelandic", "is");
-        languageMap.put("Indonesian", "id");
-        languageMap.put("Italian", "it");
-        languageMap.put("Japanese", "ja");
-        languageMap.put("Kannada", "kn");
-        languageMap.put("Korean", "ko");
-        languageMap.put("Latvian", "lv");
-        languageMap.put("Lithuanian", "lt");
-        //languageMap.put("Macedonian", "mk");
-        languageMap.put("Malay", "ms");
-        languageMap.put("Malayalam", "ml");
-        //languageMap.put("Maltese", "mt");
-        languageMap.put("Marathi", "mr");
-        languageMap.put("Norwegian", "no");
-        languageMap.put("Polish", "pl");
-        languageMap.put("Portuguese", "pt");
-        languageMap.put("Romanian", "ro");
-        languageMap.put("Russian", "ru");
-        languageMap.put("Slovak", "sk");
-        //languageMap.put("Slovenian", "sl");
-        languageMap.put("Spanish", "es");
-        //languageMap.put("Swahili", "sw");
-        languageMap.put("Swedish", "sv");
-        //languageMap.put("Tagalog", "tl");
-        languageMap.put("Tamil", "ta");
-        languageMap.put("Telugu", "te");
-        languageMap.put("Thai", "th");
-        languageMap.put("Turkish", "tr");
-        languageMap.put("Ukrainian", "uk");
-        languageMap.put("Urdu", "ur");
-        languageMap.put("Vietnamese", "vi");
-
-    }
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor == accelerometer) {
@@ -563,12 +517,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         currdirection = compassDirection;
         Log.d("Compass Direction", ""+compassDirection);
     }
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do nothing Eat Five Star
     }
-
     private String getCompassDirection(float azimuth) {
         if (azimuth >= 337.5 || azimuth < 22.5) {
             return "North";

@@ -8,6 +8,7 @@ import static com.example.thirdeye.appsettings.dpToPx;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -64,65 +65,10 @@ public class OnboardingAdapter extends PagerAdapter {
         View view = inflater.inflate(onboardingLayouts[position], container, false);
         if(position == 0){
             languageSpinner = view.findViewById(R.id.spinnerOnboard);
-            languageMap = new HashMap<>();
-            languageMap.put("Afrikaans", "af");
-            //languageMap.put("Albanian", "sq");
-            languageMap.put("Arabic", "ar");
-            languageMap.put("Bengali", "bn");
-            languageMap.put("Bulgarian", "bg");
-            //languageMap.put("Catalan", "ca");
-            languageMap.put("Chinese", "zh");
-            //languageMap.put("Croatian", "hr");
-            languageMap.put("Czech", "cs");
-            languageMap.put("Danish", "da");
-            languageMap.put("Dutch", "nl");
-            languageMap.put("English", "en");
-            languageMap.put("Finnish", "fi");
-            languageMap.put("French", "fr");
-            languageMap.put("Galician", "gl");
-            //languageMap.put("Georgian", "ka");
-            languageMap.put("German", "de");
-            languageMap.put("Greek", "el");
-            languageMap.put("Gujarati", "gu");
-            //languageMap.put("Haitian", "ht");
-            //languageMap.put("Hebrew", "he");
-            languageMap.put("Hindi", "hi");
-            languageMap.put("Hungarian", "hu");
-            languageMap.put("Icelandic", "is");
-            languageMap.put("Indonesian", "id");
-            languageMap.put("Italian", "it");
-            languageMap.put("Japanese", "ja");
-            languageMap.put("Kannada", "kn");
-            languageMap.put("Korean", "ko");
-            languageMap.put("Latvian", "lv");
-            languageMap.put("Lithuanian", "lt");
-            //languageMap.put("Macedonian", "mk");
-            languageMap.put("Malay", "ms");
-            languageMap.put("Malayalam", "ml");
-            //languageMap.put("Maltese", "mt");
-            languageMap.put("Marathi", "mr");
-            languageMap.put("Norwegian", "no");
-            languageMap.put("Polish", "pl");
-            languageMap.put("Portuguese", "pt");
-            languageMap.put("Romanian", "ro");
-            languageMap.put("Russian", "ru");
-            languageMap.put("Slovak", "sk");
-            //languageMap.put("Slovenian", "sl");
-            languageMap.put("Spanish", "es");
-            //languageMap.put("Swahili", "sw");
-            languageMap.put("Swedish", "sv");
-            //languageMap.put("Tagalog", "tl");
-            languageMap.put("Tamil", "ta");
-            languageMap.put("Telugu", "te");
-            languageMap.put("Thai", "th");
-            languageMap.put("Turkish", "tr");
-            languageMap.put("Ukrainian", "uk");
-            languageMap.put("Urdu", "ur");
-            languageMap.put("Vietnamese", "vi");
+            languageMap = MainActivity.languageMap;//
             List<String> languages = new ArrayList<>(languageMap.keySet());
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.spinner_item, languages);
             languageSpinner.setAdapter(adapter);
-//        Log.d("Spinner",languageSpinner.toString());
             languageSpinner.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -134,7 +80,6 @@ public class OnboardingAdapter extends PagerAdapter {
                     return true;
                 }
             });
-
             String temp="";
             for( Map.Entry<String, String> entry : languageMap.entrySet()){
                 if(entry.getValue().equals(UserDeafultLanguage)){
@@ -143,21 +88,34 @@ public class OnboardingAdapter extends PagerAdapter {
                 }
             }
             languageSpinner.setSelection(languages.indexOf(temp));
+//            downloadallLanguage();
         }else if(position == 1){
             TextView tx = view.findViewById(R.id.textView5);
             tx.setText(SplashScreen.translationsMap.get(Onboarding.output_lang));
             Onboarding.textToSpeech.setLanguage(new Locale(Onboarding.output_lang));
             Log.d("Checking Instruction", ""+Onboarding.output_lang+" "+tx.getText().toString());
-            Onboarding.textToSpeech.speak(tx.getText().toString(),0, null, null);
+//            Onboarding.textToSpeech.speak(tx.getText().toString(),0, null, null);
+            if(Onboarding.canSpeak)
+            speakText(tx.getText().toString(),0);
         }
 
         container.addView(view);
         return view;
     }
+    private void speakText(final String text, final int startPosition) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Onboarding.textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+        }).start();
+    }
     public  void showPopupWindow(Spinner spinnerDefaultLanguage, ArrayAdapter<String> adapter) {
         // Create a ListView for the PopupWindow
         ListView listView = new ListView(adapter.getContext());
         listView.setAdapter(adapter);
+        int selectedPosition = spinnerDefaultLanguage.getSelectedItemPosition();
+        listView.setSelection(selectedPosition);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             listView.setVerticalScrollbarThumbDrawable(ContextCompat.getDrawable(context, R.drawable.scrollbar));
         }
