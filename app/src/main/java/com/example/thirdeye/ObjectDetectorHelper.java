@@ -17,6 +17,8 @@ package com.example.thirdeye;
 
 import static android.app.PendingIntent.getActivity;
 
+import static com.example.thirdeye.cMainActivity.candetect;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -123,7 +125,7 @@ public class ObjectDetectorHelper {
         try {
             ObjectDetector.ObjectDetectorOptions.Builder optionsBuilder = ObjectDetector.ObjectDetectorOptions.builder()
                     .setBaseOptions(baseOptionsBuilder.build())
-                    .setScoreThreshold(.55f)
+                    .setScoreThreshold(0.55f)
                     .setRunningMode(runningMode)
                     .setMaxResults(3);
             imageProcessingOptions = ImageProcessingOptions.builder()
@@ -191,15 +193,22 @@ public class ObjectDetectorHelper {
         if(cMainActivity.isPlay) {
             MPImage mpImage = new BitmapImageBuilder(bitmapBuffer).build();
             if(mpImage!=null) {
-                detectAsync(mpImage, frameTime);
+                if(candetect) {
+                    candetect = false;
+                    cMainActivity.detectime = SystemClock.uptimeMillis();
+                    detectAsync(mpImage, frameTime);
+                }
             }
         }
     }
     @VisibleForTesting
     public void detectAsync(MPImage mpImage, long frameTime) {
         if (cMainActivity.isPlay) {
-            if(objectDetector!=null)
-            objectDetector.detectAsync(mpImage, imageProcessingOptions, frameTime);
+            if(objectDetector!=null){
+
+                objectDetector.detectAsync(mpImage, imageProcessingOptions, frameTime);
+            }
+
         }
     }
     private boolean detectdarkness(Bitmap bitmap){
@@ -234,6 +243,7 @@ public class ObjectDetectorHelper {
     private void returnLivestreamResult(ObjectDetectorResult result, MPImage input) {
         long finishTimeMs = SystemClock.uptimeMillis();
         long inferenceTime = finishTimeMs - result.timestampMs();
+        Log.d("Checking Results",""+result);
         language = cMainActivity.languageMap.get(output_lang);
         Log.d("objectdetector helper",language);
         for (Detection t : result.detections()) {

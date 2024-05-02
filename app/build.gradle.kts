@@ -98,11 +98,22 @@ dependencies {
     implementation("com.google.mlkit:image-labeling:17.0.8")
     testImplementation("junit:junit:4.13.2")
     implementation("com.google.android.gms:play-services-tasks:18.1.0")
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.0")
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition-devanagari:16.0.0")
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition-chinese:16.0.0")
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition-japanese:16.0.0")
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition-korean:16.0.0")
+
+
+    implementation ("com.google.mlkit:text-recognition:16.0.0")
+
+    // To recognize Chinese script
+    implementation ("com.google.mlkit:text-recognition-chinese:16.0.0")
+
+    // To recognize Devanagari script
+    implementation ("com.google.mlkit:text-recognition-devanagari:16.0.0")
+
+    // To recognize Japanese script
+    implementation ("com.google.mlkit:text-recognition-japanese:16.0.0")
+
+    // To recognize Korean script
+    implementation ("com.google.mlkit:text-recognition-korean:16.0.0")
+
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")

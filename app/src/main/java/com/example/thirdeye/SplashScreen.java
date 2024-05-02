@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import com.example.thirdeye.MainActivity;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 
 import android.Manifest;
@@ -36,6 +37,7 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splashscreen);
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -73,17 +75,18 @@ public class SplashScreen extends AppCompatActivity {
         }
     }
     public void initializeTTS() {
-        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    textToSpeech.setLanguage(new Locale("en"));
-                } else {
-                    Toast.makeText(SplashScreen.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result = textToSpeech.setLanguage(new Locale("en"));
+
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // Handle language initialization errors here
                 }
+            } else {
+                // Handle Text-to-Speech initialization error
             }
-        },"com.google.android.tts");
-        textToSpeech.setSpeechRate(1.2f);
+        });
+        textToSpeech.setSpeechRate(0.8f);
     }
     private void proceedToNextActivity() {
         Intent intent = new Intent(SplashScreen.this, Onboarding.class);

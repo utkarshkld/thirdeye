@@ -59,9 +59,8 @@ public class Onboarding extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         viewPager = findViewById(R.id.viewPager);
         button = findViewById(R.id.buttonNextonboard);
-        textToSpeech = SplashScreen.textToSpeech;
-        textToSpeech.setSpeechRate(0.8f);
-
+//        textToSpeech = SplashScreen.textToSpeech;
+//        textToSpeech.setSpeechRate(0.8f);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         progressDialog2 = new ProgressDialog(this);
@@ -76,6 +75,7 @@ public class Onboarding extends AppCompatActivity {
         pageCount = pagerAdapter.getCount();
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Setting Language ....");
+        initializetexttospeech();
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {

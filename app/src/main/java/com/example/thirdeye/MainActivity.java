@@ -1,5 +1,10 @@
 package com.example.thirdeye;
 
+//import static androidx.camera.core.impl.utils.ContextUtil.getApplicationContext;
+import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+
+import static java.lang.Integer.parseInt;
+
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,14 +15,17 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -37,8 +45,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
-    public static Vibrator vibe;
+    private  Vibrator vibe;
+    public static int objdetfps;
+    private long compasstime = 0;
     public static boolean deviceHasFlash = false;
+    private long currtime = 0;
     public static HashMap<String, String> translationMap = new HashMap<>();
     private String currdirection;
     public static HashMap<String,String> languageMap = new HashMap<>();
@@ -63,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
+    private EditText fpsnumber;
     private PackageManager pm;
 
     private float[] accelerometerData = new float[3];
@@ -73,8 +85,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        objdetfps = 30;
+        trackAppInstallation(this,"Home Page");
         pm = getPackageManager();
         deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+        final String formatedIpAddress = Formatter.formatIpAddress(ipAddress);
+        Log.d("ip adress",formatedIpAddress+" "+ipAddress);
+        fpsnumber = findViewById(R.id.fpsnumber);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
             // Accelerometer sensor is available on this device
@@ -102,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View v) {
                 vibe.vibrate(50);
+                speaktext(translationMap.get(speaklang+"_"+"opening magnifier"));
                 Intent intent = new Intent(MainActivity.this,Magnifying.class);
                 startActivity(intent);
             }
@@ -127,8 +147,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Initialize ShakeListener
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
-            Toast.makeText(MainActivity.this, "Shake detected!", Toast.LENGTH_SHORT).show();
-            startRecording();
+            long temp = System.currentTimeMillis();
+            if(temp-currtime >= 1000) {
+                currtime = temp;
+                Toast.makeText(MainActivity.this, "Shake detected!", Toast.LENGTH_SHORT).show();
+                startRecording();
+            }
         });
         ImageView micButton = findViewById(R.id.micButton);
         CardView objectButton = findViewById(R.id.objectbutton);
@@ -154,6 +178,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 vibe.vibrate(50);
                 speaktext(translationMap.get(speaklang+"_"+"opening object"));
                 Intent intent = new Intent(MainActivity.this, cMainActivity.class);
+                if(!fpsnumber.getText().toString().isEmpty())
+                {
+                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
+                }
+
                 intent.putExtra("flash",false);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -260,7 +289,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        }).start();
 //    }
     @Override
+    protected void onStart() {
+//        int READINGRATE = 500000;
+        if(magnetometer != null) {
+            if (accelerometer != null) {
+                sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+            sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }else {
+            Toast.makeText(MainActivity.this, "Compass is not supported with your device", Toast.LENGTH_LONG).show();
+        }
+        super.onStart();
+    }
+    @Override
     protected void onResume() {
+        if(magnetometer != null) {
+            if (accelerometer != null) {
+                sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+            sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }else {
+            Toast.makeText(MainActivity.this, "Compass is not supported with your device", Toast.LENGTH_LONG).show();
+        }
         super.onResume();
 
         // Start the shake listener when the activity is resumed
@@ -268,6 +318,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     @Override
     protected void onPause() {
+        sensorManager.unregisterListener(this);
         super.onPause();
 
         // Stop the shake listener when the activity is paused
@@ -293,12 +344,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void startVoiceRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Commands...");
         // Get the selected language code from the map
         String selectedSourceLanguage = output_lang;
         if (selectedSourceLanguage != null) {
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
         }
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 20000);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 20000);
+        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 20000);
         try {
             startActivityForResult(intent, SPEECH_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
@@ -310,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ImageView micButton = findViewById(R.id.micButton);
         micButton.performClick();
     }
-    private boolean partialmatch(String text, String pattern,int n,int m){
+    private boolean partialmatch(String text, String pattern,int n,int m,float threshold){
         int dp[][]=new int[2][m+1];
         int res=0;
 
@@ -328,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
         int t = n;
-        if(res > 0.6f*t){
+        if(res > threshold*t){
             return true;
         }
         return false;
@@ -351,100 +405,106 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 String spokenText = matches.get(0).toLowerCase();
                 List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
 //                Log.d("checking input cmd",wordList.toString());
-                Log.d("object cmd",commandmap.get("object").toString());
-                Log.d("traslate cmd",commandmap.get("translate").toString());
-                Log.d("read cmd",commandmap.get("read").toString());
+                Log.d("object cmd", commandmap.get("object").toString());
+                Log.d("traslate cmd", commandmap.get("translate").toString());
+                Log.d("read cmd", commandmap.get("read").toString());
                 boolean ismatched = false;
                 //we got the string seperated by space
-                if(!ismatched){                   // for object
+                if (!ismatched) {                   // for object
 
-                    for(String str : Objects.requireNonNull(commandmap.get("object"))){
+                    for (String str : Objects.requireNonNull(commandmap.get("object"))) {
                         int n = str.length();
-                        for(String str2 : wordList) {
+                        for (String str2 : wordList) {
                             int m = str2.length();
-                            if (partialmatch(str2,str,m, n)) {
-                                speaktext(translationMap.get(speaklang+"_"+"opening object"));
+                            if (partialmatch(str2, str, m, n,0.6f)) {
+                                speaktext(translationMap.get(speaklang + "_" + "opening object"));
                                 Intent intent = new Intent(MainActivity.this, cMainActivity.class);
+                                if(!fpsnumber.getText().toString().isEmpty())
+                                {
+                                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
+                                }
                                 startActivity(intent);
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
                                 ismatched = true;
                                 break;
                             }
                         }
-                        if(ismatched){
+                        if (ismatched) {
                             break;
                         }
                     }
                 }
-                if(!ismatched){
+                if (!ismatched) {
                     // for object
 
-                    for(String str : Objects.requireNonNull(commandmap.get("read"))){
+                    for (String str : Objects.requireNonNull(commandmap.get("read"))) {
                         int n = str.length();
-                        for(String str2 : wordList) {
+                        for (String str2 : wordList) {
                             int m = str2.length();
-                            if (partialmatch(str2,str,m, n)) {
-                                Log.d("Checking read text",""+str+" "+str2);
-                                speaktext(translationMap.get(speaklang+"_"+"opening read text"));
+                            if (partialmatch(str2, str, m, n,0.7f)) {
+                                Log.d("Checking read text", "" + str + " " + str2);
+                                speaktext(translationMap.get(speaklang + "_" + "opening read text"));
                                 Intent intent = new Intent(MainActivity.this, TextSpeech.class);
-                                startActivity(intent);;
+                                startActivity(intent);
+                                ;
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
                                 ismatched = true;
                                 break;
                             }
                         }
-                        if(ismatched){
+                        if (ismatched) {
                             break;
                         }
                     }
                 }
-                if(!ismatched){
+                if (!ismatched) {
                     // for object
-                    for(String str : Objects.requireNonNull(commandmap.get("translate"))){
+                    for (String str : Objects.requireNonNull(commandmap.get("translate"))) {
                         int n = str.length();
-                        for(String str2 : wordList) {
+                        for (String str2 : wordList) {
                             int m = str2.length();
-                            if (partialmatch(str2,str,m, n)) {
+                            if (partialmatch(str2, str, m, n,0.7f)) {
                                 ismatched = true;
                                 break;
                             }
                         }
-                        if(ismatched){
+                        if (ismatched) {
                             break;
                         }
                     }
 
-                    if(ismatched){
+                    if (ismatched) {
                         // before starting we have itertate over the map for detecting langugages
                         String defaultlang = speaklang;
 
-                        for(Map.Entry<String, String> entry : Objects.requireNonNull(langnamemap.get(speaklang)).entrySet()){
+                        for (Map.Entry<String, String> entry : Objects.requireNonNull(langnamemap.get(speaklang)).entrySet()) {
                             String str = entry.getKey();
 
-                            int n =str.length();
-                            for(String currword : wordList){
+                            int n = str.length();
+                            for (String currword : wordList) {
                                 int m = currword.length();
-                                if (partialmatch(str.toLowerCase(),currword,n,m)) {
+                                if (partialmatch(str.toLowerCase(), currword, n, m,0.7f)) {
                                     defaultlang = langnamemap.get(speaklang).get(str);
                                     break;
                                 }
                             }
                         }
-                        Log.d("Checking language ", "onActivityResult: "+defaultlang);
-                        speaktext(translationMap.get(speaklang+"_"+"opening translate")+" "+defaultlang);
+                        Log.d("Checking language ", "onActivityResult: " + defaultlang);
+                        speaktext(translationMap.get(speaklang + "_" + "opening translate") + " " + defaultlang);
                         Intent intent = new Intent(MainActivity.this, LangTranslate.class);
-                        intent.putExtra("Translation lang",languageMap.get(defaultlang));
+                        intent.putExtra("Translation lang", languageMap.get(defaultlang));
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
                         startActivity(intent);
                     }
                 }
-                if(!ismatched){
-                    for(String str : Objects.requireNonNull(commandmap.get("settings"))){
+                if (!ismatched) {
+                    for (String str : Objects.requireNonNull(commandmap.get("settings"))) {
                         int n = str.length();
-                        for(String str2 : wordList) {
+                        for (String str2 : wordList) {
                             int m = str2.length();
-                            if (partialmatch(str2,str,m, n)) {
-                                speaktext(translationMap.get(speaklang+"_"+"opening setting"));
+                            if (partialmatch(str2, str, m, n,0.8f)) {
+                                Log.d("Checking strings", "" + str + " " + str2);
+                                speaktext(translationMap.get(speaklang + "_" + "opening setting"));
                                 Intent intent = new Intent(MainActivity.this, appsettings.class);
                                 startActivity(intent);
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
@@ -452,40 +512,57 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 break;
                             }
                         }
-                        if(ismatched){
+                        if (ismatched) {
                             break;
                         }
                     }
                 }
-                if(!ismatched) {
+                if (!ismatched) {
                     for (String str : Objects.requireNonNull(commandmap.get("direction"))) {
                         int n = str.length();
                         for (String str2 : wordList) {
                             int m = str2.length();
-                            if (partialmatch(str2,str, m, n)) {
+                            if (partialmatch(str2, str, m, n,0.7f)) {
                                 ismatched = true;
-                                if(magnetometer != null){
-                                    if(accelerometer!=null) {
-                                        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-                                    }
-                                    sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            // Speak direction
-                                            speaktext(translationMap.get(speaklang + "_" + currdirection));
-                                            Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
+                                Log.d("Direction Test", "" + translationMap.get(speaklang + "_" + currdirection));
 
-                                            sensorManager.unregisterListener(MainActivity.this); // Assuming MyAsyncTask is the AsyncTask instance
-                                        }
-                                    }, 200);
-//                                    Log.d("Direction Test", ""+translationMap.get(speaklang+"_"+currdirection));
+                                textToSpeech.speak(translationMap.get(speaklang + "_" + currdirection), TextToSpeech.QUEUE_FLUSH, null, null);
+
+//                                new Handler().postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        // Speak direction
+//                                        speaktext(translationMap.get(speaklang + "_" + currdirection));
+//                                        Log.d("Direction Test", "" + translationMap.get(speaklang + "_" + currdirection));
 //
-//                                    textToSpeech.speak(translationMap.get(speaklang+"_"+currdirection),TextToSpeech.QUEUE_FLUSH,null,null);
+//                                        // Assuming MyAsyncTask is the AsyncTask instance
+//                                    }
+//                                }, 1000);
+
 //                                    sensorManager.unregisterListener(this);
-                                }else{
-                                    Toast.makeText(MainActivity.this,"Compass is not supported with your device",Toast.LENGTH_LONG).show();
-                                }
+
+                                break;
+                            }
+                        }
+
+                        if (ismatched) {
+                            break;
+                        }
+                    }
+
+
+                }
+                if(!ismatched) {
+                    for (String str : Objects.requireNonNull(commandmap.get("magnifier"))) {
+                        int n = str.length();
+                        for (String str2 : wordList) {
+                            int m = str2.length();
+                            if (partialmatch(str2, str, m, n,0.8f)) {
+                                speaktext(translationMap.get(speaklang + "_" + "opening magnifier"));
+                                Intent intent = new Intent(MainActivity.this, Magnifying.class);
+                                startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                ismatched = true;
                                 break;
                             }
                         }
@@ -502,6 +579,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
+        long temptime = System.currentTimeMillis();
+//        if(temptime-compasstime < 1000){
+//            return;
+//        }
+        compasstime = temptime;
         if (event.sensor == accelerometer) {
             System.arraycopy(event.values, 0, accelerometerData, 0, accelerometerData.length);
         } else if (event.sensor == magnetometer) {
@@ -516,6 +598,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String compassDirection = getCompassDirection(azimuthInDegrees);
         currdirection = compassDirection;
         Log.d("Compass Direction", ""+compassDirection);
+    }
+    @Override
+    public void onBackPressed(){
+//        super.onBackPressed();
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
+        finish();
+        super.onBackPressed();
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -543,6 +635,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        sensorManager.unregisterListener(this);
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();

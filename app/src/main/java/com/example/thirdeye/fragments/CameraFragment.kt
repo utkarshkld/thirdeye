@@ -155,7 +155,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     @SuppressLint("MissingPermission")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override  fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // Initialize our background executor
@@ -224,13 +224,24 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 .build()
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
+        val builder =  ImageAnalysis.Builder()
+        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(builder)
+//        ext.setCaptureRequestOption(
+//            CaptureRequest.CONTROL_AE_MODE,
+//            CaptureRequest.CONTROL_AE_MODE_OFF
+//        )
+        Log.d("Checking fps",""+cMainActivity.setfps)
+        ext.setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+            Range<Int>(MainActivity.objdetfps, MainActivity.objdetfps)
+        )
+
         imageAnalyzer =
-            ImageAnalysis.Builder()
+            builder
                 .setTargetAspectRatio(AspectRatio.RATIO_4_3)
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
+                .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_RGBA_8888).build()
                 // The analyzer can then be assigned to the instance
                 .also {
                     it.setAnalyzer(
@@ -250,6 +261,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 preview,
                 imageAnalyzer
             )
+
 
             CameraControlHelper.cameraControl  = camera!!.cameraControl
             // Attach the viewfinder's surface provider to preview use case

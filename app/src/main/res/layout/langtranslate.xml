@@ -152,13 +152,14 @@
         android:layout_marginTop="15dp"
         android:layout_marginBottom="15dp"
         android:hint="Translated Text"
-        android:paddingTop="22dp"
-        android:paddingEnd="22dp"
+        android:scrollbars="vertical"
+        android:paddingTop="10dp"
+        android:paddingEnd="10dp"
         android:paddingBottom="27dp"
         android:text=""
         android:textColor="@color/white"
         android:textColorHint="@color/backText"
-        android:textSize="@dimen/_20sdp" />
+        android:textSize="20dp" />
 </LinearLayout>
     <LinearLayout
         android:id="@+id/llgridView"

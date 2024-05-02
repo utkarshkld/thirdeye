@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Vibrator;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -25,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,7 +58,9 @@ import java.util.Objects;
 
 public class appsettings extends AppCompatActivity {
 
+    private  Vibrator vibe;
     private SeekBar seekBarSpeechRate;
+
     private MicHandler shakeListener;
     Calendar calendar;
     private long currtime = 0;
@@ -70,6 +74,7 @@ public class appsettings extends AppCompatActivity {
     private HashMap<String, String> languageMap = MainActivity.languageMap;
     private HashMap<Integer, String> WeekDays = new HashMap<>();
     private ProgressDialog progressDialog;
+    private boolean isfirstime = false;
     private String ouptutlang = MainActivity.output_lang;
     private boolean blindness = MainActivity.blindness;
     private float rate = MainActivity.speech_rate;
@@ -84,6 +89,7 @@ public class appsettings extends AppCompatActivity {
     private static final int SPEECH_REQUEST_CODE = 1;
     private int width;
     private List<String> languages = new ArrayList<>();
+    public static Map<String, String> languageLocalMap = new HashMap<>();
 
 
     @Override
@@ -94,6 +100,7 @@ public class appsettings extends AppCompatActivity {
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
         switchPartiallyBlind = findViewById(R.id.partallyblindswitch);
         llsettings = findViewById(R.id.llsettings);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
         feedbackBtn = findViewById(R.id.buttonfeedback);
@@ -110,7 +117,7 @@ public class appsettings extends AppCompatActivity {
         feedbackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 startActivity(new Intent(appsettings.this, FeedbackActivity.class));
             }
         });
@@ -118,6 +125,7 @@ public class appsettings extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // This method is called when the progress of the seek bar changes
+                    Log.d("Checking progress",""+progress);
                     calendar = Calendar.getInstance();
                     int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                     textToSpeech.speak("Today is " + WeekDays.get(dayOfWeek), TextToSpeech.QUEUE_FLUSH, null, null);
@@ -145,7 +153,7 @@ public class appsettings extends AppCompatActivity {
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 Intent intent = new Intent(appsettings.this,MainActivity.class);
                 startActivity(intent);
             }
@@ -155,7 +163,7 @@ public class appsettings extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (buttonClickable) {
-                    MainActivity.vibe.vibrate(50);
+                    vibe.vibrate(50);
                     downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()));
                     final ProgressDialog progressDialog = new ProgressDialog(appsettings.this);
                     progressDialog.setMessage("Applying all the changes...");
@@ -187,18 +195,44 @@ public class appsettings extends AppCompatActivity {
         spinnerDefaultLanguage.setAdapter(adapter);
         spinnerDefaultLanguage.setSelection(languages.indexOf(ouptutlang));
         switchPartiallyBlind.setChecked(blindness);
-        seekBarSpeechRate.setProgress((int)(rate*100/3.0f));
+        seekBarSpeechRate.setProgress((int)(rate*100.0f/2.0f));
         spinnerDefaultLanguage.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    showPopupWindow(spinnerDefaultLanguage, adapter);//
+                    showPopupWindow(spinnerDefaultLanguage, adapter);
                     return true;
                 }
                 return true;
             }
         });
+        switchPartiallyBlind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // Set the spoken state based on the switch state change
+                setSpokenState(isChecked);
+            }
+        });
+        spinnerDefaultLanguage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected item text
+                if(!isfirstime){
+                    isfirstime = true;
+                    return;
+                }
+                String selectedText = parent.getItemAtPosition(position).toString();
+                textToSpeech.speak(selectedText, TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+    private void setSpokenState(boolean isChecked) {
+        String state = isChecked ? "Partial Blind on" : "Partial Blind off";
+        textToSpeech.speak(state, TextToSpeech.QUEUE_FLUSH, null, null);
     }
     private void showPopupWindow(Spinner spinnerDefaultLanguage, ArrayAdapter<String> adapter) {
         // Create a ListView for the PopupWindow
@@ -265,7 +299,7 @@ public class appsettings extends AppCompatActivity {
             }
         }
         int t = Math.min(m,n);
-        if(res > 0.6f*t){
+        if(res > 0.8f*t){
             return true;
         }
         return false;
@@ -480,6 +514,12 @@ public class appsettings extends AppCompatActivity {
             }
         });
         thread.start();
+    }
+    @Override
+    public void onBackPressed(){
+        Intent intent = new Intent(appsettings.this,MainActivity.class);
+        startActivity(intent);
+        super.onBackPressed();
     }
     private void initializelanguageMap(){
         WeekDays.put(1, "Sunday");

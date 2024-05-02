@@ -29,6 +29,17 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/zoblik"
+            android:padding="10dp"
+            android:background="@drawable/zoblik_background"
+            android:layout_gravity="center"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
         <ImageButton
             android:id="@+id/settings"
             android:layout_width="60dp"
@@ -146,6 +157,13 @@
                     android:gravity="center"
                     android:layout_marginTop="10dp"
                     android:orientation="vertical">
+                    <EditText
+                        android:id="@+id/fpsnumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/textbackground"
+                        android:hint="default 30"
+                        android:inputType="number"/>
 
                     <ImageView
                         android:layout_width="@dimen/_76sdp"

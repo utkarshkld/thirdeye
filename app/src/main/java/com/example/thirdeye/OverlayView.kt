@@ -18,6 +18,7 @@ package com.example.thirdeye;
 import android.content.Context
 import android.graphics.*
 import android.os.Build
+import android.os.SystemClock
 import android.speech.tts.TextToSpeech
 import android.text.SpannableString
 import android.util.AttributeSet
@@ -46,6 +47,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var outputHeight = 0
     private var outputRotate = 0
     private var runningMode: RunningMode = RunningMode.IMAGE
+    private var screenHeight : Int = cMainActivity.fragmentContainerView.layoutParams.height
+    private var screenWidth : Int = cMainActivity.fragmentContainerView.layoutParams.height
     private var textToSpeech: TextToSpeech? = null
     private var outputlang : String? = cMainActivity.languageMap.get(MainActivity.output_lang);
 
@@ -85,76 +88,114 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        results?.detections()?.map {
-            val boxRect = RectF(
-                it.boundingBox().left,
-                it.boundingBox().top,
-                it.boundingBox().right,
-                it.boundingBox().bottom
-            )
-            val matrix = Matrix()
-            matrix.postTranslate(-outputWidth / 2f, -outputHeight / 2f)
+//        var time = (SystemClock.uptimeMillis()- results?.timestampMs()!!)
+        var time = results?.timestampMs()
+        if(time== null){
+            time = 0
+        }
+//        Log.d("Checking drawing time",""+time+" "+(SystemClock.uptimeMillis()-cMainActivity.detectime))
+        if(SystemClock.uptimeMillis()-cMainActivity.detectime <= 1500) {
 
-            // Rotate box.
-            matrix.postRotate(outputRotate.toFloat())
 
-            // If the outputRotate is 90 or 270 degrees, the translation is
-            // applied after the rotation. This is because a 90 or 270 degree rotation
-            // flips the image vertically or horizontally, respectively.
-            if (outputRotate == 90 || outputRotate == 270) {
-                matrix.postTranslate(outputHeight / 2f, outputWidth / 2f)
-            } else {
-                matrix.postTranslate(outputWidth / 2f, outputHeight / 2f)
-            }
-            matrix.mapRect(boxRect)
-            boxRect
-        }?.forEachIndexed { index, floats ->
-
-            val top = floats.top * scaleFactor
-            val bottom = floats.bottom * scaleFactor
-            val left = floats.left * scaleFactor
-            val right = floats.right * scaleFactor
-
-            // Draw bounding box around detected objects
-            val drawableRect = RectF(left, top, right, bottom)
-            canvas.drawRect(drawableRect, boxPaint)
-
-            // Create text to display alongside detected objects
-            val category = results?.detections()!![index].categories()[0]
-            Log.d("Testing the objdet",""+category);
-            val drawableText =
-                ObjectDetectorHelper.translationMap.get(ObjectDetectorHelper.language+"_"+category.categoryName()) + " " + String.format(
-                    "%.2f",
-                    category.score()
+            results?.detections()?.map {
+                val boxRect = RectF(
+                    it.boundingBox().left,
+                    it.boundingBox().top,
+                    it.boundingBox().right,
+                    it.boundingBox().bottom
                 )
+                val matrix = Matrix()
+                matrix.postTranslate(-outputWidth / 2f, -outputHeight / 2f)
+
+                // Rotate box.
+                matrix.postRotate(outputRotate.toFloat())
+
+                // If the outputRotate is 90 or 270 degrees, the translation is
+                // applied after the rotation. This is because a 90 or 270 degree rotation
+                // flips the image vertically or horizontally, respectively.
+                if (outputRotate == 90 || outputRotate == 270) {
+                    matrix.postTranslate(outputHeight / 2f, outputWidth / 2f)
+                } else {
+                    matrix.postTranslate(outputWidth / 2f, outputHeight / 2f)
+                }
+                matrix.mapRect(boxRect)
+                boxRect
+            }?.forEachIndexed { index, floats ->
+
+                val top = floats.top * scaleFactor
+                val bottom = floats.bottom * scaleFactor
+                val left = floats.left * scaleFactor
+                val right = floats.right * scaleFactor
+
+                // Draw bounding box around detected objects
+                val drawableRect = RectF(left, top, right, bottom)
+                Log.d("checking image sizes","Height : "+(top-bottom)+" Width : "+(right-left))
+                Log.d("checking image sizes screen","Height : "+cMainActivity.fragmentContainerView.height+" Width : "+cMainActivity.fragmentContainerView.width)
+                var temp = ""
+                if((bottom-top) >= 0.8*cMainActivity.fragmentContainerView.height || (right-left) >= 0.8*cMainActivity.fragmentContainerView.width){
+                    temp = "close"
+                    boxPaint.color = ContextCompat.getColor(context!!,android.R.color.holo_red_dark)
+                }else{
+                    boxPaint.color = ContextCompat.getColor(context!!, android.R.color.holo_green_dark)
+                }
+
+
+                // Create text to display alongside detected objects
+                val category = results?.detections()!![index].categories()[0]
+//                var temp = ""
+//                if(category.categoryName() == "car" || category.categoryName() == "bus" || category.categoryName() == "truck"  || category.categoryName() == "scooter" || category.categoryName() == "person" ){
+//
+//                    if((bottom-top) >= 0.8*cMainActivity.fragmentContainerView.height || (right-left) >= 0.8*cMainActivity.fragmentContainerView.width){
+//                        temp = "close"
+//                        boxPaint.color = ContextCompat.getColor(context!!,android.R.color.holo_red_dark)
+//                    }else{
+//                        boxPaint.color = ContextCompat.getColor(context!!, android.R.color.holo_green_dark)
+//                    }
+//                }else{
+//                    boxPaint.color = ContextCompat.getColor(context!!, R.color.mp_primary)
+//                }
+                val drawableText =
+                    ObjectDetectorHelper.translationMap.get(ObjectDetectorHelper.language + "_" + category.categoryName()) + " " + String.format(
+                        "%.2f",
+                        category.score()
+                    ) + temp
 //            Log.d("Detected objects",category.toString())
 
-            // Draw rect behind display text
-            textBackgroundPaint.getTextBounds(
-                drawableText,
-                0,
-                drawableText.length,
-                bounds
-            )
-            val textWidth = bounds.width()
-            val textHeight = bounds.height()
-            canvas.drawRect(
-                left,
-                top,
-                left + textWidth + BOUNDING_RECT_TEXT_PADDING,
-                top + textHeight + BOUNDING_RECT_TEXT_PADDING,
-                textBackgroundPaint
-            )
+                // Draw rect behind display text
+                textBackgroundPaint.getTextBounds(
+                    drawableText,
+                    0,
+                    drawableText.length,
+                    bounds
+                )
+                val textWidth = bounds.width()
+                val textHeight = bounds.height()
 
-            // Draw text for detected object
-            canvas.drawText(
-                drawableText,
-                left,
-                top + bounds.height(),
-                textPaint
-            )
+                canvas.drawRect(drawableRect, boxPaint)
+                canvas.drawRect(
+                    left,
+                    top,
+                    left + textWidth + BOUNDING_RECT_TEXT_PADDING,
+                    top + textHeight + BOUNDING_RECT_TEXT_PADDING,
+                    textBackgroundPaint
+                )
+                canvas.drawText(
+                    drawableText,
+                    left,
+                    top + bounds.height(),
+                    textPaint
+                )
 
+
+
+                // Draw text for detected object
+
+
+            }
         }
+        cMainActivity.candetect = true;
+
+
 
     }
 

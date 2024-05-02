@@ -2,6 +2,7 @@ package com.example.thirdeye;
 import static com.example.thirdeye.MainActivity.translationMap;
 import static com.example.thirdeye.MainActivity.commandmap;
 import static com.example.thirdeye.MainActivity.langnamemap;
+import static com.example.thirdeye.appsettings.languageLocalMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class translationmap {
              objectTranslations.add("објект"); // Macedonian
              objectTranslations.add("objek"); // Malay
 //             objectTranslations.add("वास्तु");
+
              objectTranslations.add("വസ്തുവിന്റെ"); // Malayalam
              objectTranslations.add("oġġett"); // Maltese
              objectTranslations.add("ऑब्जेक्ट"); // Marathi
@@ -66,6 +68,61 @@ public class translationmap {
              objectTranslations.add("اشیاء"); // Urdu
              objectTranslations.add("đối tượng");//Vietnamese
              commandmap.put("object",objectTranslations);
+             List<String> magnifierTranslations = new ArrayList<>();
+             magnifierTranslations.add("vergroter"); // Afrikaans
+             magnifierTranslations.add("lupë"); // Albanian
+             magnifierTranslations.add("مكبر"); // Arabic
+             magnifierTranslations.add("বৃদ্ধি"); // Bengali
+             magnifierTranslations.add("увеличител"); // Bulgarian
+             magnifierTranslations.add("放大镜"); // Chinese
+             magnifierTranslations.add("zvětšovač"); // Czech
+             magnifierTranslations.add("forstørrelsesglas"); // Danish
+             magnifierTranslations.add("vergrootglas"); // Dutch
+             magnifierTranslations.add("magnifier"); // English
+             magnifierTranslations.add("suurennuslasi"); // Finnish
+             magnifierTranslations.add("loupe"); // French
+             magnifierTranslations.add("magnificador"); // Galician
+             magnifierTranslations.add("საზომი"); // Georgian
+             magnifierTranslations.add("Vergrößerungsglas"); // German
+             magnifierTranslations.add("μεγεθυντικός φακός"); // Greek
+             magnifierTranslations.add("મેગ્નિફિયર"); // Gujarati
+             magnifierTranslations.add("loup"); // Haitian
+             magnifierTranslations.add("מגדיל"); // Hebrew
+             magnifierTranslations.add("बड़ा करने वाला"); // Hindi
+             magnifierTranslations.add("nagyító"); // Hungarian
+             magnifierTranslations.add("stærraðargler"); // Icelandic
+             magnifierTranslations.add("pembesar"); // Indonesian
+             magnifierTranslations.add("ingranditore"); // Italian
+             magnifierTranslations.add("拡大鏡"); // Japanese
+             magnifierTranslations.add("ವೃದ್ಧಿಗಾರ"); // Kannada
+             magnifierTranslations.add("확대기"); // Korean
+             magnifierTranslations.add("palielinātājs"); // Latvian
+             magnifierTranslations.add("didinamasis stiklas"); // Lithuanian
+             magnifierTranslations.add("магнификација"); // Macedonian
+             magnifierTranslations.add("pembesar"); // Malay
+             magnifierTranslations.add("വലിപ്പം വർദ്ധിപ്പിക്കാൻ"); // Malayalam
+             magnifierTranslations.add("magnifier"); // Maltese
+             magnifierTranslations.add("वाढवणारा"); // Marathi
+             magnifierTranslations.add("forstørrelsesglass"); // Norwegian
+             magnifierTranslations.add("lupa"); // Polish
+             magnifierTranslations.add("lupa"); // Portuguese
+             magnifierTranslations.add("lupă"); // Romanian
+             magnifierTranslations.add("увеличител"); // Russian
+             magnifierTranslations.add("zväčšovač"); // Slovak
+             magnifierTranslations.add("povečevalno steklo"); // Slovenian
+             magnifierTranslations.add("lupa"); // Spanish
+             magnifierTranslations.add("kuza"); // Swahili
+             magnifierTranslations.add("förstoringsglas"); // Swedish
+             magnifierTranslations.add("magnifying"); // Tagalog
+             magnifierTranslations.add("பெரிய"); // Tamil
+             magnifierTranslations.add("వృద్ధి"); // Telugu
+             magnifierTranslations.add("เพิ่มขนาด"); // Thai
+             magnifierTranslations.add("büyüteç"); // Turkish
+             magnifierTranslations.add("збільшувач"); // Ukrainian
+             magnifierTranslations.add("مگنیفائر"); // Urdu
+             magnifierTranslations.add("kính lúp"); // Vietnamese
+             magnifierTranslations.add("đại bàng"); // Chinese
+             commandmap.put("magnifier",magnifierTranslations);
              List<String> readTranslations = new ArrayList<>();
              readTranslations.add("lees"); // Afrikaans
              readTranslations.add("lexoni"); // Albanian
@@ -1090,6 +1147,67 @@ public class translationmap {
              translationMap.put("Vietnamese_opening read text", "đọc văn bản mở đầu");
              translationMap.put("Chinese_opening read text", "阅读开头文字");
 
+             translationMap.put("Afrikaans_opening magnifier", "open vergrootglas");
+             translationMap.put("Arabic_opening magnifier", "المكبر الافتتاحي");
+             translationMap.put("Hindi_opening magnifier", "ओपनिंग मैग्नीफायर");
+             translationMap.put("English_opening magnifier", "opening magnifier");
+             translationMap.put("Marathi_opening magnifier", "उघडणारे म्याग्निफायर");
+             translationMap.put("Belarusian_opening magnifier", "адкрыццё магніфікатара");
+             translationMap.put("Bulgarian_opening magnifier", "отваряне увеличител");
+             translationMap.put("Bengali_opening magnifier", "উদ্বারণ বৃদ্ধি");
+             translationMap.put("Catalan_opening magnifier", "ampliador d'obertura");
+             translationMap.put("Czech_opening magnifier", "otevírací zvětšovací sklo");
+             translationMap.put("Welsh_opening magnifier", "magnifydd agoriadol");
+             translationMap.put("Danish_opening magnifier", "åbning forstørrelsesglas");
+             translationMap.put("German_opening magnifier", "Öffnungsvergrößerer");
+             translationMap.put("Greek_opening magnifier", "ανοίγοντας μεγεθυντικό");
+             translationMap.put("Esperanto_opening magnifier", "malferma lupo");
+             translationMap.put("Spanish_opening magnifier", "ampliador de apertura");
+             translationMap.put("Estonian_opening magnifier", "ava suurendusklaas");
+             translationMap.put("Persian_opening magnifier", "بزرگنمایی افتتاحیه");
+             translationMap.put("Finnish_opening magnifier", "avaus suurennuslasi");
+             translationMap.put("French_opening magnifier", "loupe d'ouverture");
+             translationMap.put("Irish_opening magnifier", "maigneola oscailte");
+             translationMap.put("Galician_opening magnifier", "ampliador de apertura");
+             translationMap.put("Gujarati_opening magnifier", "ઓપનિંગ મેગ્નિફાયર");
+             translationMap.put("Hebrew_opening magnifier", "מגדיל פתיחה");
+             translationMap.put("Croatian_opening magnifier", "otvaranje lupe");
+             translationMap.put("Haitian_opening magnifier", "gwo loup ouvèti");
+             translationMap.put("Hungarian_opening magnifier", "nyitó nagyító");
+             translationMap.put("Indonesian_opening magnifier", "pembesar pembukaan");
+             translationMap.put("Icelandic_opening magnifier", "opnun stærri");
+             translationMap.put("Italian_opening magnifier", "ingranditore di apertura");
+             translationMap.put("Japanese_opening magnifier", "オープニングマグニファイヤー");
+             translationMap.put("Georgian_opening magnifier", "გახსნის მაგნიფიკატორი");
+             translationMap.put("Kannada_opening magnifier", "ಆರಂಭಿಕ ಮ್ಯಾಗ್ನಿಫೈಯರ್");
+             translationMap.put("Korean_opening magnifier", "오프닝 확대경");
+             translationMap.put("Lithuanian_opening magnifier", "atidarymo didinamasis stiklas");
+             translationMap.put("Latvian_opening magnifier", "atvēršanas palielinātājs");
+             translationMap.put("Macedonian_opening magnifier", "отварање лупа");
+             translationMap.put("Malay_opening magnifier", "pembesar pembukaan");
+             translationMap.put("Maltese_opening magnifier", "mgħaġġel ta' ftuħ");
+             translationMap.put("Dutch_opening magnifier", "openingsloep");
+             translationMap.put("Norwegian_opening magnifier", "åpning forstørrelsesglass");
+             translationMap.put("Polish_opening magnifier", "lupa otwarcia");
+             translationMap.put("Portuguese_opening magnifier", "ampliador de abertura");
+             translationMap.put("Romanian_opening magnifier", "lupă de deschidere");
+             translationMap.put("Russian_opening magnifier", "открывающий увеличитель");
+             translationMap.put("Slovak_opening magnifier", "otvárací zväčšovací sklo");
+             translationMap.put("Slovenian_opening magnifier", "odpiranje povečevalnega stekla");
+             translationMap.put("Albanian_opening magnifier", "lupa e hapjes");
+             translationMap.put("Swedish_opening magnifier", "öppning förstoringsglas");
+             translationMap.put("Swahili_opening magnifier", "kioo cha ufunguzi");
+             translationMap.put("Tamil_opening magnifier", "திறக்கும் மேக்னிபையர்");
+             translationMap.put("Telugu_opening magnifier", "ఓపెనింగ్ మ్యాగ్నిఫైర్");
+             translationMap.put("Thai_opening magnifier", "เลนส์ขยายเปิด");
+             translationMap.put("Tagalog_opening magnifier", "bukas na malaking kagamitan");
+             translationMap.put("Turkish_opening magnifier", "açılış büyüteç");
+             translationMap.put("Ukrainian_opening magnifier", "відкриваючий збільшувач");
+             translationMap.put("Urdu_opening magnifier", "خواندہ میگنیفائر کھولنا");
+             translationMap.put("Vietnamese_opening magnifier", "kính lúp mở đầu");
+             translationMap.put("Chinese_opening magnifier", "开放放大镜");
+
+
              translationMap.put("Afrikaans_opening translate", "opening vertaal");
              translationMap.put("Arabic_opening translate", "ترجمة الافتتاح");
              translationMap.put("Hindi_opening translate", "आरंभ अनुवाद");
@@ -1149,6 +1267,62 @@ public class translationmap {
              translationMap.put("Urdu_opening translate", "آغاز ترجمہ");
              translationMap.put("Vietnamese_opening translate", "dịch mở đầu");
              translationMap.put("Chinese_opening translate", "开场翻译");
+
+//             Map<String, String> languageLocalMap = new HashMap<>();
+             languageLocalMap.put("Afrikaans", "Afrikaans");
+             languageLocalMap.put("Arabic", "العربية");
+             languageLocalMap.put("Bengali", "বাংলা");
+             languageLocalMap.put("Belarusian", "беларуская");
+             languageLocalMap.put("Bulgarian", "български");
+             languageLocalMap.put("Catalan", "català");
+             languageLocalMap.put("Chinese", "中文");
+             languageLocalMap.put("Croatian", "hrvatski");
+             languageLocalMap.put("Czech", "čeština");
+             languageLocalMap.put("Danish", "dansk");
+             languageLocalMap.put("Dutch", "Nederlands");
+             languageLocalMap.put("English", "English");
+             languageLocalMap.put("Estonian", "eesti");
+             languageLocalMap.put("Finnish", "suomi");
+             languageLocalMap.put("French", "français");
+             languageLocalMap.put("German", "Deutsch");
+             languageLocalMap.put("Greek", "ελληνικά");
+             languageLocalMap.put("Gujarati", "ગુજરાતી");
+             languageLocalMap.put("Haitian", "kreyòl ayisyen");
+             languageLocalMap.put("Hebrew", "עברית");
+             languageLocalMap.put("Hindi", "हिन्दी");
+             languageLocalMap.put("Hungarian", "magyar");
+             languageLocalMap.put("Icelandic", "íslenska");
+             languageLocalMap.put("Indonesian", "Indonesia");
+             languageLocalMap.put("Irish", "Gaeilge");
+             languageLocalMap.put("Italian", "italiano");
+             languageLocalMap.put("Japanese", "日本語");
+             languageLocalMap.put("Kannada", "ಕನ್ನಡ");
+             languageLocalMap.put("Korean", "한국어");
+             languageLocalMap.put("Latvian", "latviešu");
+             languageLocalMap.put("Lithuanian", "lietuvių");
+             languageLocalMap.put("Macedonian", "македонски");
+             languageLocalMap.put("Malay", "Bahasa Melayu");
+             languageLocalMap.put("Maltese", "Malti");
+             languageLocalMap.put("Norwegian", "norsk");
+             languageLocalMap.put("Persian", "فارسی");
+             languageLocalMap.put("Polish", "polski");
+             languageLocalMap.put("Portuguese", "português");
+             languageLocalMap.put("Romanian", "română");
+             languageLocalMap.put("Russian", "русский");
+             languageLocalMap.put("Slovak", "slovenčina");
+             languageLocalMap.put("Slovenian", "slovenščina");
+             languageLocalMap.put("Spanish", "español");
+             languageLocalMap.put("Swahili", "Kiswahili");
+             languageLocalMap.put("Swedish", "svenska");
+             languageLocalMap.put("Tagalog", "Tagalog");
+             languageLocalMap.put("Tamil", "தமிழ்");
+             languageLocalMap.put("Telugu", "తెలుగు");
+             languageLocalMap.put("Thai", "ไทย");
+             languageLocalMap.put("Turkish", "Türkçe");
+             languageLocalMap.put("Ukrainian", "українська");
+             languageLocalMap.put("Urdu", "اردو");
+             languageLocalMap.put("Vietnamese", "Tiếng Việt");
+             languageLocalMap.put("Welsh", "Cymraeg");
      }
 
 }

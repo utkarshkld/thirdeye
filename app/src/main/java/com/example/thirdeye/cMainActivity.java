@@ -1,10 +1,18 @@
 package com.example.thirdeye;
 
+import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+import static com.example.thirdeye.MainActivity.finalset;
 import static com.example.thirdeye.MainActivity.output_lang;
 import static com.example.thirdeye.ObjectDetectorHelper.TAG;
 import static com.example.thirdeye.ObjectDetectorHelper.textToSpeech;
 
+import static java.lang.Integer.parseInt;
+
+import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.res.Resources;
+import android.os.Vibrator;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.PorterDuff;
@@ -17,6 +25,7 @@ import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,6 +39,8 @@ import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import com.example.thirdeye.databinding.CheckMainBinding;
+import com.example.thirdeye.fragments.CameraFragment;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +50,7 @@ import java.util.Objects;
 public class cMainActivity extends AppCompatActivity {
 
     private CheckMainBinding activityMainBinding;
+    private  Vibrator vibe;
     public static Map<String, Long> objectResolver = new HashMap<>();
     public static HashMap<String, String> languageMap = new HashMap<>();
     public static boolean partialblind = MainActivity.blindness;
@@ -47,22 +59,37 @@ public class cMainActivity extends AppCompatActivity {
     public static boolean hidescreen = false;
     public static FragmentContainerView fragmentContainerView;
     private ImageButton backbtn;
+    private Button setfpsbtn;
+    public static boolean candetect = true;
     private Button exitbtn;
     public static boolean flash = false;
+    public static long detectime=0;
+    public static int screenWidth , screenHeight;
+    private EditText fpsText;
+    public static int setfps;
+    private TextView textView;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         flash = intent.getBooleanExtra("flash",false);
+        setfps = intent.getIntExtra("FPS",15);
         activityMainBinding = CheckMainBinding.inflate(getLayoutInflater());
         partialblind = MainActivity.blindness;
+        cMainActivity.isPlay = true;
         setContentView(activityMainBinding.getRoot());
         fragmentContainerView = findViewById(R.id.fragment);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        trackAppInstallation(this,"Object Detection");
         hidescreen = false;
+        screenHeight = fragmentContainerView.getLayoutParams().height;
+        screenWidth = fragmentContainerView.getLayoutParams().width;
+        Log.d("Checking screen size",screenHeight +" "+screenWidth);
         Log.d("Checking Partial Blind", ""+partialblind);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        isPlay = true;
+
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
         assert navHostFragment != null;
@@ -70,43 +97,76 @@ public class cMainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         backbtn = findViewById(R.id.backbtn_);
         exitbtn = findViewById(R.id.exitbtn);
+        textView = findViewById(R.id.fpscount);
+        Log.d("Fps checker","Current Fps : "+setfps);
+        textView.setText("FPS : "+setfps);
         fragmentContainerView = findViewById(R.id.fragment);
         initializeTextToSpeech();
+        setfpsbtn = findViewById(R.id.setFpsbtn);
+        fpsText = findViewById(R.id.setFps);
+        initializeLanguageMap();
+        setfpsbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                isPlay = false;
+                if(textToSpeech!=null) {
+                    textToSpeech.shutdown();
+                }
+                finish();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Introduce a 100ms delay
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            // Handle the interruption in some way, or ignore it
+                            e.printStackTrace();
+                        }
+
+                        // Now create and start the intent after the delay
+                        MainActivity.objdetfps = Integer.parseInt(fpsText.getText().toString());
+                        Intent intent = new Intent(cMainActivity.this, cMainActivity.class);
+                        startActivity(intent);
+                    }
+                }).start();
+
+
+//                onBackPressed();
+            }
+        });
 
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 isPlay = false;
                 if(textToSpeech!=null) {
                     textToSpeech.stop();
                     textToSpeech.shutdown();
                 }
-                onBackPressed();
+//                Intent intent = new Intent(cMainActivity.this, MainActivity.class);
+//                startActivity(intent);
+//                onBackPressed();
             }
         });
         exitbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isPlay = false;
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 if(textToSpeech!=null) {
                    textToSpeech.stop();
                    textToSpeech.shutdown();
                 }
-                onBackPressed();
+                Intent intent = new Intent(cMainActivity.this, MainActivity.class);
+                startActivity(intent);
+//                onBackPressed();
             }
         });
-        initializeLanguageMap();
-//        Handler handler = new Handler(Looper.getMainLooper());
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(!partialblind){
-//                    findViewById(R.id.fragment).setVisibility(View.GONE);
-//                }
-//            }
-//        }, 10000);
+
+
     }
     private void initializeTextToSpeech() {
         textToSpeech = new TextToSpeech(cMainActivity.this, status -> {
@@ -149,6 +209,14 @@ public class cMainActivity extends AppCompatActivity {
         }, "com.google.android.tts");
         textToSpeech.setSpeechRate(1.2f);
     }
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
+
     private void initializeLanguageMap() {
         // Add languages and their Locale codes to the HashMap
         languageMap.put("bn", "Bengali");
@@ -220,11 +288,14 @@ public class cMainActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        isPlay = false;
+//        isPlay = false;
         if(textToSpeech!=null) {
 
             textToSpeech.shutdown();
         }
+        Intent intent = new Intent(cMainActivity.this, MainActivity.class);
+        startActivity(intent);
+
         super.onBackPressed();
     }
 }

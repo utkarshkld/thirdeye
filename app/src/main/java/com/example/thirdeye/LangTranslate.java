@@ -1,5 +1,7 @@
 package com.example.thirdeye;
 
+import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -14,12 +16,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -65,6 +69,7 @@ public class LangTranslate extends AppCompatActivity {
     private ImageButton donebtn;
     private int width;
     private Spinner sourceLanguageSpinner;
+    private boolean isLast = false;
 
 
 
@@ -76,17 +81,24 @@ public class LangTranslate extends AppCompatActivity {
     private float speeh_rate = MainActivity.speech_rate;
     private boolean isPaused = true;
     private String translationlang = MainActivity.output_lang;
+    private  Vibrator vibe;
     private long shaketime = 0;
 
 
     // Map to map language codes to their full names
     private HashMap<String, String> languageMap = MainActivity.languageMap;
     private int index = 0,index2 = 0;
+
+    private static final int MAX_DURATION_MS = 10000; // Maximum duration in milliseconds (e.g., 20 seconds)
+
+    private boolean isListening = false;
+    private Handler timeoutHandler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.langtranslate);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         Intent intent = getIntent();
         translationlang = intent.getStringExtra("Translation lang");
         Log.d("Lang translate intent", "onCreate: "+translationlang);
@@ -98,11 +110,14 @@ public class LangTranslate extends AppCompatActivity {
         ImageButton backbtn = findViewById(R.id.backbtn);
         sourceLanguageSpinner = findViewById(R.id.sourceLanguageSpinner);
         translatedTextView = findViewById(R.id.translatedText); // Initialize TextView
+        isLast = false;
+        translatedTextView.setMovementMethod(new ScrollingMovementMethod());
+        trackAppInstallation(this,"Translate Text");
 
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 onBackPressed();
             }
         });
@@ -116,6 +131,7 @@ public class LangTranslate extends AppCompatActivity {
         sourceLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
 //        targetLanguageSpinner.setDropDownHorizontalOffset(dpToPx(-10));
         sourceLanguageSpinner.setDropDownWidth(width-dpToPx(40));
+        translatedTextView.setTextAppearance(R.style.text);
 //        targetLanguageSpinner.setDropDownWidth(width-dpToPx(40));
 //        sourceLanguageSpinner.setDropDownVerticalOffset(dpToPx(26)-2);
 //        targetLanguageSpinner.setDropDownVerticalOffset(dpToPx(26)-2);
@@ -129,7 +145,7 @@ public class LangTranslate extends AppCompatActivity {
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
             if(System.currentTimeMillis()-shaketime >= 3000){
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 shaketime = System.currentTimeMillis();
                 startSpeechRecognition();
             }
@@ -139,7 +155,7 @@ public class LangTranslate extends AppCompatActivity {
             public void onClick(View v) {
                 textToSpeech.stop();
                 isPaused = true;
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 btnpauseplay.setImageResource(R.drawable.stop_fill);
                 index = 0;
                 index2 = 0;
@@ -149,10 +165,15 @@ public class LangTranslate extends AppCompatActivity {
         btnpauseplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 if (!isPaused) {
                     isPaused = true;
                     btnpauseplay.setImageResource(R.drawable.stop_fill);
+                    if(isLast){
+                        isLast = false;
+                        btnreplay.performClick();
+                        return;
+                    }
 
                     speakText(translatedTextView.getText().toString().substring(index), 0);
 
@@ -170,7 +191,7 @@ public class LangTranslate extends AppCompatActivity {
         micbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 index = 0;
                 index2 = 0;
                 textToSpeech.stop();
@@ -191,7 +212,9 @@ public class LangTranslate extends AppCompatActivity {
         donebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
+                btnpauseplay.setVisibility(View.VISIBLE);
+                btnreplay.setVisibility(View.VISIBLE);
                 detectAndTranslateLanguage(editTextLetters.getText().toString());
 
             }
@@ -260,24 +283,31 @@ public class LangTranslate extends AppCompatActivity {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
     private void startSpeechRecognition() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
-
-        // Get the selected language code from the map
-        String selectedSourceLanguage = outputlangugage  ;
-
-        if (selectedSourceLanguage != null) {
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
-        }
-        try {
-            startActivityForResult(intent, SPEECH_REQUEST_CODE);
 
 
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
-        }
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
+
+            // Get the selected language code from the map
+            String selectedSourceLanguage = outputlangugage  ;
+
+            if (selectedSourceLanguage != null) {
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
+            }
+
+
+            try {
+                startActivityForResult(intent, SPEECH_REQUEST_CODE);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
+            }
+
+
     }
+
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
@@ -347,15 +377,11 @@ public class LangTranslate extends AppCompatActivity {
                                         translatedTextView.setText(textWithHighlights);
                                         // Calculate line start for the 'end' offset
                                         int lineStart = translatedTextView.getLayout().getLineForOffset(a);
-                                        if(index+1 == translatedTextView.getText().toString().length()) {
-                                            new Handler().postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    // Code to be executed after 1 second
-                                                    // This will be executed on the main (UI) thread
+                                        translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)+30));
+                                        Log.d("Checking indexes", ""+(index+1) + " "+translatedTextView.getText().toString().length());
+                                        if(index == translatedTextView.getText().toString().length()) {//
                                                     btnpauseplay.performClick();
-                                                }
-                                            }, 500);
+                                                    isLast = true;//
                                         }
                                         // Scroll to the calculated line
 //                                        translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)-5));
@@ -398,6 +424,7 @@ public class LangTranslate extends AppCompatActivity {
                                     Task<String> result = translator.translate(sourceText).addOnSuccessListener(new OnSuccessListener<String>() {
                                         @Override
                                         public void onSuccess(String s) {
+                                            s = s+"\n ..";
                                             translatedTextView.setText(s); // Set the translated text in the TextView
                                             translatedTextView.setVisibility(View.VISIBLE);
                                             // Make the TextView visible
@@ -440,6 +467,9 @@ public class LangTranslate extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
+        Intent intent = new Intent(LangTranslate.this,MainActivity.class);
+        startActivity(intent);
+
         super.onBackPressed();
     }
     public class MyRunnable implements Runnable {

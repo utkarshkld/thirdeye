@@ -1,5 +1,7 @@
 package com.example.thirdeye;
 
+import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -21,6 +23,8 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -31,6 +35,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -43,6 +48,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
@@ -50,12 +56,14 @@ public class Magnifying extends AppCompatActivity {
 
     private ProcessCameraProvider cameraProvider;
     private ImageButton exitbtn;
+    private Vibrator vibe;
 
     boolean isFlashon = false;
     private CameraControl cameraControl;
     private CameraSelector cameraSelector;
     private SeekBar zoomSeekBar;
     private Camera camera;
+
     private PreviewView previewView;
     int cameraFacing = CameraSelector.LENS_FACING_BACK;
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
@@ -70,9 +78,12 @@ public class Magnifying extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.magnifying_main);
+
         zoomSeekBar = findViewById(R.id.zoombar);
         previewView = findViewById(R.id.cameraPreview);
         exitbtn = findViewById(R.id.exitbtn);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        trackAppInstallation(this,"Magnifying");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (ContextCompat.checkSelfPermission(Magnifying.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             activityResultLauncher.launch(Manifest.permission.CAMERA);
@@ -82,10 +93,17 @@ public class Magnifying extends AppCompatActivity {
         exitbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.vibe.vibrate(50);
+                vibe.vibrate(50);
                 onBackPressed();
             }
         });
+    }
+    @Override
+    public void onBackPressed(){
+        Intent intent = new Intent(Magnifying.this,MainActivity.class);
+        startActivity(intent);
+
+        super.onBackPressed();
     }
     public void startCamera(int cameraFacing) {
         int aspectRatio = aspectRatio(previewView.getWidth(), previewView.getHeight());
