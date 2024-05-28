@@ -15,23 +15,84 @@
         android:orientation="horizontal"
         android:background="@drawable/background"
         android:layout_alignParentTop="true">
-
-        <ImageView
+        <androidx.cardview.widget.CardView
             android:id="@+id/eyebtn"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="0"
+            android:layout_rowWeight="1"
+            android:layout_column="0"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            app:cardBackgroundColor="@color/black"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+
             android:foreground="@drawable/ripple_card"
-            android:layout_height="60dp"
-            android:src="@drawable/rdeye"
-            android:contentDescription="Magnifier"
-            android:layout_gravity="center"
-            android:layout_marginLeft="@dimen/_30sdp"/>
+            android:layout_marginLeft="@dimen/_30sdp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:gravity="center"
+                android:padding="3dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+
+                    android:contentDescription="Magnifier"
+                    android:background="@drawable/background_card"
+
+                    android:src="@drawable/rdeye" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+
+                    android:text="Magnifier"
+
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+<!--        <LinearLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_marginLeft="@dimen/_30sdp">-->
+<!--            <ImageView-->
+<!--                android:id="@+id/eyebtn"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_gravity="center_horizontal"-->
+<!--                android:foreground="@drawable/ripple_card"-->
+<!--                android:layout_height="60dp"-->
+<!--                android:src="@drawable/rdeye"-->
+<!--                android:contentDescription="Magnifier"-->
+<!--                />-->
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Magnifier"-->
+<!--                android:layout_gravity="center_horizontal"/>-->
+
+
+<!--        </LinearLayout>-->
+
+
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
             android:src="@drawable/zoblik"
             android:padding="10dp"
             android:background="@drawable/zoblik_background"
@@ -40,20 +101,76 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
-        <ImageButton
+        <androidx.cardview.widget.CardView
             android:id="@+id/settings"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:contentDescription="Settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="0"
+            android:layout_rowWeight="1"
+            android:layout_column="0"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            app:cardBackgroundColor="@color/black"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
             android:foreground="@drawable/ripple_card"
-            android:background="@drawable/imagebutton_background"
-            android:src="@drawable/settings"
-            android:padding="10dp"
-            android:layout_gravity="center"
-            android:layout_marginRight="@dimen/_30sdp"
-            />
+            android:layout_marginRight="@dimen/_30sdp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="3dp"
+                >
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:contentDescription="Settings"
+                    android:src="@drawable/settings"
+                    android:padding="10dp"
+                    android:layout_gravity="center"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
 
 
+                    android:text="Settings"
+
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+<!--        <LinearLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_marginRight="@dimen/_30sdp">-->
+<!--            <ImageButton-->
+<!--                android:id="@+id/settings"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_height="60dp"-->
+<!--                android:contentDescription="Settings"-->
+<!--                android:foreground="@drawable/ripple_card"-->
+<!--                android:background="@drawable/imagebutton_background"-->
+<!--                android:src="@drawable/settings"-->
+<!--                android:padding="10dp"-->
+<!--                android:layout_gravity="center"-->
+
+<!--                />-->
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Settings"-->
+<!--                android:layout_gravity="center_horizontal"/>-->
+<!--        </LinearLayout>-->
     </LinearLayout>
     
 
@@ -157,13 +274,13 @@
                     android:gravity="center"
                     android:layout_marginTop="10dp"
                     android:orientation="vertical">
-                    <EditText
-                        android:id="@+id/fpsnumber"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/textbackground"
-                        android:hint="default 30"
-                        android:inputType="number"/>
+<!--                    <EditText-->
+<!--                        android:id="@+id/fpsnumber"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:background="@drawable/textbackground"-->
+<!--                        android:hint="default 30"-->
+<!--                        android:inputType="number"/>-->
 
                     <ImageView
                         android:layout_width="@dimen/_76sdp"

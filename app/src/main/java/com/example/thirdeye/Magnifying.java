@@ -1,6 +1,6 @@
 package com.example.thirdeye;
 
-import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+//import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -54,6 +54,7 @@ import java.util.concurrent.Executors;
 
 public class Magnifying extends AppCompatActivity {
 
+    private long starting_time = 0;
     private ProcessCameraProvider cameraProvider;
     private ImageButton exitbtn;
     private Vibrator vibe;
@@ -83,7 +84,7 @@ public class Magnifying extends AppCompatActivity {
         previewView = findViewById(R.id.cameraPreview);
         exitbtn = findViewById(R.id.exitbtn);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        trackAppInstallation(this,"Magnifying");
+//        trackAppInstallation(this,"Magnifying");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (ContextCompat.checkSelfPermission(Magnifying.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             activityResultLauncher.launch(Manifest.permission.CAMERA);
@@ -95,14 +96,18 @@ public class Magnifying extends AppCompatActivity {
             public void onClick(View v) {
                 vibe.vibrate(50);
                 onBackPressed();
+//                Intent intent = new Intent(Magnifying.this,MainActivity.class);
+//                startActivity(intent);
+
             }
         });
+        starting_time = System.currentTimeMillis();
     }
     @Override
     public void onBackPressed(){
+//        finishAffinity();
         Intent intent = new Intent(Magnifying.this,MainActivity.class);
         startActivity(intent);
-
         super.onBackPressed();
     }
     public void startCamera(int cameraFacing) {
@@ -157,15 +162,22 @@ public class Magnifying extends AppCompatActivity {
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
                 cameraControl = camera.getCameraControl();
                 cameraControl.enableTorch(isFlashon);
-                cameraControl.setLinearZoom(zoomSeekBar.getProgress()/100f);
+                cameraControl.setLinearZoom(zoomSeekBar.getProgress()/50f);
+//                zoomSeekBar.incrementProgressBy(20);
                 zoomSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         // Calculate zoom level from seekbar progress
-                        float zoomLevel = (float) progress / 100f;
+                        float zoomLevel = (float) progress/50f ;
 
                         // Set zoom level
-                        cameraControl.setLinearZoom(zoomLevel);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                cameraControl.setLinearZoom(zoomLevel);
+                            }
+                        });
+
                     }
 
                     @Override
@@ -176,11 +188,18 @@ public class Magnifying extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         // Not needed in this implementation
-                        float zoomLevel = (float) seekBar.getProgress() / 100f;
+                        float zoomLevel = (float) seekBar.getProgress() /50f;
 
                         // Set zoom level
-                        cameraControl.setLinearZoom(zoomLevel);
+//                        cameraControl.setLinearZoom(zoomLevel);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                cameraControl.setLinearZoom(zoomLevel);
+                            }
+                        });
                     }
+
                 });
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -265,5 +284,14 @@ public class Magnifying extends AppCompatActivity {
     public void onRestart(){
         startCamera(cameraFacing);
         super.onRestart();
+    }
+    @Override
+    public void onDestroy(){
+        long end_time = System.currentTimeMillis();
+        UserPreferences userPreferences = new UserPreferences(this);
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
+        userPreferences.addFeature(time,"Magnifying");
+        Log.d("Duration check",""+time+" "+userPreferences.getFeatureListAsJsonArray());
+        super.onDestroy();
     }
 }

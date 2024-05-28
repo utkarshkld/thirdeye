@@ -19,9 +19,9 @@ android {
         multiDexEnabled =true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildFeatures{
-        dataBinding = true
-    }
+//    buildFeatures{
+//        dataBinding = true
+//    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -43,15 +43,21 @@ android {
             assets.srcDirs("src/main/assets", "src/main/assets/")
         }
     }
+    externalNativeBuild {
+        cmake {
+            version = "3.10.2"
+            path = file("src/main/jni/CMakeLists.txt")
+        }
+    }
 
 
-    buildFeatures {
-        mlModelBinding = true
-        viewBinding = true
-    }
-    androidResources{
-        noCompress("tflite")
-    }
+//    buildFeatures {
+//        mlModelBinding = true
+//        viewBinding = true
+//    }
+//    androidResources{
+//        noCompress("tflite")
+//    }
 
         packagingOptions {
             pickFirst ("META-INF/DEPENDENCIES")
@@ -59,11 +65,12 @@ android {
         }
 
 }
-project.extra["ASSET_DIR"] = projectDir.toString() + "/src/main/assets"
+//project.extra["ASSET_DIR"] = projectDir.toString() + "/src/main/assets"
 
 dependencies {
 
     implementation(kotlin("stdlib"))
+    implementation("androidx.work:work-runtime:2.7.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
@@ -98,7 +105,7 @@ dependencies {
     implementation("com.google.mlkit:image-labeling:17.0.8")
     testImplementation("junit:junit:4.13.2")
     implementation("com.google.android.gms:play-services-tasks:18.1.0")
-
+    implementation ("com.android.support:support-v4:28.0.0")
 
     implementation ("com.google.mlkit:text-recognition:16.0.0")
 
@@ -118,6 +125,15 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
+//    implementation ("com.google.android.gms:play-services-auth:21.1.1")
+//    implementation ("com.google.android.gms:play-services-auth-api-phone:18.0.2")
+//    implementation ("com.google.android.gms:play-services-auth:19.0.0")
+    implementation ("com.google.android.gms:play-services-auth:20.2.0")
+    implementation ("com.google.android.gms:play-services-identity:17.0.0")
+    implementation ("com.google.android.gms:play-services-auth-api-phone:17.4.0")
+    implementation ("com.google.android.gms:play-services-base:17.3.0")
+
+
 }
 
 

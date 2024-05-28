@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/black">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/llTitleBar"
+        android:orientation="horizontal"
+        android:background="@drawable/background"
+        android:layout_alignParentTop="true">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:contentDescription="Back"
+            android:id="@+id/backbtn22"
+            android:background="@drawable/imagebutton_background"
+            android:foreground="@drawable/ripple_card"
+            android:src="@drawable/previous"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"/>
+
+    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <SurfaceView
+            android:id="@+id/cameraview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Overlay View -->
+        <View
+            android:id="@+id/black_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:visibility="gone" />
+
+        <SeekBar
+            android:id="@+id/slidersetZoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:contentDescription="Zoom"
+            android:max="5"
+            android:min="1"
+            android:progress="1"
+            android:progressTint="#A8FFFFFF"
+            android:thumb="@drawable/custom_seekbar_thumb" />
+
+        <Button
+            android:id="@+id/exitbtn22"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:textColor="@color/black"
+            android:textSize="26dp"
+            android:background="@drawable/custom_ripple"
+            android:layout_marginBottom="@dimen/_30sdp"
+            android:text="EXIT"
+            android:contentDescription="EXIT"/>
+
+    </FrameLayout>
+</LinearLayout>

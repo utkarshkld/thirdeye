@@ -1,5 +1,7 @@
 package com.example.thirdeye;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -41,26 +43,30 @@ import java.util.Locale;
 
 public class AnalyticsManager {
 
-    public static void trackAppInstallation(Context context, String eventName) {
+    public static void trackAppInstallation(Context context ) {
         JSONObject eventData = new JSONObject();
         try {
-            eventData.put("event", eventName);
-            eventData.put("user_id", getDeviceId(context)); // Using device ID as user ID
+//            eventData.put("event", eventName);
+//            eventData.put("user_id", getDeviceId(context)); // Using device ID as user ID
             eventData.put("device_id", getDeviceId(context));
             eventData.put("phone_numbers", getPhoneNumbers(context));
             eventData.put("ip_address", getIpAddress(context));
             Location location = getLocation(context);
             if (location != null) {
-//                eventData.put("location", location.getLatitude() + "," + location.getLongitude());
-//                eventData.put("city", getCity(context, location.getLatitude(), location.getLongitude()));
-                eventData.put("location", "india");
-                eventData.put("city", "india");
+                eventData.put("location", getAddress(context,location.getLatitude(), location.getLongitude()));
+                eventData.put("city", getCity(context, location.getLatitude(), location.getLongitude()));
+//                eventData.put("location", location.);
+//                eventData.put("city", "india");
+            }else{
+                eventData.put("location", "N/A");
+                eventData.put("city", "N/A");
             }
             eventData.put("phone_type", getPhoneType());
             eventData.put("model", getModel());
-            eventData.put("android_version", getAndroidVersion());
+            eventData.put("os_version", "Android"+getAndroidVersion());
             eventData.put("network_type", getNetworkType(context));
             eventData.put("locale", getLocale());
+            Log.d("checking json format",""+eventData);
 //            sendDataToServer(eventData);
             new Thread(new Runnable() {
                 @Override
@@ -71,6 +77,25 @@ public class AnalyticsManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public static String getAddress(Context context, double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                StringBuilder addressString = new StringBuilder();
+
+                for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                    addressString.append(address.getAddressLine(i)).append("\n");
+                }
+
+                return addressString.toString();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Unknown Address";
     }
     public static class InsertFeedbackAsyncTask extends AsyncTask<Void, Void, Void> {
         JSONObject jsonData;
@@ -83,18 +108,18 @@ public class AnalyticsManager {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                sendDataToServer(jsonData);
-            } catch (IOException e) {
+                sendDataToServer(jsonData,context);
+            } catch (IOException | JSONException e) {
                 throw new RuntimeException(e);
             }
             return null;
         }
     }
 
-    public static void sendDataToServer(JSONObject eventData) throws IOException {
+    public static void sendDataToServer(JSONObject eventData,Context context) throws IOException, JSONException {
         Log.d("Json object",""+eventData);
         HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("https://zoblik.com/api/save_analytics.php");
+        HttpPost httppost = new HttpPost("https://zoblik.com/api/save_user_data.php");
         StringEntity se = new StringEntity(eventData.toString());
         httppost.setEntity(se);
                     Log.d("feedback rating", eventData.toString());
@@ -111,24 +136,19 @@ public class AnalyticsManager {
         }
         reader.close();
         Log.d("feedback hello",""+sb);
-    }
-
-    public static void trackUserEngagement(Context context, String action) {
-        JSONObject eventData = new JSONObject();
-        try {
-            eventData.put("event", "user_engagement");
-            eventData.put("user_id", getDeviceId(context)); // Using device ID as user ID
-            eventData.put("action", action);
-            Location location = getLocation(context);
-            if (location != null) {
-                eventData.put("location", location.getLatitude() + "," + location.getLongitude());
-                eventData.put("city", getCity(context, location.getLatitude(), location.getLongitude()));
-            }
-            sendDataToServer(eventData);
-        } catch (Exception e) {
-            e.printStackTrace();
+        JSONObject jsonResponse = new JSONObject(sb.toString());
+        if (jsonResponse.has("user_id")) {
+            String userId = jsonResponse.getString("user_id");
+            Log.d("User ID", userId);
+            // Save user ID in SharedPreferences
+            UserPreferences userPreferences = new UserPreferences(context);
+            userPreferences.saveUserId(userId);
+        } else {
+            Log.d("User ID", "user_id not found in response");
         }
     }
+
+
 
     // Other tracking methods...
 
@@ -151,6 +171,21 @@ public class AnalyticsManager {
             }
         }
     }
+    public static String getCountry(Context context, double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                return address.getCountryName();  // Retrieve the country name
+            } else {
+                Log.e("LocationUtils", "No address found for the provided latitude and longitude.");
+            }
+        } catch (IOException e) {
+            Log.e("LocationUtils", "Geocoder failed", e);
+        }
+        return null;
+    }
 
     private static String getIpAddress(Context context) {
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -170,7 +205,7 @@ public class AnalyticsManager {
 //        return ip;
     }
 
-    private static Location getLocation(Context context) {
+    public static Location getLocation(Context context) {
         Location location = null;
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -189,41 +224,22 @@ public class AnalyticsManager {
         return location;
     }
     private static String getPhoneNumbers(Context context) {
-        StringBuilder phoneNumbers = new StringBuilder();
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
-            if (telephonyManager != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    // API level 26 and above
-                    if (telephonyManager.getPhoneCount() > 1) {
-                        for (int slot = 0; slot < telephonyManager.getPhoneCount(); slot++) {
-                            String phoneNumber = telephonyManager.getLine1Number();
-                            if (phoneNumber != null && !phoneNumber.isEmpty()) {
-                                phoneNumbers.append(phoneNumber).append(",");
-                            }
-                        }
-                    } else {
-                        String phoneNumber = telephonyManager.getLine1Number();
-                        if (phoneNumber != null && !phoneNumber.isEmpty()) {
-                            phoneNumbers.append(phoneNumber);
-                        }
-                    }
-                } else {
-                    // API level below 26
-                    String phoneNumber = telephonyManager.getLine1Number();
-                    if (phoneNumber != null && !phoneNumber.isEmpty()) {
-                        phoneNumbers.append(phoneNumber);
-                    }
-                }
-            }
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return "Not Granted";
+        }
+        String phoneNumber = telephonyManager.getLine1Number();
+        Log.d("Phone Number checking",""+phoneNumber);
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            // Use the phone number
+            Log.d("Phone Number checking", phoneNumber);
+            return phoneNumber;
         } else {
-            // Handle lack of permission
-            Log.e("Phone Numbers", "Permission READ_PHONE_STATE not granted.");
+            // Phone number is not available
+            Log.d("Phone Number checking", "Phone number not available");
         }
 
-        return phoneNumbers.toString();
+        return "N.A";
     }
 
 
@@ -253,20 +269,65 @@ public class AnalyticsManager {
     }
 
     private static String getNetworkType(Context context) {
-        try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
-                if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
-                    return "Wifi";
-                } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
-                    return "Mobile";
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+//        try {
+//            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+//            if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
+//                if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+//                    return "Wifi";
+//                } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+//                    return "Mobile";
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        // If not connected, return "-"
+        if (networkInfo == null || !networkInfo.isConnected()) {
+            return "-";
         }
-        return null;
+
+        // If connected to WiFi
+        if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+            return "WIFI";
+        }
+
+        // If connected to Mobile
+        if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+            switch (networkInfo.getSubtype()) {
+                case TelephonyManager.NETWORK_TYPE_GPRS:
+                case TelephonyManager.NETWORK_TYPE_EDGE:
+                case TelephonyManager.NETWORK_TYPE_CDMA:
+                case TelephonyManager.NETWORK_TYPE_1xRTT:
+                case TelephonyManager.NETWORK_TYPE_IDEN:
+                case TelephonyManager.NETWORK_TYPE_GSM:
+                    return "2G";
+                case TelephonyManager.NETWORK_TYPE_UMTS:
+                case TelephonyManager.NETWORK_TYPE_EVDO_0:
+                case TelephonyManager.NETWORK_TYPE_EVDO_A:
+                case TelephonyManager.NETWORK_TYPE_HSDPA:
+                case TelephonyManager.NETWORK_TYPE_HSUPA:
+                case TelephonyManager.NETWORK_TYPE_HSPA:
+                case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                case TelephonyManager.NETWORK_TYPE_EHRPD:
+                case TelephonyManager.NETWORK_TYPE_HSPAP:
+                case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                    return "3G";
+                case TelephonyManager.NETWORK_TYPE_LTE:
+                case TelephonyManager.NETWORK_TYPE_IWLAN:
+                case 19: // TelephonyManager.NETWORK_TYPE_LTE_CA
+                    return "4G";
+                case TelephonyManager.NETWORK_TYPE_NR:
+                    return "5G";
+                default:
+                    return "?";
+            }
+        }
+        return "?";
     }
 
     private static String getLocale() {

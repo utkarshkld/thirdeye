@@ -1,6 +1,6 @@
 package com.example.thirdeye;
 
-import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+//import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -42,6 +42,7 @@ public class FeedbackActivity extends AppCompatActivity {
 
     private boolean isData = false;
     private boolean flag = false;
+    private long starting_time = 0;
     Button submit;
     private  Vibrator vibe;
     ImageButton backbtnfeedback;
@@ -57,7 +58,7 @@ public class FeedbackActivity extends AppCompatActivity {
         submit = findViewById(R.id.buttonsubmit);
         flag = false;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        trackAppInstallation(this,"Feedback activity");
+//        trackAppInstallation(this,"Feedback activity");
         backbtnfeedback = findViewById(R.id.backbtnfeedback);
         x = findViewById(R.id.radia_id1);x1 = findViewById(R.id.radia_id2); x2 = findViewById(R.id.radia_id3);x3 = findViewById(R.id.radia_id4);
         x11 = findViewById(R.id.radia_id11);x12 = findViewById(R.id.radia_id12); x13 = findViewById(R.id.radia_id13);x14 = findViewById(R.id.radia_id14);
@@ -65,6 +66,7 @@ public class FeedbackActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Submitting Feedback...");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        starting_time = System.currentTimeMillis();
 
         progressDialog.setCancelable(false);
         submit.setOnClickListener(new View.OnClickListener() {
@@ -80,8 +82,8 @@ public class FeedbackActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                mongoClient.close();
                 vibe.vibrate(50);
-
-                startActivity(new Intent(FeedbackActivity.this, appsettings.class));
+//                startActivity(new Intent(FeedbackActivity.this, appsettings.class));
+                onBackPressed();
             }
         });
 
@@ -92,7 +94,6 @@ public class FeedbackActivity extends AppCompatActivity {
 //       mongoClient.close();
         Intent intent = new Intent(FeedbackActivity.this,appsettings.class);
         startActivity(intent);
-
        super.onBackPressed();
     }
     private boolean isNetworkAvailable() {
@@ -147,6 +148,7 @@ public class FeedbackActivity extends AppCompatActivity {
             if(q1.length()>0 && q2.length()>0 && q3.length()>0){
                 try {
                     // Add your data
+                    UserPreferences userPreferences = new UserPreferences(FeedbackActivity.this);
                     isData = true;
                     HttpClient httpclient = new DefaultHttpClient();
                     HttpPost httppost = new HttpPost("https://zoblik.com/api/save_review.php");
@@ -158,6 +160,8 @@ public class FeedbackActivity extends AppCompatActivity {
                     feedbackArray.put(createFeedbackJSON("question3", q3));
 
                     JSONObject json = new JSONObject();
+                    String userId = userPreferences.getUserId();
+                    json.put("user_id",userId);
                     json.put("feedback", feedbackArray);
 //                    json.put("question1", q1);
 //                    json.put("question2", q2);
@@ -223,5 +227,14 @@ public class FeedbackActivity extends AppCompatActivity {
         feedbackJSON.put("feedback_text", feedbackText);
         feedbackJSON.put("rating", rating);
         return feedbackJSON;
+    }
+    @Override
+    public void onDestroy(){
+        long end_time = System.currentTimeMillis();
+        UserPreferences userPreferences = new UserPreferences(this);
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
+        userPreferences.addFeature(time,"Feedback");
+        Log.d("Duration check",""+time+" "+userPreferences.getFeatureListAsJsonArray());
+        super.onDestroy();
     }
 }

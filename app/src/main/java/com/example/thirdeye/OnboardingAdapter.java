@@ -95,7 +95,7 @@ public class OnboardingAdapter extends PagerAdapter {
             Onboarding.textToSpeech.setLanguage(new Locale(Onboarding.output_lang));
             Log.d("Checking Instruction", ""+Onboarding.output_lang+" "+tx.getText().toString());
 //            Onboarding.textToSpeech.speak(tx.getText().toString(),0, null, null);
-            if(Onboarding.canSpeak) {
+            if( Onboarding.canSpeak) {
                 speakText(tx.getText().toString(), 0);
             }
         }
@@ -146,6 +146,11 @@ public class OnboardingAdapter extends PagerAdapter {
     }
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+//        if(Onboarding.textToSpeech != null){
+//            Onboarding.textToSpeech.stop();
+//            Onboarding.textToSpeech.shutdown();
+//
+//        }
         container.removeView((View) object);
     }
 

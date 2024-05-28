@@ -60,6 +60,8 @@ public class appsettings extends AppCompatActivity {
 
     private  Vibrator vibe;
     private SeekBar seekBarSpeechRate;
+    private long starting_time = 0;
+    private boolean isAlert = false;
 
     private MicHandler shakeListener;
     Calendar calendar;
@@ -98,6 +100,7 @@ public class appsettings extends AppCompatActivity {
         setContentView(R.layout.settings);
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
+        starting_time = System.currentTimeMillis();
         switchPartiallyBlind = findViewById(R.id.partallyblindswitch);
         llsettings = findViewById(R.id.llsettings);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -118,6 +121,7 @@ public class appsettings extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
+
                 startActivity(new Intent(appsettings.this, FeedbackActivity.class));
             }
         });
@@ -154,8 +158,9 @@ public class appsettings extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 vibe.vibrate(50);
-                Intent intent = new Intent(appsettings.this,MainActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(appsettings.this,MainActivity.class);
+//                startActivity(intent);
+                onBackPressed();
             }
         });
         applybtn.setOnClickListener(new View.OnClickListener() {
@@ -164,7 +169,7 @@ public class appsettings extends AppCompatActivity {
 
                 if (buttonClickable) {
                     vibe.vibrate(50);
-                    downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()));
+                    downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()),isAlert);
                     final ProgressDialog progressDialog = new ProgressDialog(appsettings.this);
                     progressDialog.setMessage("Applying all the changes...");
                     progressDialog.setCancelable(false);
@@ -370,7 +375,7 @@ public class appsettings extends AppCompatActivity {
     {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
-    public void downloadLanguage(String language) {
+    public void downloadLanguage(String language,boolean fromAlert) {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         toret = false;
@@ -449,7 +454,10 @@ public class appsettings extends AppCompatActivity {
                         @Override
                         protected void onPostExecute(Void aVoid) {
                             // Update UI or perform any post-execution tasks here
-
+                            if(fromAlert) {
+                                Intent intent = new Intent(appsettings.this, MainActivity.class);
+                                startActivity(intent);
+                            }
                         }
                     }.execute();
                 })
@@ -517,9 +525,54 @@ public class appsettings extends AppCompatActivity {
     }
     @Override
     public void onBackPressed(){
-        Intent intent = new Intent(appsettings.this,MainActivity.class);
-        startActivity(intent);
-        super.onBackPressed();
+//        finishAffinity();
+//        Intent intent = new Intent(appsettings.this,MainActivity.class);
+//        startActivity(intent);
+//        showdialogOnBack();
+        new AlertDialog.Builder(this)
+                .setMessage("Do you want to save changes ?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+//                        appsettings.super.onBackPressed();
+                        isAlert = true;
+                        applybtn.performClick();
+
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+//                        appsettings.super.onBackPressed();
+                        isAlert = false;
+                        Intent intent = new Intent(appsettings.this,MainActivity.class);
+                        startActivity(intent);
+                    }
+                })
+                .show();
+//        super.onBackPressed()
+        ;
+    }
+    private void showdialogOnBack() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Save Changes...");
+        builder.setMessage("Do you want to save changes ?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Close the app if the user cancels
+
+                finish();
+            }
+        });
+        builder.setCancelable(false); // Prevent dismissing the dialog by tapping outside of it
+        builder.show();
     }
     private void initializelanguageMap(){
         WeekDays.put(1, "Sunday");
@@ -529,7 +582,11 @@ public class appsettings extends AppCompatActivity {
         WeekDays.put(5, "Thursday");
         WeekDays.put(6, "Friday");
         WeekDays.put(7, "Saturday");
-        languageMap.put("Afrikaans", "af");
+        UserPreferences userPreferences = new UserPreferences(this);
+
+        String country = userPreferences.getCountry();
+        if(!Objects.equals(country, "India")){
+            languageMap.put("Afrikaans", "af");
         //languageMap.put("Albanian", "sq");
         languageMap.put("Arabic", "ar");
         languageMap.put("Bengali", "bn");
@@ -583,5 +640,28 @@ public class appsettings extends AppCompatActivity {
         languageMap.put("Ukrainian", "uk");
         languageMap.put("Urdu", "ur");
         languageMap.put("Vietnamese", "vi");
+        }
+//
+        else{
+            languageMap.put("Tamil", "ta");
+            languageMap.put("Telugu", "te");
+            languageMap.put("Marathi", "mr");
+//        languageMap.put("Malayalam", "ml");
+            languageMap.put("Hindi", "hi");
+            languageMap.put("Gujarati", "gu");
+            languageMap.put("English", "en");
+            languageMap.put("Bengali", "bn");
+            languageMap.put("Kannada", "kn");
+        }
+
+    }
+    @Override
+    public void onDestroy(){
+        long end_time = System.currentTimeMillis();
+        UserPreferences userPreferences = new UserPreferences(this);
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
+        userPreferences.addFeature(time,"Settings");
+        Log.d("Duration check",""+time+" "+userPreferences.getFeatureListAsJsonArray());
+        super.onDestroy();
     }
 }

@@ -1,6 +1,6 @@
 package com.example.thirdeye;
 
-import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+//import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -67,6 +67,8 @@ public class LangTranslate extends AppCompatActivity {
     private ImageButton btnreplay;
     private ImageButton btnpauseplay;
     private ImageButton donebtn;
+    private long starting_time = 0;
+    private boolean isfirstime;
     private int width;
     private Spinner sourceLanguageSpinner;
     private boolean isLast = false;
@@ -83,6 +85,7 @@ public class LangTranslate extends AppCompatActivity {
     private String translationlang = MainActivity.output_lang;
     private  Vibrator vibe;
     private long shaketime = 0;
+    private int currentScrollPosition = 0;
 
 
     // Map to map language codes to their full names
@@ -100,6 +103,7 @@ public class LangTranslate extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         Intent intent = getIntent();
+        isfirstime = true;
         translationlang = intent.getStringExtra("Translation lang");
         Log.d("Lang translate intent", "onCreate: "+translationlang);
         editTextLetters = findViewById(R.id.editTextTranslate);
@@ -112,19 +116,25 @@ public class LangTranslate extends AppCompatActivity {
         translatedTextView = findViewById(R.id.translatedText); // Initialize TextView
         isLast = false;
         translatedTextView.setMovementMethod(new ScrollingMovementMethod());
-        trackAppInstallation(this,"Translate Text");
+        starting_time = System.currentTimeMillis();
+//        trackAppInstallation(this,"Translate Text");
 
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 vibe.vibrate(50);
                 onBackPressed();
+//                Intent intent = new Intent(LangTranslate.this,MainActivity.class);
+//                startActivity(intent);
+//                if (textToSpeech != null) {
+//                    textToSpeech.stop();
+//                    textToSpeech.shutdown();
+//                }
             }
         });
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         width = displayMetrics.widthPixels;
-//        initializeMap();
         List<String> selectedLanguages = new ArrayList<>(languageMap.values()); // Get language names from the map
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, languageMap.keySet().toArray(new String[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
@@ -138,6 +148,7 @@ public class LangTranslate extends AppCompatActivity {
         sourceLanguageSpinner.setAdapter(adapter);
         Log.d("Output lang : ",outputlangugage+" "+languageMap.values());
         sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(translationlang));
+//        Log.d("This is the Output language",""+MainActivity.output_lang);
 //        targetLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
         initializetexttospeech();
         btnpauseplay.setVisibility(View.GONE);
@@ -157,6 +168,8 @@ public class LangTranslate extends AppCompatActivity {
                 isPaused = true;
                 vibe.vibrate(50);
                 btnpauseplay.setImageResource(R.drawable.stop_fill);
+                currentScrollPosition=0;
+                translatedTextView.scrollTo(0,0);
                 index = 0;
                 index2 = 0;
                 speakText(translatedTextView.getText().toString(), 0);
@@ -165,20 +178,23 @@ public class LangTranslate extends AppCompatActivity {
         btnpauseplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("btnpauseplay","I am clicked");
                 vibe.vibrate(50);
                 if (!isPaused) {
                     isPaused = true;
                     btnpauseplay.setImageResource(R.drawable.stop_fill);
+//                    currentScrollPosition = translatedTextView.getScrollY();
+                    translatedTextView.scrollTo(0, currentScrollPosition);
                     if(isLast){
                         isLast = false;
                         btnreplay.performClick();
                         return;
                     }
-
                     speakText(translatedTextView.getText().toString().substring(index), 0);
 
                 } else {
                     isPaused = false;
+                    enableTextViewScroll();
                     btnpauseplay.setImageResource(R.drawable.play_fill);
                     index2 = index;
                     if (textToSpeech != null) {
@@ -209,14 +225,37 @@ public class LangTranslate extends AppCompatActivity {
                 return true;
             }
         });
+        sourceLanguageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Handle the item selection here
+                String selectedLanguage = parent.getItemAtPosition(position).toString();
+                // Do something with the selected language
+                if(isfirstime){
+                    isfirstime = false;
+                    return;
+                }
+                donebtn.performClick();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Handle the case where no item is selected if needed
+            }
+        });
         donebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 vibe.vibrate(50);
                 btnpauseplay.setVisibility(View.VISIBLE);
+                btnpauseplay.setImageResource(R.drawable.stop_fill);
+                isPaused = true;
                 btnreplay.setVisibility(View.VISIBLE);
-                detectAndTranslateLanguage(editTextLetters.getText().toString());
-
+                index = 0;
+                index2 = 0;
+                if(!editTextLetters.getText().toString().isEmpty()){
+                    detectAndTranslateLanguage(editTextLetters.getText().toString());
+                }
             }
         });
     }
@@ -328,14 +367,9 @@ public class LangTranslate extends AppCompatActivity {
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
                     int result;
-                    if(outputlangugage == "id"){
-                        result = textToSpeech.setLanguage(new Locale("in"));
-                    }else if(outputlangugage == "no"){
-                        result = textToSpeech.setLanguage(new Locale("nb"));
-                    }
-                    else {
-                        result = textToSpeech.setLanguage(new Locale(outputlangugage));
-                    }
+
+                    result = textToSpeech.setLanguage(new Locale(outputlangugage));
+
                     if (result == TextToSpeech.LANG_MISSING_DATA ||
                             result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e("IN Language Translate", "TextToSpeech: Language not supported.");
@@ -350,6 +384,17 @@ public class LangTranslate extends AppCompatActivity {
                             @Override
                             public void onDone(String utteranceId) {
                                 Log.i("TTS", "utterance done");
+                                enableTextViewScroll();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        isPaused = true;
+                                        translatedTextView.setText(translatedTextView.getText().toString());
+                                        btnpauseplay.performClick();
+                                        isLast = true;
+                                    }
+                                });
+                                //
                             }
 
                             @Override
@@ -368,27 +413,53 @@ public class LangTranslate extends AppCompatActivity {
                                 end = end + index2;
                                 index = end;
                                 final int a = start, b = end;
+                                disableTextViewScroll();
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+//                                        if(b <= translatedTextView.getText().toString().length()){
+//                                            Spannable textWithHighlights = new SpannableString(translatedTextView.getText().toString());
+//                                            textWithHighlights.setSpan(new ForegroundColorSpan(Color.RED), a, b, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+//                                            translatedTextView.setText(textWithHighlights);
+//                                            // Calculate line start for the 'end' offset
+//                                            int lineStart = translatedTextView.getLayout().getLineForOffset(a);
+//                                            translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)+30));
+//                                            Log.d("Checking indexes", ""+(index+1) + " "+translatedTextView.getText().toString().length());
+//                                            if(index == translatedTextView.getText().toString().length()) {//
+//                                                btnpauseplay.performClick();
+//                                                isLast = true;//
+//                                            }
+//                                        }
 
-                                        Spannable textWithHighlights = new SpannableString(translatedTextView.getText().toString());
-                                        textWithHighlights.setSpan(new ForegroundColorSpan(Color.RED), a, b, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                                        translatedTextView.setText(textWithHighlights);
-                                        // Calculate line start for the 'end' offset
-                                        int lineStart = translatedTextView.getLayout().getLineForOffset(a);
-                                        translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)+30));
-                                        Log.d("Checking indexes", ""+(index+1) + " "+translatedTextView.getText().toString().length());
-                                        if(index == translatedTextView.getText().toString().length()) {//
-                                                    btnpauseplay.performClick();
-                                                    isLast = true;//
-                                        }
                                         // Scroll to the calculated line
 //                                        translatedTextView.scrollTo(0, lineStart*((translatedTextView.getHeight()/20)-5));
 //                                        textView.setText(textWithHighlights);
 //                                        int lineStart = textView.getLayout().getLineForOffset(b);
 //                                        textView.scrollTo(0, lineStart*((textView.getHeight()/20)-5));
+                                        Spannable textWithHighlights = new SpannableString(translatedTextView.getText().toString());
+                                        textWithHighlights.setSpan(new ForegroundColorSpan(Color.RED), a, b, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                                        translatedTextView.setText(textWithHighlights);
 
+                                        int totalLines = translatedTextView.getLayout().getLineCount();
+                                        int endLine = translatedTextView.getLayout().getLineForOffset(b);
+                                        int visibleLines = translatedTextView.getHeight() / translatedTextView.getLineHeight();
+
+                                        // Calculate the line where the last visible line is currently
+                                        int scrollY = translatedTextView.getScrollY();
+                                        int firstVisibleLine = translatedTextView.getLayout().getLineForVertical(scrollY);
+                                        int lastVisibleLine = firstVisibleLine + visibleLines - 1;
+
+                                        // Check if the end of the highlight is on or beyond the last visible line
+                                        if (endLine >= lastVisibleLine) {
+                                            // Scroll up by a specific number of lines (3 lines in this case)
+                                            int linesToScroll = 1;
+                                            int newScrollLine = Math.max(0, endLine - linesToScroll);
+                                            int newScrollY = translatedTextView.getLayout().getLineTop(newScrollLine);
+                                            translatedTextView.scrollTo(0, newScrollY);
+                                            currentScrollPosition = newScrollY;
+                                        }else {
+                                            currentScrollPosition = translatedTextView.getScrollY();
+                                        }
                                     }
                                 });
                             }
@@ -414,17 +485,16 @@ public class LangTranslate extends AppCompatActivity {
                         progressDialog.setMessage("Downloading the translation model...");
                         progressDialog.setCancelable(false);
                         progressDialog.show();
-                        MyRunnable myRunnable = new MyRunnable(LangTranslate.this,new Handler(),progressDialog);
-                        myRunnable.start();
+//                        MyRunnable myRunnable = new MyRunnable(LangTranslate.this,new Handler(),progressDialog);
+//                        myRunnable.start();
                             translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-
-                                    myRunnable.stop();
+//                                    myRunnable.stop();
                                     Task<String> result = translator.translate(sourceText).addOnSuccessListener(new OnSuccessListener<String>() {
                                         @Override
                                         public void onSuccess(String s) {
-                                            s = s+"\n ..";
+
                                             translatedTextView.setText(s); // Set the translated text in the TextView
                                             translatedTextView.setVisibility(View.VISIBLE);
                                             // Make the TextView visible
@@ -443,11 +513,24 @@ public class LangTranslate extends AppCompatActivity {
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    myRunnable.stop();
+//                                    myRunnable.stop();
                                     progressDialog.dismiss();
 
                                 }
                             });
+    }
+    private void disableTextViewScroll() {
+        translatedTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // Ignore all touch events while speaking
+                return true;
+            }
+        });
+    }
+
+    private void enableTextViewScroll() {
+        translatedTextView.setOnTouchListener(null);
     }
     private void showNoInternetDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(LangTranslate.this);
@@ -463,13 +546,21 @@ public class LangTranslate extends AppCompatActivity {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
+        long end_time = System.currentTimeMillis();
+        UserPreferences userPreferences = new UserPreferences(this);
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
+        userPreferences.addFeature(time,"Language Translate");
         super.onDestroy();
     }
     @Override
     public void onBackPressed() {
+//        finishAffinity();
         Intent intent = new Intent(LangTranslate.this,MainActivity.class);
         startActivity(intent);
-
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
         super.onBackPressed();
     }
     public class MyRunnable implements Runnable {
@@ -484,7 +575,7 @@ public class LangTranslate extends AppCompatActivity {
 
         }
         public void start() {
-            handler.postDelayed(this, 60*1000); // Run the task after 30sec milliseconds (1 second)
+//            handler.postDelayed(this, 60*1000); // Run the task after 30sec milliseconds (1 second)
         }
         public void stop() {
             handler.removeCallbacks(this); // Remove any pending callbacks
@@ -492,13 +583,13 @@ public class LangTranslate extends AppCompatActivity {
         @Override
         public void run() {
 
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    dowloading.dismiss();
-                    showNoInternetDialog();
-                }
-            });
+//            new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                @Override
+//                public void run() {
+////                    dowloading.dismiss();
+////                    showNoInternetDialog();
+//                }
+//            });
         }
     }
 }

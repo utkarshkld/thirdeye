@@ -4,11 +4,14 @@ package com.example.thirdeye;
 
 import static com.example.thirdeye.OnboardingAdapter.languageSpinner;
 
+import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -38,6 +41,7 @@ public class Onboarding extends AppCompatActivity {
     ViewPager viewPager;
     private Button button;
     public static boolean canSpeak = false;
+    public static boolean say = false;
     public static TextToSpeech textToSpeech;
     private OnboardingAdapter pagerAdapter;
     private ProgressDialog progressDialog;
@@ -69,6 +73,7 @@ public class Onboarding extends AppCompatActivity {
         progressDialog2.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         width = displayMetrics.widthPixels;
         vibe  = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        canSpeak = false;
         // Initialize ViewPager and Button
         pagerAdapter = new OnboardingAdapter(this);
         viewPager.setAdapter(pagerAdapter);
@@ -76,6 +81,14 @@ public class Onboarding extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Setting Language ....");
         initializetexttospeech();
+        UserPreferences userPreferences = new UserPreferences(this);
+        Location location = AnalyticsManager.getLocation(this);
+        String Country = "";
+        if(location!=null){
+            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
+        }
+
+        userPreferences.saveCountry(Country);
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
@@ -123,11 +136,17 @@ public class Onboarding extends AppCompatActivity {
                     downloadlanguage();
                 }else{
                     if (currentItem < pageCount - 1) {
+
+//                            say = true;
+
                         viewPager.setCurrentItem(currentItem + 1);
                     } else {
+//                        say = true;
+                        trackAppInstallation(Onboarding.this);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("isFirstRun", "Yes");
                         editor.apply();
+
                         startMainActivity();
                     }
                 }
@@ -187,9 +206,33 @@ public class Onboarding extends AppCompatActivity {
     }
     @Override
     public void onDestroy(){
-        textToSpeech.shutdown();
+        canSpeak = false;
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
         super.onDestroy();
     }
+    @Override
+    public void onBackPressed(){
+        canSpeak = false;
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onBackPressed();
+    }
+    @Override
+    public void onPause(){
+        canSpeak = false;
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onPause();
+    }
+
+
     public void insertSingleTodo(String language,String inputlang,String trans_input,boolean blindness,float speech_rate) {
         Settings settings = new Settings(language,inputlang,trans_input,blindness,speech_rate);
         InsertAsyncTask insertAsyncTask = new InsertAsyncTask();
@@ -210,6 +253,7 @@ public class Onboarding extends AppCompatActivity {
             progressDialog.dismiss();
             pagerAdapter = new OnboardingAdapter(Onboarding.this);
             canSpeak = true;
+            say = true;
             viewPager.setAdapter(pagerAdapter);
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
             super.onPostExecute(unused);
@@ -254,6 +298,7 @@ public class Onboarding extends AppCompatActivity {
     }
     // Method to start the main activity
     private void startMainActivity() {
+
         Intent intent = new Intent(Onboarding.this, MainActivity.class);
         startActivity(intent);
         finish(); // Finish the current activity to prevent returning to it on back press

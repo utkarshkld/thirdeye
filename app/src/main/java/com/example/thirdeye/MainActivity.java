@@ -1,14 +1,16 @@
 package com.example.thirdeye;
 
 //import static androidx.camera.core.impl.utils.ContextUtil.getApplicationContext;
-import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
-
-import static java.lang.Integer.parseInt;
+//import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -18,7 +20,6 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
@@ -26,18 +27,27 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.Credentials;
+import com.google.android.gms.auth.api.credentials.CredentialsClient;
+import com.google.android.gms.auth.api.credentials.HintRequest;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,19 +59,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static int objdetfps;
     private long compasstime = 0;
     public static boolean deviceHasFlash = false;
+    private GoogleApiClient apiClient;
     private long currtime = 0;
     public static HashMap<String, String> translationMap = new HashMap<>();
+    private final int CREDENTIAL_PICKER_REQUEST = 120;
     private String currdirection;
     public static HashMap<String,String> languageMap = new HashMap<>();
     public static HashMap<String,Map<String,String>> langnamemap = new HashMap<>();
     private static final int SPEECH_REQUEST_CODE = 1;
+    private long starting_time = 0;
     private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
     public static TextToSpeech textToSpeech;
+    private static final int RESOLVE_HINT = 100;
     public static String speaklang;
     private MicHandler shakeListener;
     private int i = 0;
-    private ImageView eyebtn;
-    private ImageButton settingbtn;
+    private CardView eyebtn;
+    private CardView settingbtn;
     private String UserDeafultLanguage = Locale.getDefault().getLanguage();
     public static String output_lang = null;
     public static float speech_rate;
@@ -79,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float[] accelerometerData = new float[3];
     private float[] magnetometerData = new float[3];
+    private CredentialsClient credentialsClient;
+    private ActivityResultLauncher<Intent> getPhoneNumberLauncher;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -86,14 +102,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         objdetfps = 30;
-        trackAppInstallation(this,"Home Page");
+//        trackAppInstallation(this);
         pm = getPackageManager();
         deviceHasFlash = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
         final String formatedIpAddress = Formatter.formatIpAddress(ipAddress);
         Log.d("ip adress",formatedIpAddress+" "+ipAddress);
-        fpsnumber = findViewById(R.id.fpsnumber);
+//        fpsnumber = findViewById(R.id.fpsnumber);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
             // Accelerometer sensor is available on this device
@@ -108,6 +124,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Magnetometer sensor is not available on this device
             magnetometer = null;
         }
+
+
+
+
+
+
+        // Call the getPhoneNumber method when needed
+
+
+        starting_time = System.currentTimeMillis();
 //        initializeLanguageMap();
 //        translationmap.initializetransMap();
         //Commands are Translated
@@ -148,9 +174,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
             long temp = System.currentTimeMillis();
-            if(temp-currtime >= 1000) {
+            if(temp-currtime >= 3000) {
                 currtime = temp;
-                Toast.makeText(MainActivity.this, "Shake detected!", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Shake detected!", Toast.LENGTH_SHORT).show();
                 startRecording();
             }
         });
@@ -177,13 +203,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View view) {
                 vibe.vibrate(50);
                 speaktext(translationMap.get(speaklang+"_"+"opening object"));
-                Intent intent = new Intent(MainActivity.this, cMainActivity.class);
-                if(!fpsnumber.getText().toString().isEmpty())
-                {
-                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
-                }
+                Intent intent = new Intent(MainActivity.this, Yolodetection.class);
+//                if(!fpsnumber.getText().toString().isEmpty())
+//                {
+//                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
+//                }
 
-                intent.putExtra("flash",false);
+//                intent.putExtra("flash",false);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
             }
@@ -210,6 +236,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
         getAllSettings(this::onSettingsListLoaded);// loading all settings
+        scheduleMidnightApiCall(this);
+//        requestHint();
     }
     public void insertSingleTodo(String language,String inputlang,String trans_input,boolean blindness,float speech_rate) {
         Settings settings = new Settings(language,inputlang,trans_input,blindness,speech_rate);
@@ -395,10 +423,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }).start();
     }
+    // Construct a request for phone numbers and show the picker
+    private void getPhoneNumber() throws IntentSender.SendIntentException {
+        HintRequest hintRequest = new HintRequest.Builder()
+                .setPhoneNumberIdentifierSupported(true)
+                .build();
+//
+        PendingIntent intent = Auth.CredentialsApi.getHintPickerIntent(
+                apiClient, hintRequest);
+//        startIntentSenderForResult(intent.getIntentSender(),
+//                RESOLVE_HINT, null, 0, 0, 0);
+//        getPhoneNumberLauncher.launch(getPhoneNumberIntent);
+    }
+
+    // Obtain the phone number from the result
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        if (requestCode == RESOLVE_HINT) {
+            if (resultCode == RESULT_OK && data != null) {
+                Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
+                if (credential != null) {
+                    String phoneNumber = credential.getId(); // Process the phone number string
+                    // Use the phone number as needed
+                    Log.d("The Phone Number",""+phoneNumber);
+                }
+            }
+        }
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (matches != null && !matches.isEmpty()) {
@@ -418,11 +470,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             int m = str2.length();
                             if (partialmatch(str2, str, m, n,0.6f)) {
                                 speaktext(translationMap.get(speaklang + "_" + "opening object"));
-                                Intent intent = new Intent(MainActivity.this, cMainActivity.class);
-                                if(!fpsnumber.getText().toString().isEmpty())
-                                {
-                                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
-                                }
+                                Intent intent = new Intent(MainActivity.this, Yolodetection.class);
+//                                if(!fpsnumber.getText().toString().isEmpty())
+//                                {
+//                                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
+//                                }
                                 startActivity(intent);
 //                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
                                 ismatched = true;
@@ -601,7 +653,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     @Override
     public void onBackPressed(){
+//        finishAffinity();
 //        super.onBackPressed();
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        sensorManager.unregisterListener(this);
         Intent startMain = new Intent(Intent.ACTION_MAIN);
         startMain.addCategory(Intent.CATEGORY_HOME);
         startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -634,12 +692,59 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+
         sensorManager.unregisterListener(this);
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
+
         shakeListener.onDestroy();
+        long end_time = System.currentTimeMillis();
+        UserPreferences userPreferences = new UserPreferences(this);
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
+        userPreferences.addFeature(time,"Home Page");
+        Log.d("Duration check",""+time+" "+userPreferences.getFeatureListAsJsonArray());
+        super.onDestroy();
+
+    }
+    public static void scheduleMidnightApiCall(Context context) {
+        // Get the AlarmManager service
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // Create an intent to trigger the BroadcastReceiver
+        Intent intent = new Intent(context, MidnightApiCallReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // Set the alarm to start at midnight
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        // If the time is in the past, add one day
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        // Set a repeating alarm to trigger every day at midnight
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+
+        Log.d("MainActivity", "Midnight API call scheduled");
+//        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//
+//        // Create an intent to trigger the BroadcastReceiver
+//        Intent intent = new Intent(context, MidnightApiCallReceiver.class);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+//
+//        // Set the alarm to start immediately and repeat every 10 seconds for testing
+//        long triggerTime = SystemClock.elapsedRealtime();
+//        long interval = 10 * 1000; // 10 seconds in milliseconds
+//
+//        // Set a repeating alarm to trigger every 10 seconds
+//        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime, interval, pendingIntent);
+//
+//        Log.d("MainActivity", "API call scheduled for every 10 seconds for testing");
     }
 }
