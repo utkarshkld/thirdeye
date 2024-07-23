@@ -1,39 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rellayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/rellayout"
-    tools:context=".TextSpeech"
-    android:background="@color/backgroud">
+    android:background="@color/backgroud"
+    tools:context=".TextSpeech">
 
     <!-- Right-aligned buttons -->
 
     <LinearLayout
+        android:id="@+id/llTitleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/llTitleBar"
-        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
         android:layout_marginBottom="-3dp"
         android:background="@color/black"
-        android:layout_alignParentTop="true">
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/exitbtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginStart="@dimen/_22sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
             android:background="@drawable/imagebutton_background"
+            android:contentDescription="Back"
             android:foreground="@drawable/ripple_card"
             android:padding="10dp"
-            android:src="@drawable/previous"
-            android:contentDescription="Back"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:layout_marginBottom="@dimen/_10sdp"
-            android:layout_marginStart="@dimen/_22sdp"
-            android:layout_marginEnd="@dimen/_10sdp"/>
+            android:src="@drawable/previous" />
     </LinearLayout>
 
 
@@ -41,26 +39,23 @@
         android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/llTitleBar"/>
+        android:layout_below="@+id/llTitleBar" />
 
 
     <SeekBar
         android:id="@+id/zoombar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription="Zoom Bar"
         android:layout_below="@+id/llTitleBar"
         android:layout_marginTop="20dp"
+        android:contentDescription="Zoom Bar"
         android:max="50"
+        android:padding="20dp"
         android:progress="18"
         android:progressTint="#A8FFFFFF"
-        android:padding="20dp"
         android:thumb="@drawable/custom_seekbar_thumb"
 
-         />
-
-
-
+        />
 
 
 </RelativeLayout>

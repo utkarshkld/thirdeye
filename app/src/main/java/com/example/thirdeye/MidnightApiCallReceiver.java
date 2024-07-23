@@ -41,6 +41,7 @@ public class MidnightApiCallReceiver extends BroadcastReceiver {
         new ApiCallTask(context).execute();
     }
 
+    // Function to make Api call at midnight
     public static class ApiCallTask extends AsyncTask<Void, Void, String> {
         private Context context;
 
@@ -54,18 +55,18 @@ public class MidnightApiCallReceiver extends BroadcastReceiver {
             try {
                 // Replace with your API URL
                 URL url = new URL("https://zoblik.com/api/save_user_analytics.php");
-                Log.d("Checking call made hello before","hello hello");
+                Log.d("Checking call made hello before", "hello hello");
 
                 // Create JSON object with your data
                 JSONObject eventData = new JSONObject();
                 UserPreferences userPreferences = new UserPreferences(context);
-                eventData.put("user_id",userPreferences.getUserId());
+                eventData.put("user_id", userPreferences.getUserId());
                 eventData.put("data", userPreferences.getFeatureListAsJsonArray());  // Replace with your data
 
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
-                Log.d("checking Json analytics",""+eventData.toString());
+                Log.d("checking Json analytics", "" + eventData.toString());
                 conn.setDoOutput(true);
 
                 // Write the JSON data to the output stream
@@ -92,7 +93,7 @@ public class MidnightApiCallReceiver extends BroadcastReceiver {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.d("Checking call made hello after","hello hello");
+            Log.d("Checking call made hello after", "hello hello");
             if (result != null) {
                 new UserPreferences(context).clearFeatureList();
                 Log.d("ApiCallTask saving analytics", "API Response: " + result);

@@ -1,7 +1,5 @@
 package com.example.thirdeye;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -16,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.text.format.Formatter;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -29,7 +26,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,41 +39,39 @@ import java.util.Locale;
 
 public class AnalyticsManager {
 
-    public static void trackAppInstallation(Context context ) {
+    // Method to track app installation
+    public static void trackAppInstallation(Context context) {
         JSONObject eventData = new JSONObject();
         try {
-//            eventData.put("event", eventName);
-//            eventData.put("user_id", getDeviceId(context)); // Using device ID as user ID
             eventData.put("device_id", getDeviceId(context));
             eventData.put("phone_numbers", getPhoneNumbers(context));
             eventData.put("ip_address", getIpAddress(context));
+
             Location location = getLocation(context);
             if (location != null) {
-                eventData.put("location", getAddress(context,location.getLatitude(), location.getLongitude()));
+                eventData.put("location", getAddress(context, location.getLatitude(), location.getLongitude()));
                 eventData.put("city", getCity(context, location.getLatitude(), location.getLongitude()));
-//                eventData.put("location", location.);
-//                eventData.put("city", "india");
-            }else{
+            } else {
                 eventData.put("location", "N/A");
                 eventData.put("city", "N/A");
             }
+
             eventData.put("phone_type", getPhoneType());
             eventData.put("model", getModel());
-            eventData.put("os_version", "Android"+getAndroidVersion());
+            eventData.put("os_version", "Android" + getAndroidVersion());
             eventData.put("network_type", getNetworkType(context));
             eventData.put("locale", getLocale());
-            Log.d("checking json format",""+eventData);
-//            sendDataToServer(eventData);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    new InsertFeedbackAsyncTask(context,eventData).execute();
-                }
-            }).start();
+
+            Log.d("checking json format", "" + eventData);
+
+            // Send data to server asynchronously
+            new Thread(() -> new InsertFeedbackAsyncTask(context, eventData).execute()).start();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    // Method to get the address from latitude and longitude
     public static String getAddress(Context context, double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
@@ -97,18 +91,21 @@ public class AnalyticsManager {
         }
         return "Unknown Address";
     }
+
+    // AsyncTask to send data to server
     public static class InsertFeedbackAsyncTask extends AsyncTask<Void, Void, Void> {
         JSONObject jsonData;
         Context context;
 
-        public InsertFeedbackAsyncTask(Context context,JSONObject jsonData) {
+        public InsertFeedbackAsyncTask(Context context, JSONObject jsonData) {
             this.jsonData = jsonData;
             this.context = context;
         }
+
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                sendDataToServer(jsonData,context);
+                sendDataToServer(jsonData, context);
             } catch (IOException | JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -116,15 +113,18 @@ public class AnalyticsManager {
         }
     }
 
-    public static void sendDataToServer(JSONObject eventData,Context context) throws IOException, JSONException {
-        Log.d("Json object",""+eventData);
+    // Method to send data to the server
+    public static void sendDataToServer(JSONObject eventData, Context context) throws IOException, JSONException {
+        Log.d("Json object", "" + eventData);
         HttpClient httpclient = new DefaultHttpClient();
         HttpPost httppost = new HttpPost("https://zoblik.com/api/save_user_data.php");
         StringEntity se = new StringEntity(eventData.toString());
         httppost.setEntity(se);
-                    Log.d("feedback rating", eventData.toString());
+        Log.d("feedback rating", eventData.toString());
         // Set content type of the request body
-        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));                    // Execute HTTP Post Request
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+
+        // Execute HTTP Post Request
         HttpResponse response = httpclient.execute(httppost);
         HttpEntity httpEntity = response.getEntity();
         InputStream is = httpEntity.getContent();
@@ -135,7 +135,7 @@ public class AnalyticsManager {
             sb.append(line).append("\n");
         }
         reader.close();
-        Log.d("feedback hello",""+sb);
+        Log.d("feedback hello", "" + sb);
         JSONObject jsonResponse = new JSONObject(sb.toString());
         if (jsonResponse.has("user_id")) {
             String userId = jsonResponse.getString("user_id");
@@ -148,16 +148,14 @@ public class AnalyticsManager {
         }
     }
 
-
-
-    // Other tracking methods...
-
+    // Method to get the device ID
     @SuppressLint("HardwareIds")
     private static String getDeviceId(Context context) {
         String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         return androidId != null ? androidId : Build.SERIAL;
     }
 
+    // AsyncTask to get IP address
     private static class GetIpAddressTask extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -171,6 +169,8 @@ public class AnalyticsManager {
             }
         }
     }
+
+    // Method to get the country from latitude and longitude
     public static String getCountry(Context context, double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
@@ -187,24 +187,23 @@ public class AnalyticsManager {
         return null;
     }
 
+    // Method to get the IP address
     private static String getIpAddress(Context context) {
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         int ipAddress = wm.getConnectionInfo().getIpAddress();
         int temp = ipAddress;
         String binarystring = "";
-        while(temp!=0){
-            binarystring +=  Integer.toString(temp%2); ;
+        while (temp != 0) {
+            binarystring += Integer.toString(temp % 2);
             temp /= 2;
         }
 
-
         final String formatedIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff), (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
-        Log.d("ip adress",""+formatedIpAddress+" "+ipAddress+" "+binarystring);
+        Log.d("ip adress", "" + formatedIpAddress + " " + ipAddress + " " + binarystring);
         return formatedIpAddress;
-
-//        return ip;
     }
 
+    // Method to get the location
     public static Location getLocation(Context context) {
         Location location = null;
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -223,13 +222,15 @@ public class AnalyticsManager {
         }
         return location;
     }
+
+    // Method to get the phone numbers
     private static String getPhoneNumbers(Context context) {
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             return "Not Granted";
         }
         String phoneNumber = telephonyManager.getLine1Number();
-        Log.d("Phone Number checking",""+phoneNumber);
+        Log.d("Phone Number checking", "" + phoneNumber);
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             // Use the phone number
             Log.d("Phone Number checking", phoneNumber);
@@ -242,7 +243,7 @@ public class AnalyticsManager {
         return "N.A";
     }
 
-
+    // Method to get the city from latitude and longitude
     private static String getCity(Context context, double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
@@ -256,33 +257,23 @@ public class AnalyticsManager {
         return null;
     }
 
+    // Method to get the phone type
     private static String getPhoneType() {
         return Build.MANUFACTURER + " " + Build.MODEL;
     }
 
+    // Method to get the model of the phone
     private static String getModel() {
         return Build.MODEL;
     }
 
+    // Method to get the Android version
     private static String getAndroidVersion() {
         return Build.VERSION.RELEASE;
     }
 
+    // Method to get the network type
     private static String getNetworkType(Context context) {
-//        try {
-//            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-//            if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
-//                if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
-//                    return "Wifi";
-//                } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
-//                    return "Mobile";
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
@@ -330,10 +321,12 @@ public class AnalyticsManager {
         return "?";
     }
 
+    // Method to get the locale
     private static String getLocale() {
         return Locale.getDefault().toString();
     }
 
+    // Method to get the location from GPS
     private static Location getLocationFromGps(Context context) {
         Location location = null;
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -353,4 +346,3 @@ public class AnalyticsManager {
         return location;
     }
 }
-

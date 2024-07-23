@@ -1,78 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rellayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/rellayout"
-    tools:context=".TextSpeech"
-    android:background="@color/backgroud">
+    android:background="@color/backgroud"
+    tools:context=".TextSpeech">
 
     <!-- Right-aligned buttons -->
 
     <LinearLayout
+        android:id="@+id/llTitleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/llTitleBar"
-        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
         android:layout_marginBottom="-3dp"
         android:background="@color/black"
-        android:layout_alignParentTop="true">
+        android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/exitbtntexttospeech"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:id="@+id/exitbtntexttospeech"
 
-            android:contentDescription="Back button"
-            android:src="@drawable/previous"
-            android:layout_marginTop="@dimen/_15sdp"
-            android:layout_marginBottom="@dimen/_15sdp"
             android:layout_marginStart="@dimen/_22sdp"
-            android:layout_marginEnd="@dimen/_10sdp"/>
+            android:layout_marginTop="@dimen/_15sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_15sdp"
+            android:contentDescription="Back button"
+            android:src="@drawable/previous" />
+
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
-<!--        <LinearLayout-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:background="@drawable/textbackground"-->
+            android:layout_weight="1" />
+        <!--        <LinearLayout-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:background="@drawable/textbackground"-->
 
-<!--            android:layout_marginTop="@dimen/_20sdp"-->
+        <!--            android:layout_marginTop="@dimen/_20sdp"-->
 
-<!--            android:layout_marginBottom="@dimen/_16sdp"-->
+        <!--            android:layout_marginBottom="@dimen/_16sdp"-->
 
-<!--            >-->
-<!--            <Spinner-->
-<!--                android:id="@+id/detectlnguage"-->
-<!--                android:layout_width="150dp"-->
-<!--                android:layout_height="52dp"-->
-<!--                android:popupBackground="@drawable/spinner_popup"-->
-<!--                android:overlapAnchor="false"-->
-<!--                android:dropDownWidth="150dp"-->
+        <!--            >-->
+        <!--            <Spinner-->
+        <!--                android:id="@+id/detectlnguage"-->
+        <!--                android:layout_width="150dp"-->
+        <!--                android:layout_height="52dp"-->
+        <!--                android:popupBackground="@drawable/spinner_popup"-->
+        <!--                android:overlapAnchor="false"-->
+        <!--                android:dropDownWidth="150dp"-->
 
-<!--                android:padding="3dp"-->
-<!--                android:contentDescription="Text Language"-->
+        <!--                android:padding="3dp"-->
+        <!--                android:contentDescription="Text Language"-->
 
-<!--                /></LinearLayout>-->
+        <!--                /></LinearLayout>-->
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
+
         <Button
             android:id="@+id/micButton1"
             android:layout_width="70dp"
             android:layout_height="70dp"
 
             android:layout_gravity="center"
-            android:contentDescription="Mic Button"
-            android:background="@drawable/mic_ripple" />
+            android:background="@drawable/mic_ripple"
+            android:contentDescription="Mic Button" />
 
     </LinearLayout>
-
 
 
     <SurfaceView
@@ -81,9 +80,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/btnTakePicture"
+        android:layout_below="@+id/llTitleBar"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/llTitleBar"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
 
@@ -112,30 +111,27 @@
     <!--    </LinearLayout>-->
 
 
-
-
     <TextView
         android:id="@+id/textView"
-        android:layout_marginTop="@dimen/_20sdp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/btnTakePicture"
         android:layout_below="@+id/llTitleBar"
         android:layout_alignParentStart="true"
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginBottom="@dimen/_20sdp"
-        android:scrollbars="vertical"
         android:contentDescription="Detected Text"
-        />
+        android:scrollbars="vertical" />
 
     <ImageButton
         android:id="@+id/btnReplay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/btnTakePicture"
+        android:layout_alignParentBottom="true"
         android:layout_marginRight="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_30sdp"
+        android:layout_toLeftOf="@id/btnTakePicture"
         android:background="@drawable/imagebutton_background"
-        android:layout_alignParentBottom="true"
 
         android:contentDescription="Replay"
         android:foreground="@drawable/ripple_card"
@@ -145,25 +141,25 @@
         android:id="@+id/btnTakePicture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:foreground="@drawable/ripple_card"
-        android:layout_centerHorizontal="true"
-        android:contentDescription="Take or Retake"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/_30sdp"
         android:background="@drawable/imagebutton_background"
+        android:contentDescription="Take or Retake"
+        android:foreground="@drawable/ripple_card"
         android:src="@drawable/camera_icon" />
 
     <ImageButton
         android:id="@+id/btnPausePlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Play or Pause"
         android:layout_alignParentBottom="true"
-        android:foreground="@drawable/ripple_card"
         android:layout_marginLeft="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_30sdp"
-        android:background="@drawable/imagebutton_background"
         android:layout_toRightOf="@+id/btnTakePicture"
+        android:background="@drawable/imagebutton_background"
+        android:contentDescription="Play or Pause"
+        android:foreground="@drawable/ripple_card"
         android:src="@drawable/stop_fill" />
 
 

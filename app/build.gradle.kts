@@ -19,9 +19,6 @@ android {
         multiDexEnabled =true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-//    buildFeatures{
-//        dataBinding = true
-//    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -49,15 +46,6 @@ android {
             path = file("src/main/jni/CMakeLists.txt")
         }
     }
-
-
-//    buildFeatures {
-//        mlModelBinding = true
-//        viewBinding = true
-//    }
-//    androidResources{
-//        noCompress("tflite")
-//    }
 
         packagingOptions {
             pickFirst ("META-INF/DEPENDENCIES")
@@ -125,13 +113,11 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
-//    implementation ("com.google.android.gms:play-services-auth:21.1.1")
-//    implementation ("com.google.android.gms:play-services-auth-api-phone:18.0.2")
-//    implementation ("com.google.android.gms:play-services-auth:19.0.0")
     implementation ("com.google.android.gms:play-services-auth:20.2.0")
     implementation ("com.google.android.gms:play-services-identity:17.0.0")
     implementation ("com.google.android.gms:play-services-auth-api-phone:17.4.0")
     implementation ("com.google.android.gms:play-services-base:17.3.0")
+    implementation ("com.google.android.play:app-update:2.1.0")
 
 
 }

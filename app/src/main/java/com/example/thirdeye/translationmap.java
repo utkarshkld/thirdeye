@@ -55,6 +55,8 @@ public class translationmap {
              objectTranslations.add("വസ്തുവിന്റെ"); // Malayalam
              objectTranslations.add("oġġett"); // Maltese
              objectTranslations.add("ऑब्जेक्ट"); // Marathi
+             objectTranslations.add("वास्तु");
+
              objectTranslations.add("objekt"); // Norwegian
              objectTranslations.add("obiekt"); // Polish
              objectTranslations.add("objeto"); // Portuguese
@@ -143,6 +145,7 @@ public class translationmap {
              readTranslations.add("পড়া"); // Bengali
              readTranslations.add("পাড়া");
              readTranslations.add("পাড়া");
+             readTranslations.add("पढ़े");
              readTranslations.add("रीड"); // hindi 2
              readTranslations.add("రీడ్");//telugu 2
              readTranslations.add("রিড");//bengali2

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/backgroud"
     tools:context=".FeedbackActivity">
+
     <LinearLayout
         android:id="@+id/llTitleBar"
         android:layout_width="match_parent"
@@ -18,233 +19,233 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
+            android:id="@+id/backbtnfeedback"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:id="@+id/backbtnfeedback"
-            android:contentDescription="Back"
-            android:background="@drawable/imagebutton_background"
-            android:padding="10dp"
-            android:foreground="@drawable/ripple_card"
-            android:src="@drawable/previous"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:layout_marginBottom="@dimen/_10sdp"
             android:layout_marginStart="@dimen/_10sdp"
-            android:layout_marginEnd="@dimen/_10sdp"/>
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:background="@drawable/imagebutton_background"
+            android:contentDescription="Back"
+            android:foreground="@drawable/ripple_card"
+            android:padding="10dp"
+            android:src="@drawable/previous" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/llTitleBar"
-        >
+        app:layout_constraintTop_toBottomOf="@id/llTitleBar">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/scrollableview"
-        android:orientation="vertical"
-        >
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:padding="10dp"
-        android:text="How would you rate our read function?"
-        android:textColor="@color/white"
-        android:textSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llTitleBar" />
-
-    <RadioGroup
-        android:id="@+id/groupradio"
-        android:layout_width="389dp"
-        android:layout_height="193dp"
-        android:layout_marginLeft="20dp"
-        android:padding="1dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView">
-
-        <!-- In RadioGroup create the 1 Radio Button-->
-        <!-- like this we will add some more Radio Button-->
-        <RadioButton
-            android:id="@+id/radia_id1"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Average"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:id="@+id/radia_id2"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Good"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:id="@+id/radia_id3"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Very Good"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:id="@+id/radia_id4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:text="Awesome"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-    </RadioGroup>
-
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:text="What rating would you give our\nobject detection function?"
-        android:textColor="@color/white"
-        android:textSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/groupradio" />
-
-    <RadioGroup
-        android:id="@+id/groupradio2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:padding="1dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2">
-
-        <!-- In RadioGroup create the 1 Radio Button-->
-        <!-- like this we will add some more Radio Button-->
-        <RadioButton
-            android:id="@+id/radia_id11"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Average"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:id="@+id/radia_id12"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Good"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:id="@+id/radia_id13"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Very Good"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:id="@+id/radia_id14"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Awesome"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-    </RadioGroup>
-        <TextView
-            android:id="@+id/textView3"
+        <LinearLayout
+            android:id="@+id/scrollableview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="What rating would you give our\nTranslation function?"
-            android:textColor="@color/white"
-            android:textSize="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/groupradio" />
+            android:orientation="vertical">
 
-        <RadioGroup
-            android:id="@+id/groupradio3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:padding="1dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2">
-
-            <!-- In RadioGroup create the 1 Radio Button-->
-            <!-- like this we will add some more Radio Button-->
-            <RadioButton
-                android:id="@+id/radia_id21"
-                android:layout_width="fill_parent"
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Average"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                android:text="How would you rate our read function?"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textSize="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/llTitleBar" />
 
-            <RadioButton
-                android:id="@+id/radia_id22"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Good"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+            <RadioGroup
+                android:id="@+id/groupradio"
+                android:layout_width="389dp"
+                android:layout_height="193dp"
+                android:layout_marginLeft="20dp"
+                android:padding="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView">
 
-            <RadioButton
-                android:id="@+id/radia_id23"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Very Good"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                <!-- In RadioGroup create the 1 Radio Button-->
+                <!-- like this we will add some more Radio Button-->
+                <RadioButton
+                    android:id="@+id/radia_id1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Average"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
 
-            <RadioButton
-                android:id="@+id/radia_id24"
-                android:layout_width="fill_parent"
+                <RadioButton
+                    android:id="@+id/radia_id2"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Good"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id3"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Very Good"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id4"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="Awesome"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+            </RadioGroup>
+
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Awesome"
+                android:padding="10dp"
+                android:text="What rating would you give our\nobject detection function?"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
-        </RadioGroup>
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="500dp"/>
-    </LinearLayout>
+                android:textSize="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/groupradio" />
+
+            <RadioGroup
+                android:id="@+id/groupradio2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:padding="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+                <!-- In RadioGroup create the 1 Radio Button-->
+                <!-- like this we will add some more Radio Button-->
+                <RadioButton
+                    android:id="@+id/radia_id11"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Average"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id12"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Good"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id13"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Very Good"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id14"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Awesome"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="What rating would you give our\nTranslation function?"
+                android:textColor="@color/white"
+                android:textSize="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/groupradio" />
+
+            <RadioGroup
+                android:id="@+id/groupradio3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:padding="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+                <!-- In RadioGroup create the 1 Radio Button-->
+                <!-- like this we will add some more Radio Button-->
+                <RadioButton
+                    android:id="@+id/radia_id21"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Average"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id22"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Good"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id23"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Very Good"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <RadioButton
+                    android:id="@+id/radia_id24"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Awesome"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+            </RadioGroup>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="500dp" />
+        </LinearLayout>
     </ScrollView>
+
     <Button
         android:id="@+id/buttonsubmit"
         android:layout_width="300dp"
         android:layout_height="70dp"
         android:layout_marginBottom="@dimen/_10sdp"
-        android:text="SUBMIT"
         android:backgroundTint="@color/black"
+        android:text="SUBMIT"
         android:textSize="25dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

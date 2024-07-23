@@ -17,19 +17,24 @@ package com.example.thirdeye;
 import android.content.res.AssetManager;
 import android.view.Surface;
 
-public class Yolov8Ncnn
-{
+public class Yolov8Ncnn {
+    // Native method to load the model with specified model ID and CPU/GPU usage
     public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
 
-    public static native String [] getObjectlist();
-//    public  native boolean ChangeZoomRatio(float ratio);
+    // Static native method to get the list of objects
+    public static native String[] getObjectlist();
 
-    public native boolean openCamera(int facing,float magnifyinglevel);
+    // Native method to open the camera with specified facing direction and magnifying level
+    public native boolean openCamera(int facing, float magnifyinglevel);
+
+    // Native method to close the camera
     public native boolean closeCamera();
+
+    // Native method to set the output window where the camera preview will be displayed
     public native boolean setOutputWindow(Surface surface);
 
+    // Load the native library "yolov8ncnn"
     static {
         System.loadLibrary("yolov8ncnn");
-
     }
 }

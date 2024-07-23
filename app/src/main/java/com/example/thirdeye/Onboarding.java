@@ -1,10 +1,8 @@
 package com.example.thirdeye;
 
 
-
-import static com.example.thirdeye.OnboardingAdapter.languageSpinner;
-
 import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+import static com.example.thirdeye.OnboardingAdapter.languageSpinner;
 import static com.example.thirdeye.OnboardingAdapter.speakText;
 
 import android.app.AlertDialog;
@@ -14,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -51,10 +48,10 @@ public class Onboarding extends AppCompatActivity {
     private ProgressDialog progressDialog;
     public static ProgressDialog progressDialog2;
     private boolean blindness;
-    private String input_lang,trans_input;
+    private String input_lang, trans_input;
     private List<TranslatorOptions> optionslist;
     private Vibrator vibe;
-    public static String output_lang="en";
+    public static String output_lang = "en";
     private float speech_rate;
 
     public static int width;
@@ -67,16 +64,15 @@ public class Onboarding extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         viewPager = findViewById(R.id.viewPager);
         button = findViewById(R.id.buttonNextonboard);
-//        textToSpeech = SplashScreen.textToSpeech;
-//        textToSpeech.setSpeechRate(0.8f);
+
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         progressDialog2 = new ProgressDialog(this);
-        progressDialog2.setMessage("Downloading Language Models..."+"\n"+"This process may take time depending on internet speed");
+        progressDialog2.setMessage("Downloading Language Models..." + "\n" + "This process may take time depending on internet speed");
         progressDialog2.setCancelable(false);
         progressDialog2.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         width = displayMetrics.widthPixels;
-        vibe  = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         canSpeak = false;
         // Initialize ViewPager and Button
         pagerAdapter = new OnboardingAdapter(this);
@@ -109,11 +105,11 @@ public class Onboarding extends AppCompatActivity {
         // Check if it's the first run of the app
         SharedPreferences preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String firstTime = preferences.getString("isFirstRun", "");
-        Log.d("checking first run",firstTime);
+        Log.d("checking first run", firstTime);
         if (firstTime.equals("")) {
             // If it's the first run, set the flag in SharedPreferences
 //             Listen for page changes in ViewPager
-            SharedPreferences preferencesDate = getSharedPreferences("installDate",MODE_PRIVATE);
+            SharedPreferences preferencesDate = getSharedPreferences("installDate", MODE_PRIVATE);
             SharedPreferences.Editor editor = preferencesDate.edit();
             editor.putLong("TIME_MILLI_SEC", System.currentTimeMillis());
             editor.apply();
@@ -125,52 +121,47 @@ public class Onboarding extends AppCompatActivity {
             }).start();
         } else {
             // If not the first run, directly start the main activity
-
-            SharedPreferences preferencesDate = getSharedPreferences("installDate",MODE_PRIVATE);
+            // Checks the code is in testing phase
+            SharedPreferences preferencesDate = getSharedPreferences("installDate", MODE_PRIVATE);
             // remove this code for testing phase
-            if(System.currentTimeMillis() - preferencesDate.getLong("TIME_MILLI_SEC",0) < 604800000){
+            if (System.currentTimeMillis() - preferencesDate.getLong("TIME_MILLI_SEC", 0) < 604800000) {
                 startMainActivity();
-            }else{
+            } else {
                 showOpenSettingsAlertDialog();
             }
+            // Checks whether the code is Testing Phase
+            // Call below Directly if not in testing phase
 //            startMainActivity();
 
         }
+        // Handling the Next Button
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 vibe.vibrate(50);
                 int currentItem = viewPager.getCurrentItem();
-                if(currentItem == 0){
-                    // Add in database
-//                    speech_rate = 1f;
-//                    output_lang = OnboardingAdapter.languageMap.get(languageSpinner.getSelectedItem().toString());
-//                    blindness = false;
-//                    input_lang = "English";
-//                    trans_input = "en";
-//                    insertSingleTodo(output_lang,input_lang,trans_input,blindness,speech_rate);
-//                    pagerAdapter = new OnboardingAdapter(Onboarding.this);
-//                    viewPager.setAdapter(pagerAdapter);
+                if (currentItem == 0) {
+                    // If first page then download the necessary languages
                     downloadlanguage();
-                }else{
+                } else {
                     if (currentItem < pageCount - 1) {
-
-//                            say = true;
-
+                        // Move to next page
                         viewPager.setCurrentItem(currentItem + 1);
                     } else {
-//                        say = true;
+
+                        // call the api to track device insallations
                         trackAppInstallation(Onboarding.this);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("isFirstRun", "Yes");
                         editor.apply();
-
                         startMainActivity();
                     }
                 }
             }
         });
     }
+
+    // Testing period Alert Dialog
     private void showOpenSettingsAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Can't Open the App");
@@ -185,17 +176,20 @@ public class Onboarding extends AppCompatActivity {
         builder.setCancelable(false);
         builder.show();
     }
+
     public interface SettingsListCallback {
         void onSettingsListLoaded(List<Settings> settingsList);
     }
+
     public void onSettingsListLoaded(List<Settings> settingsList) {
         List<Settings> finalset = settingsList;
-        for(Settings t : finalset){
-            Log.d("Delete",t.toString());
+        for (Settings t : finalset) {
+            Log.d("Delete", t.toString());
             deleteATodo(t);
         }
     }
-    public  void deleteATodo(Settings setting) {
+
+    public void deleteATodo(Settings setting) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -210,6 +204,7 @@ public class Onboarding extends AppCompatActivity {
             }
         }).start();
     }
+
     public void getAllSettings(final Onboarding.SettingsListCallback callback) {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -223,7 +218,8 @@ public class Onboarding extends AppCompatActivity {
         });
         thread.start();
     }
-    public void initializetexttospeech(){
+
+    public void initializetexttospeech() {
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -233,11 +229,12 @@ public class Onboarding extends AppCompatActivity {
                     Toast.makeText(Onboarding.this, "Text-to-speech initialization failed.", Toast.LENGTH_SHORT).show();
                 }
             }
-        },"com.google.android.tts");
+        }, "com.google.android.tts");
         textToSpeech.setSpeechRate(0.8f);
     }
+
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         canSpeak = false;
         if (textToSpeech != null) {
             textToSpeech.stop();
@@ -245,8 +242,9 @@ public class Onboarding extends AppCompatActivity {
         }
         super.onDestroy();
     }
+
     @Override
-    public void onBackPressed(){
+    public void onBackPressed() {
         canSpeak = false;
         if (textToSpeech != null) {
             textToSpeech.stop();
@@ -254,8 +252,9 @@ public class Onboarding extends AppCompatActivity {
         }
         super.onBackPressed();
     }
+
     @Override
-    public void onPause(){
+    public void onPause() {
         canSpeak = false;
         inPauseSpeak = true;
 //        Log.d("Inside the onPause",""+viewPager.getCurrentItem()+" "+"I am in Pause");
@@ -265,26 +264,27 @@ public class Onboarding extends AppCompatActivity {
         }
         super.onPause();
     }
-    public void onStop(){
+
+    public void onStop() {
         canSpeak = false;
-        Log.d("Inside the onPause",""+viewPager.getCurrentItem()+" "+"I am in Pause");
+        Log.d("Inside the onPause", "" + viewPager.getCurrentItem() + " " + "I am in Pause");
         if (textToSpeech != null) {
             textToSpeech.stop();
 //            textToSpeech.shutdown();
         }
         super.onStop();
     }
+
     @Override
-    public void onResume(){
-        Log.d("Checking the current page Number",""+viewPager.getCurrentItem());
-        if(viewPager.getCurrentItem() == 1){
-//            initializetexttospeech();
+    public void onResume() {
+        Log.d("Checking the current page Number", "" + viewPager.getCurrentItem());
+        if (viewPager.getCurrentItem() == 1) {
             canSpeak = true;
             inPauseSpeak = false;
             Onboarding.textToSpeech.setLanguage(new Locale(Onboarding.output_lang));
-            Log.d("Checking Instruction", ""+Onboarding.output_lang+" "+OnboardingAdapter.tx.getText().toString());
-//            Onboarding.textToSpeech.speak(tx.getText().toString(),0, null, null);
-            if( Onboarding.canSpeak && !inPauseSpeak) {
+            Log.d("Checking Instruction", "" + Onboarding.output_lang + " " + OnboardingAdapter.tx.getText().toString());
+            // When the screen turns off and then again started speak the instructions again
+            if (Onboarding.canSpeak && !inPauseSpeak) {
                 speakText(OnboardingAdapter.tx.getText().toString(), 0);
             }
         }
@@ -292,12 +292,13 @@ public class Onboarding extends AppCompatActivity {
     }
 
 
-    public void insertSingleTodo(String language,String inputlang,String trans_input,boolean blindness,float speech_rate) {
-        Settings settings = new Settings(language,inputlang,trans_input,blindness,speech_rate);
+    public void insertSingleTodo(String language, String inputlang, String trans_input, boolean blindness, float speech_rate) {
+        Settings settings = new Settings(language, inputlang, trans_input, blindness, speech_rate);
         InsertAsyncTask insertAsyncTask = new InsertAsyncTask();
         progressDialog.show();
         insertAsyncTask.execute(settings);
     }
+
     class InsertAsyncTask extends AsyncTask<Settings, Void, Void> {
         @Override
         protected Void doInBackground(Settings... settings) {
@@ -307,6 +308,7 @@ public class Onboarding extends AppCompatActivity {
                     .insert(settings[0]);
             return null;
         }
+
         @Override
         protected void onPostExecute(Void unused) {
             progressDialog.dismiss();
@@ -318,26 +320,28 @@ public class Onboarding extends AppCompatActivity {
             super.onPostExecute(unused);
         }
     }
-    public void downloadlanguage(){
-        List<String> languages = new ArrayList<>(Arrays.asList("en", "zh", "hi","ko","ja"));
+
+    public void downloadlanguage() {
+        List<String> languages = new ArrayList<>(Arrays.asList("en", "zh", "hi", "ko", "ja"));
         languages.add(OnboardingAdapter.languageMap.get(languageSpinner.getSelectedItem().toString()));
         optionslist = new ArrayList<>();
         progressDialog2.show();
-        for(int i = 0;i<6;++i){
+        for (int i = 0; i < 6; ++i) {
             TranslatorOptions options = new TranslatorOptions.Builder()
                     .setSourceLanguage("en")
                     .setTargetLanguage(languages.get(i))
                     .build();
             optionslist.add(options);
         }
-        downloadModel(optionslist.get(0),0);
+        downloadModel(optionslist.get(0), 0);
     }
-    private void downloadModel(TranslatorOptions options,int i) {
+
+    private void downloadModel(TranslatorOptions options, int i) {
         Translator translator = Translation.getClient(options);
         translator.downloadModelIfNeeded()
                 .addOnSuccessListener(unused -> {
-                    progressDialog2.setProgress((int)(((i+1)/6f)*100f));
-                    if(i == 5) {
+                    progressDialog2.setProgress((int) (((i + 1) / 6f) * 100f));
+                    if (i == 5) {
                         progressDialog2.dismiss();
                         speech_rate = 1f;
                         output_lang = OnboardingAdapter.languageMap.get(languageSpinner.getSelectedItem().toString());
@@ -345,9 +349,9 @@ public class Onboarding extends AppCompatActivity {
                         blindness = false;
                         input_lang = "English";
                         trans_input = "en";
-                        insertSingleTodo(output_lang,input_lang,trans_input,blindness,speech_rate);
-                    }else{
-                        downloadModel(optionslist.get(i+1),i+1);
+                        insertSingleTodo(output_lang, input_lang, trans_input, blindness, speech_rate);
+                    } else {
+                        downloadModel(optionslist.get(i + 1), i + 1);
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -355,6 +359,7 @@ public class Onboarding extends AppCompatActivity {
                     Toast.makeText(Onboarding.this, "Language can't be loaded", Toast.LENGTH_SHORT).show();
                 });
     }
+
     // Method to start the main activity
     private void startMainActivity() {
 

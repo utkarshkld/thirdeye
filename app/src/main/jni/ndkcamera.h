@@ -36,8 +36,9 @@ public:
     void close();
     virtual void on_image(const cv::Mat& rgb) const;
     virtual void on_image(const unsigned char* nv21, int nv21_width, int nv21_height) const;
-    void analyzeAndUpdateFlashMode(const unsigned char* nv21, int nv21_width, int nv21_height);
-    void setZoom(float magnifyinglevel);
+
+
+    __attribute__((unused)) void setZoom(float magnifyinglevel);
 
     ACaptureRequest* capture_request;
 public:

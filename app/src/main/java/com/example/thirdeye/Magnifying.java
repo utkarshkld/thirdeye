@@ -2,26 +2,6 @@ package com.example.thirdeye;
 
 //import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.OptIn;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.AspectRatio;
-import androidx.camera.core.Camera;
-import androidx.camera.core.CameraControl;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ExperimentalGetImage;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -40,17 +20,31 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
-import com.example.thirdeye.R;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.AspectRatio;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraControl;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 public class Magnifying extends AppCompatActivity {
 
@@ -75,6 +69,7 @@ public class Magnifying extends AppCompatActivity {
             }
         }
     });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +81,7 @@ public class Magnifying extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         MainActivity.shakeListener.unregisterShakeListener();
         MainActivity.shakeListener.onDestroy();
-//        trackAppInstallation(this,"Magnifying");
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (ContextCompat.checkSelfPermission(Magnifying.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             activityResultLauncher.launch(Manifest.permission.CAMERA);
@@ -98,20 +93,21 @@ public class Magnifying extends AppCompatActivity {
             public void onClick(View v) {
                 vibe.vibrate(50);
                 onBackPressed();
-//                Intent intent = new Intent(Magnifying.this,MainActivity.class);
-//                startActivity(intent);
-
             }
         });
         starting_time = System.currentTimeMillis();
     }
+
     @Override
-    public void onBackPressed(){
-//        finishAffinity();
-        Intent intent = new Intent(Magnifying.this,MainActivity.class);
+    public void onBackPressed() {
+
+        Intent intent = new Intent(Magnifying.this, MainActivity.class);
         startActivity(intent);
         super.onBackPressed();
     }
+
+    // Initialising Camera
+    // Setting Zoom Slider
     public void startCamera(int cameraFacing) {
         int aspectRatio = aspectRatio(previewView.getWidth(), previewView.getHeight());
         ListenableFuture<ProcessCameraProvider> listenableFuture = ProcessCameraProvider.getInstance(this);
@@ -127,7 +123,7 @@ public class Magnifying extends AppCompatActivity {
                 ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
-
+                // Frame By Frame Image Analysis
                 imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
                     @Override
                     public void analyze(@NonNull ImageProxy image) {
@@ -143,7 +139,6 @@ public class Magnifying extends AppCompatActivity {
                                     // Calculate average brightness of the image
                                     boolean temp = detectdarkness(bitmap);
                                     Log.d("Flash", "" + temp + " " + image);
-
                                     // Enable or disable flash based on brightness level
                                     if (temp) {
                                         isFlashon = true;
@@ -152,7 +147,6 @@ public class Magnifying extends AppCompatActivity {
                                         disableFlash();
                                     }
                                     Log.d("Flash", "" + isFlashon + " " + System.currentTimeMillis());
-
                                     // Close the image proxy to release its resources
                                     image.close();
                                 }
@@ -160,17 +154,17 @@ public class Magnifying extends AppCompatActivity {
                         }).start();
                     }
                 });
-                camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture,imageAnalysis);
+                camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
                 cameraControl = camera.getCameraControl();
                 cameraControl.enableTorch(isFlashon);
-                cameraControl.setLinearZoom(zoomSeekBar.getProgress()/50f);
-//                zoomSeekBar.incrementProgressBy(20);
+                cameraControl.setLinearZoom(zoomSeekBar.getProgress() / 50f);
+                // setting Up the Zoom seekbar for carrying zoom in and out
                 zoomSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         // Calculate zoom level from seekbar progress
-                        float zoomLevel = (float) progress/50f ;
+                        float zoomLevel = (float) progress / 50f;
 
                         // Set zoom level
                         runOnUiThread(new Runnable() {
@@ -189,11 +183,8 @@ public class Magnifying extends AppCompatActivity {
 
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
-                        // Not needed in this implementation
-                        float zoomLevel = (float) seekBar.getProgress() /50f;
 
-                        // Set zoom level
-//                        cameraControl.setLinearZoom(zoomLevel);
+                        float zoomLevel = (float) seekBar.getProgress() / 50f;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -209,7 +200,9 @@ public class Magnifying extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    @OptIn(markerClass = ExperimentalGetImage.class) public static Bitmap decodeSampledBitmapFromImageProxy(ImageProxy imageProxy) {
+    // Function Converts ImageProxy to Bitmap
+    @OptIn(markerClass = ExperimentalGetImage.class)
+    public static Bitmap decodeSampledBitmapFromImageProxy(ImageProxy imageProxy) {
         Image image = imageProxy.getImage();
         if (image == null) {
             return null;
@@ -236,6 +229,7 @@ public class Magnifying extends AppCompatActivity {
         byte[] imageBytes = out.toByteArray();
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
+
     private void enableFlash() {
 
         cameraControl.enableTorch(true);
@@ -245,8 +239,10 @@ public class Magnifying extends AppCompatActivity {
 
         cameraControl.enableTorch(false);
     }
-    private boolean detectdarkness(Bitmap bitmap){
-        if(bitmap == null){
+
+    // Function analyse the wether the image is dark or not
+    private boolean detectdarkness(Bitmap bitmap) {
+        if (bitmap == null) {
             return false;
         }
         int width = bitmap.getWidth();
@@ -269,8 +265,8 @@ public class Magnifying extends AppCompatActivity {
                 }
             }
         }
-        float total = width*height;
-        float threshhold = (darkPixels/total);
+        float total = width * height;
+        float threshhold = (darkPixels / total);
         return threshhold > 0.8;
     }
 
@@ -282,18 +278,20 @@ public class Magnifying extends AppCompatActivity {
         }
         return AspectRatio.RATIO_16_9;
     }
+
     @Override
-    public void onRestart(){
+    public void onRestart() {
         startCamera(cameraFacing);
         super.onRestart();
     }
+
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         long end_time = System.currentTimeMillis();
         UserPreferences userPreferences = new UserPreferences(this);
-        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
-        userPreferences.addFeature(time,"Magnifying");
-        Log.d("Duration check",""+time+" "+userPreferences.getFeatureListAsJsonArray());
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time - starting_time);
+        userPreferences.addFeature(time, "Magnifying");
+        Log.d("Duration check", "" + time + " " + userPreferences.getFeatureListAsJsonArray());
         super.onDestroy();
     }
 }

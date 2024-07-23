@@ -228,18 +228,8 @@
 //}
 package com.example.thirdeye;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import com.example.thirdeye.MainActivity;
-import com.google.android.gms.auth.api.credentials.Credential;
-import com.google.android.gms.auth.api.credentials.Credentials;
-import com.google.android.gms.auth.api.credentials.HintRequest;
-
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -253,6 +243,19 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.tasks.Task;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
@@ -261,6 +264,7 @@ public class SplashScreen extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final int MICROPHONE_PERMISSION_REQUEST_CODE = 2;
+    private static final int UPDATE_CODE = 8297;
     private static final int OTHER_PERMISSIONS_REQUEST_CODE = 100;
     private final int CREDENTIAL_PICKER_REQUEST = 120;
 
@@ -285,6 +289,25 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splashscreen);
+        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
+
+// Returns an intent object that you use to check for an update.
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+// Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    // This example applies an immediate update. To apply a flexible update
+                    // instead, pass in AppUpdateType.FLEXIBLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                // Request the update.
+                try {
+                    appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, SplashScreen.this, UPDATE_CODE);
+                } catch (IntentSender.SendIntentException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
 
         new Handler().postDelayed(new Runnable() {
@@ -295,14 +318,14 @@ public class SplashScreen extends AppCompatActivity {
 //                initializelanguageMap();
                 translationmap.initializetransMap();
                 start();
-        }
+            }
         }, 1500);
         UserPreferences userPreferences = new UserPreferences(this);
         Location location = AnalyticsManager.getLocation(this);
         String Country = "";
-        if(location!=null){
-            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
-            Log.d("Country check",Country);
+        if (location != null) {
+            Country = AnalyticsManager.getCountry(this, location.getLatitude(), location.getLongitude());
+            Log.d("Country check", Country);
         }
 
         userPreferences.saveCountry(Country);
@@ -364,28 +387,36 @@ public class SplashScreen extends AppCompatActivity {
         });
         textToSpeech.setSpeechRate(0.8f);
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_CODE) {
+            Toast.makeText(this, "Downloading Started", Toast.LENGTH_SHORT).show();
+            if (resultCode != RESULT_OK) {
+                Log.d("Update Log", "Update Failed" + resultCode);
+            }
+        }
         if (requestCode == CREDENTIAL_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
                 if (credential != null) {
                     String phoneNumber = credential.getId(); // Process the phone number string
                     // Use the phone number as needed
-                    Log.d("Getting phone number",phoneNumber);
+                    Log.d("Getting phone number", phoneNumber);
                 }
                 // credential.getId();  <-- will need to process phone number string
             }
         }
     }
+
     private void proceedToNextActivity() {
         UserPreferences userPreferences = new UserPreferences(this);
         Location location = AnalyticsManager.getLocation(this);
         String Country = "";
-        if(location!=null){
-            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
-            Log.d("Country check",Country);
+        if (location != null) {
+            Country = AnalyticsManager.getCountry(this, location.getLatitude(), location.getLongitude());
+            Log.d("Country check", Country);
         }
 
         userPreferences.saveCountry(Country);
@@ -453,69 +484,93 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     public void onRestart() {
         super.onRestart();
+
         start();
+    }
+
+    @Override
+    public void onResume() {
+        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
+
+// Returns an intent object that you use to check for an update.
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+// Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    // This example applies an immediate update. To apply a flexible update
+                    // instead, pass in AppUpdateType.FLEXIBLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, SplashScreen.this, UPDATE_CODE);
+                } catch (IntentSender.SendIntentException e) {
+                    throw new RuntimeException(e);
+                }
+                // Request the update.
+            }
+        });
+        super.onResume();
     }
 
     private void initializelanguageMap() {
         UserPreferences userPreferences = new UserPreferences(this);
         String country = userPreferences.getCountry();
-        if(!Objects.equals(country, "India")){
+        if (!Objects.equals(country, "India")) {
             MainActivity.languageMap.put("Afrikaans", "af");
             MainActivity.languageMap.put("Albanian", "sq");
-        MainActivity.languageMap.put("Arabic", "ar");
-        MainActivity.languageMap.put("Bengali", "bn");
-        MainActivity.languageMap.put("Bulgarian", "bg");
+            MainActivity.languageMap.put("Arabic", "ar");
+            MainActivity.languageMap.put("Bengali", "bn");
+            MainActivity.languageMap.put("Bulgarian", "bg");
             MainActivity.languageMap.put("Catalan", "ca");
-        MainActivity.languageMap.put("Chinese", "zh");
+            MainActivity.languageMap.put("Chinese", "zh");
             MainActivity.languageMap.put("Croatian", "hr");
-        MainActivity.languageMap.put("Czech", "cs");
-        MainActivity.languageMap.put("Danish", "da");
-        MainActivity.languageMap.put("Dutch", "nl");
-        MainActivity.languageMap.put("English", "en");
-        MainActivity.languageMap.put("Finnish", "fi");
-        MainActivity.languageMap.put("French", "fr");
-        MainActivity.languageMap.put("Galician", "gl");
+            MainActivity.languageMap.put("Czech", "cs");
+            MainActivity.languageMap.put("Danish", "da");
+            MainActivity.languageMap.put("Dutch", "nl");
+            MainActivity.languageMap.put("English", "en");
+            MainActivity.languageMap.put("Finnish", "fi");
+            MainActivity.languageMap.put("French", "fr");
+            MainActivity.languageMap.put("Galician", "gl");
             MainActivity.languageMap.put("Georgian", "ka");
-        MainActivity.languageMap.put("German", "de");
-        MainActivity.languageMap.put("Greek", "el");
-        MainActivity.languageMap.put("Gujarati", "gu");
+            MainActivity.languageMap.put("German", "de");
+            MainActivity.languageMap.put("Greek", "el");
+            MainActivity.languageMap.put("Gujarati", "gu");
             MainActivity.languageMap.put("Haitian", "ht");
             MainActivity.languageMap.put("Hebrew", "he");
-        MainActivity.languageMap.put("Hindi", "hi");
-        MainActivity.languageMap.put("Hungarian", "hu");
-        MainActivity.languageMap.put("Icelandic", "is");
-        MainActivity.languageMap.put("Indonesian", "id");
-        MainActivity.languageMap.put("Italian", "it");
-        MainActivity.languageMap.put("Japanese", "ja");
-        MainActivity.languageMap.put("Kannada", "kn");
-        MainActivity.languageMap.put("Korean", "ko");
-        MainActivity.languageMap.put("Latvian", "lv");
-        MainActivity.languageMap.put("Lithuanian", "lt");
+            MainActivity.languageMap.put("Hindi", "hi");
+            MainActivity.languageMap.put("Hungarian", "hu");
+            MainActivity.languageMap.put("Icelandic", "is");
+            MainActivity.languageMap.put("Indonesian", "id");
+            MainActivity.languageMap.put("Italian", "it");
+            MainActivity.languageMap.put("Japanese", "ja");
+            MainActivity.languageMap.put("Kannada", "kn");
+            MainActivity.languageMap.put("Korean", "ko");
+            MainActivity.languageMap.put("Latvian", "lv");
+            MainActivity.languageMap.put("Lithuanian", "lt");
             MainActivity.languageMap.put("Macedonian", "mk");
-        MainActivity.languageMap.put("Malay", "ms");
-        MainActivity.languageMap.put("Malayalam", "ml");
+            MainActivity.languageMap.put("Malay", "ms");
+            MainActivity.languageMap.put("Malayalam", "ml");
             MainActivity.languageMap.put("Maltese", "mt");
-        MainActivity.languageMap.put("Marathi", "mr");
-        MainActivity.languageMap.put("Norwegian", "no");
-        MainActivity.languageMap.put("Polish", "pl");
-        MainActivity.languageMap.put("Portuguese", "pt");
-        MainActivity.languageMap.put("Romanian", "ro");
-        MainActivity.languageMap.put("Russian", "ru");
-        MainActivity.languageMap.put("Slovak", "sk");
+            MainActivity.languageMap.put("Marathi", "mr");
+            MainActivity.languageMap.put("Norwegian", "no");
+            MainActivity.languageMap.put("Polish", "pl");
+            MainActivity.languageMap.put("Portuguese", "pt");
+            MainActivity.languageMap.put("Romanian", "ro");
+            MainActivity.languageMap.put("Russian", "ru");
+            MainActivity.languageMap.put("Slovak", "sk");
             MainActivity.languageMap.put("Slovenian", "sl");
-        MainActivity.languageMap.put("Spanish", "es");
+            MainActivity.languageMap.put("Spanish", "es");
             MainActivity.languageMap.put("Swahili", "sw");
-        MainActivity.languageMap.put("Swedish", "sv");
+            MainActivity.languageMap.put("Swedish", "sv");
             MainActivity.languageMap.put("Tagalog", "tl");
-        MainActivity.languageMap.put("Tamil", "ta");
-        MainActivity.languageMap.put("Telugu", "te");
-        MainActivity.languageMap.put("Thai", "th");
-        MainActivity.languageMap.put("Turkish", "tr");
-        MainActivity.languageMap.put("Ukrainian", "uk");
-        MainActivity.languageMap.put("Urdu", "ur");
-        MainActivity.languageMap.put("Vietnamese", "vi");
-        }
-        else{
+            MainActivity.languageMap.put("Tamil", "ta");
+            MainActivity.languageMap.put("Telugu", "te");
+            MainActivity.languageMap.put("Thai", "th");
+            MainActivity.languageMap.put("Turkish", "tr");
+            MainActivity.languageMap.put("Ukrainian", "uk");
+            MainActivity.languageMap.put("Urdu", "ur");
+            MainActivity.languageMap.put("Vietnamese", "vi");
+        } else {
             MainActivity.languageMap.put("Tamil", "ta");
             MainActivity.languageMap.put("Telugu", "te");
             MainActivity.languageMap.put("Marathi", "mr");

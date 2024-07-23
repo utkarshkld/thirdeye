@@ -1,4 +1,5 @@
 package com.example.thirdeye;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,8 +11,10 @@ import android.util.SparseIntArray;
 import android.view.Surface;
 
 import java.io.ByteArrayOutputStream;
+
 public class CameraUtils {
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
+
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 0);
         ORIENTATIONS.append(Surface.ROTATION_90, 90);
@@ -32,10 +35,18 @@ public class CameraUtils {
                 .getRotation();
         int degrees = 0;
         switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
         }
 
         int result;
@@ -64,6 +75,7 @@ public class CameraUtils {
         return cameraId;
     }
 
+    // Convert the Yuv format to Jpeg
     public static byte[] convertYuvToJpeg(byte[] data2, Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
 

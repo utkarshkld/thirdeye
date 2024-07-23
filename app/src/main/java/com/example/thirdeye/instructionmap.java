@@ -2,6 +2,7 @@ package com.example.thirdeye;
 
 import static com.example.thirdeye.SplashScreen.translationsMap;
 
+// Instructions are initialised here for the onBoarding Process
 public class instructionmap {
     public static void makeinstruction() {
         // Create a HashMap to store translations for each language

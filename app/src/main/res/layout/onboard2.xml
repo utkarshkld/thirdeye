@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroud"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context=".MainActivity"
-    android:background="@color/backgroud">
+    tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:lineSpacingExtra="-10dp"
@@ -33,10 +32,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginTop="5dp"
         android:layout_gravity="center"
-        android:lineSpacingExtra="-10dp"
+        android:layout_marginTop="5dp"
         android:gravity="center"
+        android:lineSpacingExtra="-10dp"
         android:text="It is created to assist you with everything you do everyday."
         android:textColor="@color/white"
         android:textSize="18dp"
@@ -68,20 +67,17 @@
         tools:layout_editor_absoluteY="200dp">
 
 
-
-
         <TextView
             android:id="@+id/textView5"
             android:layout_width="wrap_content"
-            android:padding="10dp"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:padding="10dp"
             android:text="•   The main screen has three channels accessible to assist you in your everyday activities: read, object, and translate, which are represented by the buttons below.\n•   One microphone button is located in the middle of the app's main screen, and you may use it to open any channel you like. For example, say 'read' and it will take you there.\n•   There is a setting button on the right side of the top navigation bar and clicking it will give you options to customize our app: Default Language, Speech Rate (how quickly you want the app to speak), and Partially Blind (enable it if you are not completely blind)."
             android:textColor="@color/white"
             android:textSize="15dp" />
 
     </LinearLayout>
-
 
 
 </LinearLayout>

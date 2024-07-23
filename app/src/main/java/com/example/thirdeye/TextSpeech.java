@@ -1,15 +1,12 @@
 package com.example.thirdeye;
 //import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
-import static com.example.thirdeye.LangTranslate.dpToPx;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -40,7 +37,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -84,6 +80,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 public class TextSpeech extends AppCompatActivity {
     private ProgressDialog progressprocessing;
     private int count = 0;
@@ -153,8 +150,8 @@ public class TextSpeech extends AppCompatActivity {
     private MySharedPreferences sharedPreferences;
 
 
-    private long lastpgdet = 0,lastpagedet2 = 0,lastpage3=0;
-    private ArrayAdapter<String>  text_det_adapter;
+    private long lastpgdet = 0, lastpagedet2 = 0, lastpage3 = 0;
+    private ArrayAdapter<String> text_det_adapter;
     private boolean isCaptured = false;
     private ProgressDialog voiceDialog;
 
@@ -207,7 +204,7 @@ public class TextSpeech extends AppCompatActivity {
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(isClickable) {
+                if (isClickable) {
                     isClickable = false;
                     vibe.vibrate(50);
                     if (!isPlaying) {
@@ -268,7 +265,7 @@ public class TextSpeech extends AppCompatActivity {
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
             Toast.makeText(TextSpeech.this, "Shake detected!", Toast.LENGTH_SHORT).show();
-            if(System.currentTimeMillis()-shaketime >= 3000){
+            if (System.currentTimeMillis() - shaketime >= 3000) {
                 shaketime = System.currentTimeMillis();
                 micc.performClick();
             }
@@ -285,8 +282,8 @@ public class TextSpeech extends AppCompatActivity {
                     isPaused = true;
                     btnPausePlay.setImageResource(R.drawable.stop_fill);
                     btnPausePlay.setContentDescription("Pause");
-                    textView.scrollTo(0,currentScrollPosition);
-                    if(isLast){
+                    textView.scrollTo(0, currentScrollPosition);
+                    if (isLast) {
                         isLast = false;
                         btnReplay.performClick();
                         return;
@@ -312,12 +309,11 @@ public class TextSpeech extends AppCompatActivity {
                 textToSpeech.stop();
                 isPaused = true;
                 vibe.vibrate(50);
-                textView.scrollTo(0,0);
+                textView.scrollTo(0, 0);
                 index = 0;
                 index2 = 0;
                 speakText(textView.getText().toString(), 0);
                 btnPausePlay.setImageResource(R.drawable.stop_fill);
-
 
 
             }
@@ -386,6 +382,7 @@ public class TextSpeech extends AppCompatActivity {
         }
         super.onPause();
     }
+
     private void disableTextViewScroll() {
         textView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -399,6 +396,7 @@ public class TextSpeech extends AppCompatActivity {
     private void enableTextViewScroll() {
         textView.setOnTouchListener(null);
     }
+
     @Override
     protected void onResume() {
         shakeListener.registerShakeListener();
@@ -442,7 +440,7 @@ public class TextSpeech extends AppCompatActivity {
                     if (result == TextToSpeech.LANG_MISSING_DATA ||
                             result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e(TAG, "TextToSpeech: Language not supported.");
-                    }else {
+                    } else {
 
                         textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                             @Override
@@ -531,7 +529,7 @@ public class TextSpeech extends AppCompatActivity {
                                             int newScrollY = textView.getLayout().getLineTop(newScrollLine);
                                             textView.scrollTo(0, newScrollY);
                                             currentScrollPosition = newScrollY;
-                                        }else {
+                                        } else {
                                             currentScrollPosition = textView.getScrollY();
                                         }
 //
@@ -556,7 +554,7 @@ public class TextSpeech extends AppCompatActivity {
 //                    Log.d("hui",t.toString());
 //                }
                 if (status == TextToSpeech.SUCCESS) {
-                    int result = textToSpeech2.setLanguage(new Locale("en","IN"));
+                    int result = textToSpeech2.setLanguage(new Locale("en", "IN"));
                     if (result == TextToSpeech.LANG_MISSING_DATA ||
                             result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e(TAG, "TextToSpeech: Language not supported.");
@@ -604,9 +602,7 @@ public class TextSpeech extends AppCompatActivity {
 //            }else if(selectedlang.equals("Korean")){
 //                detecttextwithlanguage(koreanrecog,image,selectedlang,expirydatebuilder);
 
-            detecttextwithlanguage(engtextrecog,image,"English",expirydatebuilder);
-
-
+            detecttextwithlanguage(engtextrecog, image, "English", expirydatebuilder);
 
 
         } catch (Exception e) {
@@ -614,12 +610,12 @@ public class TextSpeech extends AppCompatActivity {
         }
     }
 
-    private void detecttextwithlanguage(TextRecognizer textrecog, InputImage image,String language,StringBuilder expirydatebuilder) {
+    private void detecttextwithlanguage(TextRecognizer textrecog, InputImage image, String language, StringBuilder expirydatebuilder) {
         textrecog.process(image).addOnSuccessListener(new OnSuccessListener<Text>() {
             @Override
             public void onSuccess(Text result) {
 //                Log.e(TAG, "onSuccess: result size is " + result.getTextBlocks().size());
-                StringBuilder stringBuilder = new StringBuilder(),stringBuilder1 = new StringBuilder();
+                StringBuilder stringBuilder = new StringBuilder(), stringBuilder1 = new StringBuilder();
 
                 for (Text.TextBlock block : result.getTextBlocks()) {
                     for (Text.Line line : block.getLines()) {
@@ -630,9 +626,9 @@ public class TextSpeech extends AppCompatActivity {
                     }
                 }
                 // will get identified text here have to modify here
-                Log.d("I am here","hello");
-                if(stringBuilder1.toString().isEmpty()){
-                    Toast.makeText(TextSpeech.this,"No text detected ...",Toast.LENGTH_LONG).show();
+                Log.d("I am here", "hello");
+                if (stringBuilder1.toString().isEmpty()) {
+                    Toast.makeText(TextSpeech.this, "No text detected ...", Toast.LENGTH_LONG).show();
                     isClickable = true;
                     btnTakePicture.performClick();
                     progressprocessing.dismiss();
@@ -640,9 +636,9 @@ public class TextSpeech extends AppCompatActivity {
                 }
                 String x = stringBuilder1.toString();
                 String temp = x.toLowerCase();
-                if(Objects.equals(language, "English")){
+                if (Objects.equals(language, "English")) {
                     EnglishText = x;
-                }else{
+                } else {
                     HindiText = x;
                 }
 
@@ -650,7 +646,7 @@ public class TextSpeech extends AppCompatActivity {
 //                "(use[ ]*by|best[ ]*before|exp|expiry|mfg|mfd|manufacturing)(date)*[. /-:]*(date)*[. /-:]*((([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7](20\\d{2}))|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7]\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/\\d{2})|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./7 ]*(20[0-9]{2}))|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ 7]*([0-9]{2}))$)"
                 Pattern expiryDatePattern = Pattern.compile("([uj]se *by|best *before|exp|expiry|mfg|mfd|manufacturing)[., /-:(date)]*((([0O][1-9]|[12]\\d|3[01])[-,./]*([0O][1-9]|1[0-2])[-,./]*(20\\d{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\.([0O][1-9]|1[O0-2])\\.(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\/([0O][1-9]|1[O0-2])\\/(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])[-./,]*([0O][1-9]|1[O0-2])[-./,]*\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\.([0O][1-9]|1[O0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\/([0O][1-9]|1[O0-2])\\/\\d{2})|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*(2[0O][O0-9]{2}))|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*([O0-9]{2}))$)", Pattern.CASE_INSENSITIVE);
                 Matcher matcher = expiryDatePattern.matcher(temp);//
-                if(language.equals("English")) {
+                if (language.equals("English")) {
                     while (matcher.find()) {
                         // If the line contains the expiry date, append it to the expiryDateBuilder
                         String categ = matcher.group(1);
@@ -679,80 +675,78 @@ public class TextSpeech extends AppCompatActivity {
                     }
                 }
                 stringBuilder.append(x);
-                if(language.equals("English")){
-                    detecttextwithlanguage(hindirecog,image,"Hindi",expirydatebuilder);
+                if (language.equals("English")) {
+                    detecttextwithlanguage(hindirecog, image, "Hindi", expirydatebuilder);
                 }
-                if(language.equals("Hindi")){
+                if (language.equals("Hindi")) {
 //                     Get the selected language code from the map
-                String targetLanguage = outputlangugage;
+                    String targetLanguage = outputlangugage;
 //                Toast.makeText(TextSpeech.this, targetLanguage, Toast.LENGTH_SHORT).show();
-                String tt = "English";
-                String ss = EnglishText;
-                if(EnglishText.length() >= HindiText.length()){
-                    tt = "English";
-                }else{
-                    tt = "Hindi";
-                    ss = HindiText;
-                }
-                final String kk = ss;
-                TranslatorOptions options = new TranslatorOptions.Builder()
-                        .setSourceLanguage(languageMap.get(tt))
-                        .setTargetLanguage(targetLanguage)
-                        .build();
-                Translator translator = Translation.getClient(options);
-                ProgressDialog progressDialog = new ProgressDialog(TextSpeech.this);
-                progressDialog.setMessage("Downloading the translation model...");
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-                MyRunnable2 myRunnable2 = new MyRunnable2(TextSpeech.this, new Handler(), progressDialog);
-                myRunnable2.start();
-                translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    String tt = "English";
+                    String ss = EnglishText;
+                    if (EnglishText.length() >= HindiText.length()) {
+                        tt = "English";
+                    } else {
+                        tt = "Hindi";
+                        ss = HindiText;
+                    }
+                    final String kk = ss;
+                    TranslatorOptions options = new TranslatorOptions.Builder()
+                            .setSourceLanguage(languageMap.get(tt))
+                            .setTargetLanguage(targetLanguage)
+                            .build();
+                    Translator translator = Translation.getClient(options);
+                    ProgressDialog progressDialog = new ProgressDialog(TextSpeech.this);
+                    progressDialog.setMessage("Downloading the translation model...");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+                    MyRunnable2 myRunnable2 = new MyRunnable2(TextSpeech.this, new Handler(), progressDialog);
+                    myRunnable2.start();
+                    translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
 
-                    @Override
-                    public void onSuccess(Void unused) {
-                        s = true;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                myRunnable2.stop();
-                                progressDialog.dismiss();
-                                progressprocessing.dismiss();
+                        @Override
+                        public void onSuccess(Void unused) {
+                            s = true;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    myRunnable2.stop();
+                                    progressDialog.dismiss();
+                                    progressprocessing.dismiss();
 
-                            }
-                        });
+                                }
+                            });
 
 
+                            Task<String> result = translator.translate(kk).addOnSuccessListener(new OnSuccessListener<String>() {
+                                @Override
+                                public void onSuccess(String s) {
 
-                        Task<String> result = translator.translate(kk).addOnSuccessListener(new OnSuccessListener<String>() {
-                            @Override
-                            public void onSuccess(String s) {
-
-                                isClickable = true;
-                                alltext.append(s);
-                                alltext.insert(0,expirydatebuilder);
-                                textView.setText(alltext.toString());
-                                speakText(alltext.toString(), 0);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                isClickable = true;
-                                progressprocessing.dismiss();
+                                    isClickable = true;
+                                    alltext.append(s);
+                                    alltext.insert(0, expirydatebuilder);
+                                    textView.setText(alltext.toString());
+                                    speakText(alltext.toString(), 0);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    isClickable = true;
+                                    progressprocessing.dismiss();
 //                                Toast.makeText(TextSpeech.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressprocessing.dismiss();
-                        isClickable = true;
-                        myRunnable2.stop();
-                        progressDialog.dismiss();
-                    }
-                });
+                                }
+                            });
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressprocessing.dismiss();
+                            isClickable = true;
+                            myRunnable2.stop();
+                            progressDialog.dismiss();
+                        }
+                    });
                 }
-
 
 
             }
@@ -760,6 +754,7 @@ public class TextSpeech extends AppCompatActivity {
 
 
     }
+
     private void speakText(String text, int startPosition) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -769,6 +764,7 @@ public class TextSpeech extends AppCompatActivity {
         }
 
     }
+
     private void setupSurfaceHolder() {
         surfaceViewHolder = surfaceView.getHolder();
         surfaceViewHolder.addCallback(new SurfaceHolder.Callback() {
@@ -797,17 +793,18 @@ public class TextSpeech extends AppCompatActivity {
             }
         });
     }
+
     private void startCamera() {
 
         camera = Camera.open();
         Camera.Parameters params = camera.getParameters();
         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 
-        if(deviceHasFlash && flash){
+        if (deviceHasFlash && flash) {
 //            Toast.makeText(TextSpeech.this,"Flash ON",Toast.LENGTH_SHORT).show();
             params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-        }else if(flash && !deviceHasFlash){
-            Toast.makeText(TextSpeech.this,"Device doesnt have flash Light",Toast.LENGTH_LONG).show();
+        } else if (flash && !deviceHasFlash) {
+            Toast.makeText(TextSpeech.this, "Device doesnt have flash Light", Toast.LENGTH_LONG).show();
         }
         camera.setParameters(params);
         camera.setDisplayOrientation(CameraUtils.getRotationCompensation(CameraUtils.getCameraID(), TextSpeech.this));
@@ -830,7 +827,7 @@ public class TextSpeech extends AppCompatActivity {
                 data2 = data;
 
 
-                if (System.currentTimeMillis() - currtime >= 800&& !next) {
+                if (System.currentTimeMillis() - currtime >= 800 && !next) {
                     next = true;
                     camerathread = new Thread(new Runnable() {
                         @Override
@@ -938,6 +935,7 @@ public class TextSpeech extends AppCompatActivity {
             camera = null;
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -993,13 +991,12 @@ public class TextSpeech extends AppCompatActivity {
 //                });
 
 
-
             }
 
             @Override
             public void onRmsChanged(float rmsdB) {
                 // You can update UI here with rmsdB value if you want
-                voiceDialog.setProgress(Math.max(0,(int)rmsdB));
+                voiceDialog.setProgress(Math.max(0, (int) rmsdB));
             }
 
             @Override
@@ -1106,30 +1103,21 @@ public class TextSpeech extends AppCompatActivity {
         });
         sr.startListening(intent);
     }
-    private void showAlertDialog(String language){
-//         builderInput = new AlertDialog.Builder(this);
-//
-//        // Inflate custom layout for the dialog
-//        // Note: You can use a layout file if needed
-//        // builder.setView(R.layout.custom_dialog_layout);
-//
-//        // Set dialog title and message
-//        builderInput.setTitle("Spoken Text")
-//                .setMessage("Language: " +language);
 
+    private void showAlertDialog(String language) {
 
         // Create and show the dialog
         voiceDialog = new ProgressDialog(this);
 //        voiceDialog.setMax(10);
 //        voiceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        voiceDialog.setTitle("Language : "+language);
+        voiceDialog.setTitle("Language : " + language);
         voiceDialog.setMessage("Listening...");
         voiceDialog.setCancelable(false);
         voiceDialog.setOnCancelListener(dialog -> stopSpeechRecognition());
-
         voiceDialog.show();
 
     }
+
     private void stopSpeechRecognition() {
         if (sr != null) {
             sr.stopListening();
@@ -1138,22 +1126,18 @@ public class TextSpeech extends AppCompatActivity {
             sr = null;
         }
     }
-    private void startRecording() {
-        Button mic1 = findViewById(R.id.micButton1);
-        mic1.performClick();
-    }
+//    private void startRecording() {
+//        Button mic1 = findViewById(R.id.micButton1);
+//        mic1.performClick();
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (matches != null && !matches.isEmpty()) {
                 String spokenText = matches.get(0).toLowerCase();
-
-
                 if (spokenText.contains("click") || spokenText.contains("capture")) {
                     if (isPlaying) {
                         speaktext2("Go to capture mode first.");
@@ -1199,7 +1183,8 @@ public class TextSpeech extends AppCompatActivity {
             }
         }
     }
-    private boolean detectdarkness(Bitmap bitmap){
+
+    private boolean detectdarkness(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int darkPixels = 0;
@@ -1220,8 +1205,8 @@ public class TextSpeech extends AppCompatActivity {
                 }
             }
         }
-        float total = width*height;
-        float threshhold = (darkPixels/total);
+        float total = width * height;
+        float threshhold = (darkPixels / total);
         return threshhold > 0.8;
     }
 
@@ -1234,7 +1219,7 @@ public class TextSpeech extends AppCompatActivity {
         }
     }
 
-//    protected void onResume(){
+    //    protected void onResume(){
 //        startCamera();
 //        super.onResume();
 //    }
@@ -1247,11 +1232,10 @@ public class TextSpeech extends AppCompatActivity {
         }
         long end_time = System.currentTimeMillis();
         UserPreferences userPreferences = new UserPreferences(this);
-        String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
-        userPreferences.addFeature(time,"Text To Speech");
-        Log.d("Duration check",""+time+" "+userPreferences.getFeatureListAsJsonArray());
+        String time = userPreferences.convertMillisToMinutesSeconds(end_time - starting_time);
+        userPreferences.addFeature(time, "Text To Speech");
+        Log.d("Duration check", "" + time + " " + userPreferences.getFeatureListAsJsonArray());
         super.onDestroy();
-
 
     }
 
@@ -1259,10 +1243,10 @@ public class TextSpeech extends AppCompatActivity {
     public void onBackPressed() {
 //        progressprocessing.dismiss();
 //        finishAffinity();
-        Intent intent = new Intent(TextSpeech.this,MainActivity.class);
+        Intent intent = new Intent(TextSpeech.this, MainActivity.class);
         startActivity(intent);
         releaseCamera();
-        if(textToSpeech!=null) {
+        if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
@@ -1355,7 +1339,7 @@ public class TextSpeech extends AppCompatActivity {
         public void start() {
             isRunning = true;
             progressDialog.show();
-            handler.postDelayed(this, 1500); // Run the task after 1000 milliseconds (1 second)
+            handler.postDelayed(this, 500); // Run the task after 1000 milliseconds (1 second)
         }
 
         public void stop() {
@@ -1387,6 +1371,7 @@ public class TextSpeech extends AppCompatActivity {
             });
         }
     }
+
     private void showNoInternetDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(TextSpeech.this);
         builder.setMessage("No internet connection. Please check your connection and try again.");
@@ -1430,6 +1415,7 @@ public class TextSpeech extends AppCompatActivity {
             });
         }
     }
+
     public class MySharedPreferences {
 
         private static final String PREF_NAME = "TextToSpeech";

@@ -99,19 +99,9 @@ static void onImageAvailable(void* context, AImageReader* reader)
 
     if (u_data == v_data + 1 && v_data == y_data + width * height && y_pixelStride == 1 && u_pixelStride == 2 && v_pixelStride == 2 && y_rowStride == width && u_rowStride == width && v_rowStride == width)
     {
-        // already nv21  :)
-//        cv::Mat nv21_mat(height * 3 / 2, width, CV_8UC1, (void*)y_data);
-//        bool shouldTurnOnFlashlight = analyzeImage(nv21_mat);
-//        if(shouldTurnOnFlashlight && isfirstime){
-//            uint8_t flashModeTorch = ACAMERA_FLASH_MODE_TORCH;
-//            camera_status_t statusFlashMode = ACaptureRequest_setEntry_u8(capture_request, ACAMERA_FLASH_MODE, 1, &flashModeTorch);
-//            if (statusFlashMode != ACAMERA_OK) {
-//                __android_log_print(ANDROID_LOG_ERROR, "NdkCamera", "in auto flash Failed to set flash mode to torch: %d", statusFlashMode);
-//            }
-//            isfirstime = false;
-//        }
+
         __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "in auto flash already n21 " );
-        ((NdkCamera*)context)->analyzeAndUpdateFlashMode(y_data,640,480);
+//        ((NdkCamera*)context)->analyzeAndUpdateFlashMode(y_data,640,480);
         ((NdkCamera*)context)->on_image((unsigned char*)y_data, (int)width, (int)height);
     }
     else
@@ -248,21 +238,9 @@ NdkCamera::~NdkCamera()
         image_reader_surface = 0;
     }
 }
-void NdkCamera::analyzeAndUpdateFlashMode(const uint8_t* y_data , int nv21_width, int nv21_height)
-{
-    // Convert nv21 to OpenCV Mat
-//    __android_log_print(ANDROID_LOG_ERROR, "NdkCamera", "is auto flash %d",nv21_width);
-//    cv::Mat nv21_mat(nv21_height * 3 / 2, nv21_width, CV_8UC1, (void*)y_data);
-//
-//    // Analyze the image
-//    bool shouldTurnOnFlashlight = analyzeImage(nv21_mat);
-//
-//
-//    // Set the flashlight mode based on the analysis
-//    uint8_t flashMode = shouldTurnOnFlashlight ? ACAMERA_FLASH_MODE_TORCH : ACAMERA_FLASH_MODE_OFF;
-//    ACaptureRequest_setEntry_u8(capture_request, ACAMERA_FLASH_MODE, 1, &flashMode);
-}
-void NdkCamera::setZoom(float magnifyinglevel){
+
+
+__attribute__((unused)) void NdkCamera::setZoom(float magnifyinglevel){
     {
         ACameraMetadata* camera_metadata = nullptr;
         ACameraManager_getCameraCharacteristics(camera_manager, camera_id.c_str(), &camera_metadata);

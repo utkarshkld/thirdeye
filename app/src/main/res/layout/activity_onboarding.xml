@@ -28,19 +28,19 @@
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
 
-       >
+        >
 
         <Button
             android:id="@+id/buttonNextonboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
+            android:background="@drawable/apply_ripple"
 
+            android:contentDescription="Next"
+            android:padding="10dp"
             android:text="NEXT"
             android:textSize="20dp"
             android:textStyle="bold"
-            android:contentDescription="Next"
-            android:background="@drawable/apply_ripple"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
