@@ -51,7 +51,7 @@
         android:id="@+id/textDefaultLanguage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Default Reading Language"
+        android:text="Default Language"
         android:textSize="@dimen/_15sdp"
         android:layout_marginBottom="10dp"
         android:textColor="@android:color/white"
@@ -78,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="Language Selector"
-
+            android:hint="Language"
             android:overlapAnchor="false"/>
     </LinearLayout>
 
@@ -161,6 +161,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:contentDescription="Speech Rate"
+        android:hint="Speech Rate"
         android:layout_marginTop="10dp"
         android:max="100"
         android:progress="50"
@@ -198,6 +199,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="Partial Blind"
+
             android:thumb="@drawable/custom_seekbar_thumb"
             app:track="@drawable/switch_track"
            />
@@ -224,11 +226,13 @@
             android:id="@+id/buttonfeedback"
             android:layout_width="0dp"
             android:layout_height="70dp"
-            android:contentDescription="Submit Feedback"
+            android:contentDescription="Give Feedback"
             android:layout_marginStart="@dimen/_8sdp"
             android:layout_weight="1"
             android:background="@drawable/apply_ripple"
-            android:text="SUBMIT FEEDBACK"
+            android:text="GIVE FEEDBACK"
+
+
             android:textColor="@android:color/white"
             android:textSize="20dp" />
     </LinearLayout>

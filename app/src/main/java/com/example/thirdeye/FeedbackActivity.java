@@ -60,6 +60,8 @@ public class FeedbackActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 //        trackAppInstallation(this,"Feedback activity");
         backbtnfeedback = findViewById(R.id.backbtnfeedback);
+        MainActivity.shakeListener.unregisterShakeListener();
+        MainActivity.shakeListener.onDestroy();
         x = findViewById(R.id.radia_id1);x1 = findViewById(R.id.radia_id2); x2 = findViewById(R.id.radia_id3);x3 = findViewById(R.id.radia_id4);
         x11 = findViewById(R.id.radia_id11);x12 = findViewById(R.id.radia_id12); x13 = findViewById(R.id.radia_id13);x14 = findViewById(R.id.radia_id14);
         x21 = findViewById(R.id.radia_id21);x22 = findViewById(R.id.radia_id22); x23 = findViewById(R.id.radia_id23);x24 = findViewById(R.id.radia_id24);
@@ -92,8 +94,9 @@ public class FeedbackActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 //       mongoClient.close();
-        Intent intent = new Intent(FeedbackActivity.this,appsettings.class);
-        startActivity(intent);
+//        Intent intent = new Intent(FeedbackActivity.this,appsettings.class);
+//        startActivity(intent);
+//        onDestroy();
        super.onBackPressed();
     }
     private boolean isNetworkAvailable() {
@@ -213,8 +216,10 @@ public class FeedbackActivity extends AppCompatActivity {
                 if(isNetworkAvailable()) {
                     Toast.makeText(FeedbackActivity.this, "Data submitted.", Toast.LENGTH_SHORT).show();
                     Toast.makeText(FeedbackActivity.this, "Thanks for your feedback.", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(FeedbackActivity.this,appsettings.class);
-                    startActivity(intent);
+//                    Intent intent = new Intent(FeedbackActivity.this,appsettings.class);
+//                    startActivity(intent);
+//                    onDestroy();
+                    onBackPressed();
                 }else{
                     Toast.makeText(FeedbackActivity.this,"No Internet Connection", Toast.LENGTH_LONG).show();
                 }

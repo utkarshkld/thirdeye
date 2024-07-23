@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Vibrator;
 import android.content.res.Resources;
@@ -60,8 +61,11 @@ public class appsettings extends AppCompatActivity {
 
     private  Vibrator vibe;
     private SeekBar seekBarSpeechRate;
+    private boolean isChanged = false;
+    private long touchtim = 0;
     private long starting_time = 0;
     private boolean isAlert = false;
+    private boolean isSaveClicked = false;
 
     private MicHandler shakeListener;
     Calendar calendar;
@@ -73,9 +77,9 @@ public class appsettings extends AppCompatActivity {
     private Button applybtn;
     private TextToSpeech textToSpeech;
 
-    private HashMap<String, String> languageMap = MainActivity.languageMap;
+    private HashMap<String, String> languageMap = new HashMap<>();
     private HashMap<Integer, String> WeekDays = new HashMap<>();
-    private ProgressDialog progressDialog;
+    private ProgressDialog progressDialog,progressDialog2;
     private boolean isfirstime = false;
     private String ouptutlang = MainActivity.output_lang;
     private boolean blindness = MainActivity.blindness;
@@ -100,6 +104,7 @@ public class appsettings extends AppCompatActivity {
         setContentView(R.layout.settings);
         seekBarSpeechRate = findViewById(R.id.sliderSpeechRate);
         spinnerDefaultLanguage = findViewById(R.id.spinnerDefaultLanguage);
+        isSaveClicked = false;
         starting_time = System.currentTimeMillis();
         switchPartiallyBlind = findViewById(R.id.partallyblindswitch);
         llsettings = findViewById(R.id.llsettings);
@@ -107,10 +112,14 @@ public class appsettings extends AppCompatActivity {
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
         feedbackBtn = findViewById(R.id.buttonfeedback);
+        progressDialog2 = new ProgressDialog(appsettings.this);
+        progressDialog2.setMessage("Applying all the changes...");
+        progressDialog2.setCancelable(false);
+        initializelanguageMap();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         initializetexttospeech();
         getAllSettings(this::onSettingsListLoaded);
-        initializelanguageMap();
+
         for( Map.Entry<String, String> entry : languageMap.entrySet()){
             if(entry.getValue().equals(ouptutlang)){
                 speaklang = entry.getKey();
@@ -129,7 +138,8 @@ public class appsettings extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // This method is called when the progress of the seek bar changes
-                    Log.d("Checking progress",""+progress);
+//                    Log.d("Checking progress",""+progress);
+                    isChanged = true;
                     calendar = Calendar.getInstance();
                     int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                     textToSpeech.speak("Today is " + WeekDays.get(dayOfWeek), TextToSpeech.QUEUE_FLUSH, null, null);
@@ -145,15 +155,16 @@ public class appsettings extends AppCompatActivity {
                     calendar = Calendar.getInstance();
                     int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                     int currprogg = seekBarSpeechRate.getProgress();
+                    isChanged = true;
                     textToSpeech.speak("Today is " + WeekDays.get(dayOfWeek), TextToSpeech.QUEUE_FLUSH, null, null);
                     textToSpeech.setSpeechRate((currprogg / 100.0f) * 2.0f);
             }
         });
-        shakeListener = new MicHandler(this);
-        shakeListener.setOnShakeListener(() -> {
-            Toast.makeText(appsettings.this, "Shake detected!", Toast.LENGTH_SHORT).show();
-            startVoiceRecognition();
-        });
+//        shakeListener = new MicHandler(this);
+//        shakeListener.setOnShakeListener(() -> {
+//            Toast.makeText(appsettings.this, "Shake detected!", Toast.LENGTH_SHORT).show();
+//            startVoiceRecognition();
+//        });
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -163,6 +174,7 @@ public class appsettings extends AppCompatActivity {
                 onBackPressed();
             }
         });
+
         applybtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -170,18 +182,23 @@ public class appsettings extends AppCompatActivity {
                 if (buttonClickable) {
                     vibe.vibrate(50);
                     downloadLanguage(languageMap.get(spinnerDefaultLanguage.getSelectedItem().toString()),isAlert);
-                    final ProgressDialog progressDialog = new ProgressDialog(appsettings.this);
-                    progressDialog.setMessage("Applying all the changes...");
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-                    applybtn.setEnabled(false); // Disable the button
+                    progressDialog2.show();
+//                    applybtn.setEnabled(false); // Disable the button
+                    isSaveClicked = true;
                     buttonClickable = false;
+                    isChanged = false;
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            applybtn.setEnabled(true);
-                            progressDialog.dismiss();
+//                            applybtn.setEnabled(true);
+                            progressDialog2.dismiss();
                             buttonClickable = true;
+                            if(isAlert){
+                                appsettings.super.onBackPressed();
+//                                Intent intent = new Intent(appsettings.this,MainActivity.class);
+//                                startActivity(intent);
+                            }
+
                         }
                     }, 1000); // 1 second
                 }
@@ -205,8 +222,14 @@ public class appsettings extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    showPopupWindow(spinnerDefaultLanguage, adapter);
-                    return true;
+                    long curr = System.currentTimeMillis();
+                    if(curr-touchtim >= 800){
+                        touchtim = curr;
+                        showPopupWindow(spinnerDefaultLanguage, adapter);
+                        return true;
+                    }
+
+
                 }
                 return true;
             }
@@ -215,6 +238,7 @@ public class appsettings extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // Set the spoken state based on the switch state change
+                isChanged = true;
                 setSpokenState(isChecked);
             }
         });
@@ -226,6 +250,7 @@ public class appsettings extends AppCompatActivity {
                     isfirstime = true;
                     return;
                 }
+                isChanged = true;
                 String selectedText = parent.getItemAtPosition(position).toString();
                 textToSpeech.speak(selectedText, TextToSpeech.QUEUE_FLUSH, null, null);
             }
@@ -338,7 +363,6 @@ public class appsettings extends AppCompatActivity {
                 Log.d("inside mic intent",defaultlang);
                 for(Map.Entry<String, String> entry : Objects.requireNonNull(MainActivity.langnamemap.get(defaultlang)).entrySet()){
                     String str = entry.getKey();
-
                     int n =str.length();
                     for(String currword : wordList){
                         int m = currword.length();
@@ -351,6 +375,7 @@ public class appsettings extends AppCompatActivity {
                     if(islangdetected)break;
                 }
                 if(islangdetected && islanguage){
+                    isChanged = true;
                     spinnerDefaultLanguage.setSelection(languages.indexOf(languageMap.get(defaultlang)));
                     applybtn.performClick();
                 }
@@ -437,6 +462,10 @@ public class appsettings extends AppCompatActivity {
                             st.blindness = switchPartiallyBlind.isChecked();
                             MainActivity.input_lang = st.input_lang;
                             MainActivity.output_lang = st.output_speech;
+                            SharedPreferences sharedPreferences = getSharedPreferences("Output_lang", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("langname", st.output_speech);
+                            editor.apply();
                             MainActivity.blindness = st.blindness;
                             MainActivity.speech_rate = st.rate;
                             MainActivity.trans_input = st.trans_input;
@@ -447,17 +476,26 @@ public class appsettings extends AppCompatActivity {
                                 }
                             }
                             MainActivity.textToSpeech.setLanguage(new Locale(st.output_speech));
-                            insertSingleTodo(st);
+                            insertSingleTodo(st);runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+//                                    progressDialog2.dismiss();
+                                }
+                            });
+
+
                             return null;
 
                         }
                         @Override
                         protected void onPostExecute(Void aVoid) {
                             // Update UI or perform any post-execution tasks here
-                            if(fromAlert) {
-                                Intent intent = new Intent(appsettings.this, MainActivity.class);
-                                startActivity(intent);
-                            }
+//                            progressDialog2.dismiss();
+//                            if(fromAlert) {
+//
+//                                Intent intent = new Intent(appsettings.this, MainActivity.class);
+//                                startActivity(intent);
+//                            }
                         }
                     }.execute();
                 })
@@ -489,6 +527,17 @@ public class appsettings extends AppCompatActivity {
                     // Model download failed, handle the failure
                     Toast.makeText(appsettings.this, "Language can't be loaded", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    @Override
+    public void onResume(){
+//        shakeListener.registerShakeListener();
+        super.onResume();
+    }
+    @Override
+    public void onPause(){
+//        shakeListener.unregisterShakeListener();
+        super.onPause();
     }
     public void insertSingleTodo(Settings settings) {
 //        Settings settings = new Settings(language,blindness,speech_rate);
@@ -529,14 +578,38 @@ public class appsettings extends AppCompatActivity {
 //        Intent intent = new Intent(appsettings.this,MainActivity.class);
 //        startActivity(intent);
 //        showdialogOnBack();
+        if(isSaveClicked){
+            isAlert = false;
+            appsettings.super.onBackPressed();
+            return;
+
+        }
+        if(!isChanged){
+            isAlert = false;
+            appsettings.super.onBackPressed();
+            return;
+        }
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save changes ?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 //                        appsettings.super.onBackPressed();
+
+
                         isAlert = true;
                         applybtn.performClick();
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                progressDialog2.dismiss();
+//                                progressDialog.dismiss();
+//                            }
+//                        });
+////                        finishAffinity();
+//        Intent intent = new Intent(appsettings.this,MainActivity.class);
+//        startActivity(intent);
+//        appsettings.super.onBackPressed();
 
                     }
                 })
@@ -544,8 +617,10 @@ public class appsettings extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
 //                        appsettings.super.onBackPressed();
                         isAlert = false;
-                        Intent intent = new Intent(appsettings.this,MainActivity.class);
-                        startActivity(intent);
+//                        finishAffinity();
+//                        Intent intent = new Intent(appsettings.this,MainActivity.class);
+//                        startActivity(intent);
+                        appsettings.super.onBackPressed();
                     }
                 })
                 .show();

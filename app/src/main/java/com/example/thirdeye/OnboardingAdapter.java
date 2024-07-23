@@ -33,7 +33,9 @@ import java.util.Map;
 
 public class OnboardingAdapter extends PagerAdapter {
     private Context context;
+    public static TextView tx;
     public static Spinner languageSpinner;
+    private long touchtime;
     public static Map<String, String> languageMap;
 
 
@@ -68,16 +70,44 @@ public class OnboardingAdapter extends PagerAdapter {
             languageMap = MainActivity.languageMap;//
             List<String> languages = new ArrayList<>(languageMap.keySet());
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.spinner_item, languages);
+            touchtime = 0;
             languageSpinner.setAdapter(adapter);
             languageSpinner.setOnTouchListener(new View.OnTouchListener() {
+
+
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
+                    Log.d("checking spinner" , ""+System.currentTimeMillis());
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        showPopupWindow(languageSpinner, adapter);
+                        long curr= System.currentTimeMillis();
+                        Log.d("checking spinner" , ""+curr);
+                        if(curr - touchtime >= 800){
+                            touchtime = curr;
+                            showPopupWindow(languageSpinner, adapter);
+                            return true;
+                        }
+
 //                        }
-                        return true;
+
                     }
                     return true;
+                }
+            });
+            languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    // Handle the item selection here
+                    String selectedLanguage = parent.getItemAtPosition(position).toString();
+                    Log.d("checking Output_lang",""+selectedLanguage+" "+MainActivity.languageMap.get(selectedLanguage));
+                    MainActivity.output_lang = MainActivity.languageMap.get(selectedLanguage);
+
+
+
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    // Handle the case where no item is selected if needed
                 }
             });
             String temp="";
@@ -90,12 +120,12 @@ public class OnboardingAdapter extends PagerAdapter {
             languageSpinner.setSelection(languages.indexOf(temp));
 //            downloadallLanguage();
         }else if(position == 1){
-            TextView tx = view.findViewById(R.id.textView5);
+             tx = view.findViewById(R.id.textView5);
             tx.setText(SplashScreen.translationsMap.get(Onboarding.output_lang));
             Onboarding.textToSpeech.setLanguage(new Locale(Onboarding.output_lang));
             Log.d("Checking Instruction", ""+Onboarding.output_lang+" "+tx.getText().toString());
 //            Onboarding.textToSpeech.speak(tx.getText().toString(),0, null, null);
-            if( Onboarding.canSpeak) {
+            if( Onboarding.canSpeak && !Onboarding.inPauseSpeak) {
                 speakText(tx.getText().toString(), 0);
             }
         }
@@ -103,7 +133,7 @@ public class OnboardingAdapter extends PagerAdapter {
         container.addView(view);
         return view;
     }
-    private void speakText(final String text, final int startPosition) {
+    public static void speakText(final String text, final int startPosition) {
         new Thread(new Runnable() {
             @Override
             public void run() {

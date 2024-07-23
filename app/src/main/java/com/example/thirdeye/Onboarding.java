@@ -5,9 +5,12 @@ package com.example.thirdeye;
 import static com.example.thirdeye.OnboardingAdapter.languageSpinner;
 
 import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
+import static com.example.thirdeye.OnboardingAdapter.speakText;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -41,6 +44,7 @@ public class Onboarding extends AppCompatActivity {
     ViewPager viewPager;
     private Button button;
     public static boolean canSpeak = false;
+    public static boolean inPauseSpeak = false;
     public static boolean say = false;
     public static TextToSpeech textToSpeech;
     private OnboardingAdapter pagerAdapter;
@@ -81,14 +85,15 @@ public class Onboarding extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Setting Language ....");
         initializetexttospeech();
-        UserPreferences userPreferences = new UserPreferences(this);
-        Location location = AnalyticsManager.getLocation(this);
-        String Country = "";
-        if(location!=null){
-            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
-        }
-
-        userPreferences.saveCountry(Country);
+//        UserPreferences userPreferences = new UserPreferences(this);
+//        Location location = AnalyticsManager.getLocation(this);
+//        String Country = "";
+//        if(location!=null){
+//            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
+//            Log.d("Country check",Country);
+//        }
+//
+//        userPreferences.saveCountry(Country);
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
@@ -108,6 +113,10 @@ public class Onboarding extends AppCompatActivity {
         if (firstTime.equals("")) {
             // If it's the first run, set the flag in SharedPreferences
 //             Listen for page changes in ViewPager
+            SharedPreferences preferencesDate = getSharedPreferences("installDate",MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferencesDate.edit();
+            editor.putLong("TIME_MILLI_SEC", System.currentTimeMillis());
+            editor.apply();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -116,7 +125,16 @@ public class Onboarding extends AppCompatActivity {
             }).start();
         } else {
             // If not the first run, directly start the main activity
-            startMainActivity();
+
+            SharedPreferences preferencesDate = getSharedPreferences("installDate",MODE_PRIVATE);
+            // remove this code for testing phase
+            if(System.currentTimeMillis() - preferencesDate.getLong("TIME_MILLI_SEC",0) < 604800000){
+                startMainActivity();
+            }else{
+                showOpenSettingsAlertDialog();
+            }
+//            startMainActivity();
+
         }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,6 +170,20 @@ public class Onboarding extends AppCompatActivity {
                 }
             }
         });
+    }
+    private void showOpenSettingsAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Can't Open the App");
+        builder.setMessage("Testing period of 7 days Ended...");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        builder.setCancelable(false);
+        builder.show();
     }
     public interface SettingsListCallback {
         void onSettingsListLoaded(List<Settings> settingsList);
@@ -225,11 +257,38 @@ public class Onboarding extends AppCompatActivity {
     @Override
     public void onPause(){
         canSpeak = false;
+        inPauseSpeak = true;
+//        Log.d("Inside the onPause",""+viewPager.getCurrentItem()+" "+"I am in Pause");
         if (textToSpeech != null) {
             textToSpeech.stop();
-            textToSpeech.shutdown();
+//            textToSpeech.shutdown();
         }
         super.onPause();
+    }
+    public void onStop(){
+        canSpeak = false;
+        Log.d("Inside the onPause",""+viewPager.getCurrentItem()+" "+"I am in Pause");
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+//            textToSpeech.shutdown();
+        }
+        super.onStop();
+    }
+    @Override
+    public void onResume(){
+        Log.d("Checking the current page Number",""+viewPager.getCurrentItem());
+        if(viewPager.getCurrentItem() == 1){
+//            initializetexttospeech();
+            canSpeak = true;
+            inPauseSpeak = false;
+            Onboarding.textToSpeech.setLanguage(new Locale(Onboarding.output_lang));
+            Log.d("Checking Instruction", ""+Onboarding.output_lang+" "+OnboardingAdapter.tx.getText().toString());
+//            Onboarding.textToSpeech.speak(tx.getText().toString(),0, null, null);
+            if( Onboarding.canSpeak && !inPauseSpeak) {
+                speakText(OnboardingAdapter.tx.getText().toString(), 0);
+            }
+        }
+        super.onResume();
     }
 
 
@@ -303,4 +362,15 @@ public class Onboarding extends AppCompatActivity {
         startActivity(intent);
         finish(); // Finish the current activity to prevent returning to it on back press
     }
+//    public class TimePreference {
+//
+//        private static final String PREFS_NAME = "MyPrefs";
+//        private static final String KEY_TIME_MILLIS = "stored_time_millis";
+//
+//        public  void saveTimeInMillis(Context context, long timeInMillis) {
+//            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            editor.putLong(KEY_TIME_MILLIS, timeInMillis);
+//            editor.apply(); // Save changes
+//        }
 }

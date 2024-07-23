@@ -7,17 +7,21 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.hardware.SensorListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
@@ -55,9 +59,11 @@ import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 public class LangTranslate extends AppCompatActivity {
@@ -68,13 +74,15 @@ public class LangTranslate extends AppCompatActivity {
     private ImageButton btnpauseplay;
     private ImageButton donebtn;
     private long starting_time = 0;
+    private boolean resultflag = false;
     private boolean isfirstime;
     private int width;
     private Spinner sourceLanguageSpinner;
     private boolean isLast = false;
+    private MySharedPreferences sharedPreferences;
 
 
-
+    private SpeechRecognizer sr;
     private TextToSpeech textToSpeech;
     private static final int SPEECH_REQUEST_CODE = 123;
     private TextView translatedTextView; // Added TextView to display translated text
@@ -89,8 +97,10 @@ public class LangTranslate extends AppCompatActivity {
 
 
     // Map to map language codes to their full names
-    private HashMap<String, String> languageMap = MainActivity.languageMap;
+    private HashMap<String, String> languageMap = new HashMap<>();
     private int index = 0,index2 = 0;
+    private boolean a = false;
+    private ProgressDialog voiceDialog;
 
     private static final int MAX_DURATION_MS = 10000; // Maximum duration in milliseconds (e.g., 20 seconds)
 
@@ -102,13 +112,16 @@ public class LangTranslate extends AppCompatActivity {
         setContentView(R.layout.langtranslate);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
         Intent intent = getIntent();
+        initializelanguageMap();
         isfirstime = true;
         translationlang = intent.getStringExtra("Translation lang");
         Log.d("Lang translate intent", "onCreate: "+translationlang);
         editTextLetters = findViewById(R.id.editTextTranslate);
         btnreplay = findViewById(R.id.btnReplay);
         btnpauseplay = findViewById(R.id.btnPausePlay);
+        btnpauseplay.setContentDescription("Pause");
         donebtn = findViewById(R.id.donebtn);
         ImageButton micbtn = findViewById(R.id.speakwords);
         ImageButton backbtn = findViewById(R.id.backbtn);
@@ -117,7 +130,12 @@ public class LangTranslate extends AppCompatActivity {
         isLast = false;
         translatedTextView.setMovementMethod(new ScrollingMovementMethod());
         starting_time = System.currentTimeMillis();
-//        trackAppInstallation(this,"Translate Text");
+        sharedPreferences = new MySharedPreferences(this);
+        String lang = sharedPreferences.getString();
+        Log.d("Check string first time",""+lang+" "+translationlang );
+        if(!lang.isEmpty() && Objects.equals(outputlangugage, translationlang)){
+            translationlang = lang;
+        }
 
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,15 +168,19 @@ public class LangTranslate extends AppCompatActivity {
         sourceLanguageSpinner.setSelection(selectedLanguages.indexOf(translationlang));
 //        Log.d("This is the Output language",""+MainActivity.output_lang);
 //        targetLanguageSpinner.setSelection(selectedLanguages.indexOf(outputlangugage));
+//
         initializetexttospeech();
         btnpauseplay.setVisibility(View.GONE);
         btnreplay.setVisibility(View.GONE);
+        a = false;
         shakeListener = new MicHandler(this);
         shakeListener.setOnShakeListener(() -> {
-            if(System.currentTimeMillis()-shaketime >= 3000){
-                vibe.vibrate(50);
+            if(System.currentTimeMillis()-shaketime >= 5000 && !a ){
+//                vibe.vibrate(50);
+                a = true;
                 shaketime = System.currentTimeMillis();
-                startSpeechRecognition();
+//                startSpeechRecognition();
+                micbtn.performClick();
             }
         });
         btnreplay.setOnClickListener(new View.OnClickListener() {
@@ -168,6 +190,7 @@ public class LangTranslate extends AppCompatActivity {
                 isPaused = true;
                 vibe.vibrate(50);
                 btnpauseplay.setImageResource(R.drawable.stop_fill);
+                btnpauseplay.setContentDescription("Pause");
                 currentScrollPosition=0;
                 translatedTextView.scrollTo(0,0);
                 index = 0;
@@ -183,6 +206,7 @@ public class LangTranslate extends AppCompatActivity {
                 if (!isPaused) {
                     isPaused = true;
                     btnpauseplay.setImageResource(R.drawable.stop_fill);
+                    btnpauseplay.setContentDescription("Pause");
 //                    currentScrollPosition = translatedTextView.getScrollY();
                     translatedTextView.scrollTo(0, currentScrollPosition);
                     if(isLast){
@@ -196,6 +220,7 @@ public class LangTranslate extends AppCompatActivity {
                     isPaused = false;
                     enableTextViewScroll();
                     btnpauseplay.setImageResource(R.drawable.play_fill);
+                    btnpauseplay.setContentDescription("Pause");
                     index2 = index;
                     if (textToSpeech != null) {
                         textToSpeech.stop();
@@ -210,7 +235,13 @@ public class LangTranslate extends AppCompatActivity {
                 vibe.vibrate(50);
                 index = 0;
                 index2 = 0;
-                textToSpeech.stop();
+                a = false;
+//                textToSpeech.stop();
+//                initializetexttospeech();
+
+                isPaused = false;
+//                btnpauseplay.performClick();
+                btnpauseplay.setImageResource(R.drawable.stop_fill);
                 editTextLetters.setText("");
                 startSpeechRecognition();
             }
@@ -230,12 +261,23 @@ public class LangTranslate extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Handle the item selection here
                 String selectedLanguage = parent.getItemAtPosition(position).toString();
+                Log.d("selected Lang",""+languageMap.get(selectedLanguage));
+                sharedPreferences.saveString(languageMap.get(selectedLanguage));
+                if (textToSpeech != null) {
+                    textToSpeech.stop();
+//                    textToSpeech.shutdown();
+                }
                 // Do something with the selected language
                 if(isfirstime){
                     isfirstime = false;
                     return;
                 }
-                donebtn.performClick();
+                Log.d("checking text",""+translatedTextView.getText());
+                editTextLetters.getText().toString();
+                if(!editTextLetters.getText().toString().isEmpty()){
+                    donebtn.performClick();
+                }
+
             }
 
             @Override
@@ -247,6 +289,10 @@ public class LangTranslate extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 vibe.vibrate(50);
+                if(editTextLetters.getText().toString().isEmpty()){
+                    Toast.makeText(LangTranslate.this,"No Text Entered",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 btnpauseplay.setVisibility(View.VISIBLE);
                 btnpauseplay.setImageResource(R.drawable.stop_fill);
                 isPaused = true;
@@ -256,6 +302,7 @@ public class LangTranslate extends AppCompatActivity {
                 if(!editTextLetters.getText().toString().isEmpty()){
                     detectAndTranslateLanguage(editTextLetters.getText().toString());
                 }
+
             }
         });
     }
@@ -327,30 +374,136 @@ public class LangTranslate extends AppCompatActivity {
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the text you want to translate.");
-
+            resultflag = false;
             // Get the selected language code from the map
             String selectedSourceLanguage = outputlangugage  ;
 
             if (selectedSourceLanguage != null) {
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
             }
+        sr = SpeechRecognizer.createSpeechRecognizer(this);
+        sr.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+//                Toast.makeText(MainActivity.this, "Ready for speech", Toast.LENGTH_SHORT).show();
 
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showAlertDialog(MainActivity.speaklang == null ? "English": MainActivity.speaklang);
+                    }
+                });
 
-            try {
-                startActivityForResult(intent, SPEECH_REQUEST_CODE);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void onBeginningOfSpeech() {
+//                Toast.makeText(MainActivity.this, "Speech started", Toast.LENGTH_SHORT).show();
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                    }
+//                });
+
+
+
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+                // You can update UI here with rmsdB value if you want
+                voiceDialog.setProgress(Math.max(0,(int)rmsdB));
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+//                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
+//                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onError(int error) {
+                Toast.makeText(LangTranslate.this, "No Text Detected", Toast.LENGTH_SHORT).show();
+                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null) {
+                    String resultText = matches.get(0).toLowerCase();
+                    editTextLetters.setText(resultText);
+                    btnpauseplay.setVisibility(View.VISIBLE);
+                    btnreplay.setVisibility(View.VISIBLE);
+                    detectAndTranslateLanguage(resultText);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            voiceDialog.setMessage("Result : " + resultText);
+                        }
+                    });
+
+
+//                voiceDialog.dismiss();
+                }
+                Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        voiceDialog.dismiss();
+                    }
+                };
+                handler.postDelayed(runnable, 1500);
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+
+
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
+        });
+
+
+        if (selectedSourceLanguage != null) {
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
+        }
+        sr.startListening(intent);
+
+
+//            try {
+//                startActivityForResult(intent, SPEECH_REQUEST_CODE);
+//            } catch (ActivityNotFoundException e) {
+//                Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
+//            }
 
 
     }
 
-
+    private void stopSpeechRecognition() {
+        if (sr != null) {
+            sr.stopListening();
+            sr.cancel();
+            sr.destroy();
+            sr = null;
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            resultflag = true;
             if (results != null && !results.isEmpty()) {
                 String spokenText = results.get(0);
                 editTextLetters.setText(spokenText);
@@ -359,7 +512,31 @@ public class LangTranslate extends AppCompatActivity {
                 detectAndTranslateLanguage(spokenText);
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
+
+    }
+    private void showAlertDialog(String language){
+//         builderInput = new AlertDialog.Builder(this);
+//
+//        // Inflate custom layout for the dialog
+//        // Note: You can use a layout file if needed
+//        // builder.setView(R.layout.custom_dialog_layout);
+//
+//        // Set dialog title and message
+//        builderInput.setTitle("Spoken Text")
+//                .setMessage("Language: " +language);
+
+
+        // Create and show the dialog
+        voiceDialog = new ProgressDialog(this);
+//        voiceDialog.setMax(10);
+//        voiceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        voiceDialog.setTitle("Language : "+language);
+        voiceDialog.setMessage("Listening...");
+        voiceDialog.setCancelable(true);
+        voiceDialog.setOnCancelListener(dialog -> stopSpeechRecognition());
+
+        voiceDialog.show();
+
     }
     private void initializetexttospeech(){
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -498,8 +675,39 @@ public class LangTranslate extends AppCompatActivity {
                                             translatedTextView.setText(s); // Set the translated text in the TextView
                                             translatedTextView.setVisibility(View.VISIBLE);
                                             // Make the TextView visible
-                                            textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
-                                            textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceID");
+
+//                                            textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
+                                            try{
+//                                                new Thread(new Runnable() {
+//                                                    @Override
+//                                                    public void run() {
+//                                                        textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
+//                                                        textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceID");
+//                                                    }
+//                                                }).start();
+//                                                Handler handler = new Handler(Looper.getMainLooper());
+//
+//                                                // Post the delayed task
+//                                                handler.postDelayed(new Runnable() {
+//                                                    @Override
+//                                                    public void run() {
+//
+//                                                    }
+//                                                }, 3000); // 100
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        Log.d("Hey there","texttospeech called"+Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem())));
+                                                        textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
+//                                                        speakText(s,0);
+                                                        textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, "myUtteranceID");
+                                                    }
+                                                });
+
+                                            }catch (Error e){
+                                                Log.d("check speak",""+e);
+                                            }
+
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {
                                         @Override
@@ -540,12 +748,40 @@ public class LangTranslate extends AppCompatActivity {
         builder.setPositiveButton("OK", (dialog, which) -> {});
         builder.create().show();
     }
+
     @Override
-    protected void onDestroy() {
+    protected void onPause() {
+        shakeListener.unregisterShakeListener();
         if (textToSpeech != null) {
             textToSpeech.stop();
-            textToSpeech.shutdown();
+//            textToSpeech.shutdown();
         }
+        super.onPause();
+    }
+    @Override
+    protected void onStart(){
+        shakeListener.registerShakeListener();
+        super.onStart();
+    }
+    @Override
+    protected void onStop(){
+        shakeListener.unregisterShakeListener();
+        super.onStop();
+    }
+    @Override
+    protected void onRestart(){
+        shakeListener.registerShakeListener();
+        super.onRestart();
+    }
+    @Override
+    protected void onResume(){
+        shakeListener.registerShakeListener();
+        super.onResume();
+    }
+    @Override
+    protected void onDestroy() {
+        shakeListener.unregisterShakeListener();
+        shakeListener.onDestroy();
         long end_time = System.currentTimeMillis();
         UserPreferences userPreferences = new UserPreferences(this);
         String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
@@ -563,33 +799,112 @@ public class LangTranslate extends AppCompatActivity {
         }
         super.onBackPressed();
     }
-    public class MyRunnable implements Runnable {
-        private Handler handler;
-        private Context context;
+    public class MySharedPreferences {
 
-        private ProgressDialog dowloading;
-        public MyRunnable(Context context, Handler handler,ProgressDialog dialog) {
-            this.context = context;
-            this.handler = handler;
-            this.dowloading = dialog;
+        private static final String PREF_NAME = "LangTranslate";
+        private static final String KEY_STRING = "TargetLanguage";
 
-        }
-        public void start() {
-//            handler.postDelayed(this, 60*1000); // Run the task after 30sec milliseconds (1 second)
-        }
-        public void stop() {
-            handler.removeCallbacks(this); // Remove any pending callbacks
-        }
-        @Override
-        public void run() {
+        private SharedPreferences sharedPreferences;
+        private SharedPreferences.Editor editor;
 
-//            new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                @Override
-//                public void run() {
-////                    dowloading.dismiss();
-////                    showNoInternetDialog();
-//                }
-//            });
+        public MySharedPreferences(Context context) {
+            sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+            editor = sharedPreferences.edit();
         }
+
+        // Method to save a string
+        public void saveString(String value) {
+
+            editor.putString(KEY_STRING, value);
+            editor.apply();
+        }
+
+        // Method to retrieve a string
+        public String getString() {
+            return sharedPreferences.getString(KEY_STRING, "");
+        }
+    }
+    private void initializelanguageMap() {
+        UserPreferences userPreferences = new UserPreferences(this);
+        String country = userPreferences.getCountry();
+        if(!country.equals("India")){
+            languageMap.put("Afrikaans", "af");
+            languageMap.put("Albanian", "sq");
+            languageMap.put("Arabic", "ar");
+            languageMap.put("Bengali", "bn");
+            languageMap.put("Bulgarian", "bg");
+            languageMap.put("Catalan", "ca");
+            languageMap.put("Chinese", "zh");
+            languageMap.put("Croatian", "hr");
+            languageMap.put("Czech", "cs");
+            languageMap.put("Danish", "da");
+            languageMap.put("Dutch", "nl");
+            languageMap.put("English", "en");
+            languageMap.put("Finnish", "fi");
+            languageMap.put("French", "fr");
+            languageMap.put("Galician", "gl");
+            languageMap.put("Georgian", "ka");
+            languageMap.put("German", "de");
+            languageMap.put("Greek", "el");
+            languageMap.put("Gujarati", "gu");
+            languageMap.put("Haitian", "ht");
+            languageMap.put("Hebrew", "he");
+            languageMap.put("Hindi", "hi");
+            languageMap.put("Hungarian", "hu");
+            languageMap.put("Icelandic", "is");
+            languageMap.put("Indonesian", "id");
+            languageMap.put("Italian", "it");
+            languageMap.put("Japanese", "ja");
+            languageMap.put("Kannada", "kn");
+            languageMap.put("Korean", "ko");
+            languageMap.put("Latvian", "lv");
+            languageMap.put("Lithuanian", "lt");
+            languageMap.put("Macedonian", "mk");
+            languageMap.put("Malay", "ms");
+            languageMap.put("Malayalam", "ml");
+            languageMap.put("Maltese", "mt");
+            languageMap.put("Marathi", "mr");
+            languageMap.put("Norwegian", "no");
+            languageMap.put("Polish", "pl");
+            languageMap.put("Portuguese", "pt");
+            languageMap.put("Romanian", "ro");
+            languageMap.put("Russian", "ru");
+            languageMap.put("Slovak", "sk");
+            languageMap.put("Slovenian", "sl");
+            languageMap.put("Spanish", "es");
+            languageMap.put("Swahili", "sw");
+            languageMap.put("Swedish", "sv");
+            languageMap.put("Tagalog", "tl");
+            languageMap.put("Tamil", "ta");
+            languageMap.put("Telugu", "te");
+            languageMap.put("Thai", "th");
+            languageMap.put("Turkish", "tr");
+            languageMap.put("Ukrainian", "uk");
+            languageMap.put("Urdu", "ur");
+            languageMap.put("Vietnamese", "vi");
+        }
+//        languageMap.put("Tamil", "ta");
+//        languageMap.put("Telugu", "te");
+//        languageMap.put("Marathi", "mr");
+////        languageMap.put("Malayalam", "ml");
+//        languageMap.put("Hindi", "hi");
+//        languageMap.put("Gujarati", "gu");
+//        languageMap.put("English", "en");
+//        languageMap.put("Bengali", "bn");
+//        languageMap.put("Kannada", "kn");
+        else{
+            languageMap.put("Tamil", "ta");
+            languageMap.put("Telugu", "te");
+            languageMap.put("Marathi", "mr");
+//        languageMap.put("Malayalam", "ml");
+            languageMap.put("Hindi", "hi");
+            languageMap.put("Gujarati", "gu");
+            languageMap.put("English", "en");
+            languageMap.put("Bengali", "bn");
+            languageMap.put("Kannada", "kn");
+        }
+//
+
+
     }
 }

@@ -244,6 +244,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -291,11 +292,20 @@ public class SplashScreen extends AppCompatActivity {
             public void run() {
                 initializeTTS();
                 instructionmap.makeinstruction();
-                initializelanguageMap();
+//                initializelanguageMap();
                 translationmap.initializetransMap();
                 start();
         }
         }, 1500);
+        UserPreferences userPreferences = new UserPreferences(this);
+        Location location = AnalyticsManager.getLocation(this);
+        String Country = "";
+        if(location!=null){
+            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
+            Log.d("Country check",Country);
+        }
+
+        userPreferences.saveCountry(Country);
     }
 
     private void start() {
@@ -370,6 +380,16 @@ public class SplashScreen extends AppCompatActivity {
         }
     }
     private void proceedToNextActivity() {
+        UserPreferences userPreferences = new UserPreferences(this);
+        Location location = AnalyticsManager.getLocation(this);
+        String Country = "";
+        if(location!=null){
+            Country = AnalyticsManager.getCountry(this,location.getLatitude(),location.getLongitude());
+            Log.d("Country check",Country);
+        }
+
+        userPreferences.saveCountry(Country);
+        initializelanguageMap();
         Intent intent = new Intent(SplashScreen.this, Onboarding.class);
         startActivity(intent);
         finish();

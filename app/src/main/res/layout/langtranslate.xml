@@ -117,9 +117,9 @@
             android:layout_height="52dp"
             android:contentDescription="Target Language Selector"
             android:layout_centerHorizontal="true"
+            android:hint="Language "
             android:overlapAnchor="false"
             android:textColor="#FFFFFF"
-
             />
 
     </LinearLayout>
@@ -161,6 +161,7 @@
         android:scrollbars="vertical"
         android:paddingTop="10dp"
         android:paddingEnd="10dp"
+        android:contentDescription="Translated Text"
         android:paddingBottom="27dp"
         android:text=""
         android:textColor="@color/white"
@@ -280,7 +281,7 @@
             android:foreground="@drawable/ripple_card"
             android:layout_marginBottom="@dimen/_30sdp"
             android:background="@drawable/imagebutton_background"
-            android:contentDescription="Mic"
+            android:contentDescription="Mic Button"
             android:src="@drawable/mictranslate" />
 
         <ImageButton

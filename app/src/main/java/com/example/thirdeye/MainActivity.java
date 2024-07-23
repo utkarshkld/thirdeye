@@ -6,11 +6,15 @@ package com.example.thirdeye;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -20,19 +24,28 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Vibrator;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
@@ -44,6 +57,12 @@ import com.google.android.gms.auth.api.credentials.Credentials;
 import com.google.android.gms.auth.api.credentials.CredentialsClient;
 import com.google.android.gms.auth.api.credentials.HintRequest;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.mlkit.nl.translate.Translation;
+import com.google.mlkit.nl.translate.Translator;
+import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static int objdetfps;
     private long compasstime = 0;
     public static boolean deviceHasFlash = false;
+    boolean resultflag = true;
     private GoogleApiClient apiClient;
     private long currtime = 0;
     public static HashMap<String, String> translationMap = new HashMap<>();
@@ -72,7 +92,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static TextToSpeech textToSpeech;
     private static final int RESOLVE_HINT = 100;
     public static String speaklang;
-    private MicHandler shakeListener;
+    private boolean a;
+    public static MicHandler shakeListener;
+    CardView objectButton;
     private int i = 0;
     private CardView eyebtn;
     private CardView settingbtn;
@@ -85,16 +107,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static List<Settings> finalset;
 
     public static Map<String, List<String>> commandmap = new HashMap<>();
-    private SensorManager sensorManager;
+    public static SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
     private EditText fpsnumber;
     private PackageManager pm;
+    private SpeechRecognizer sr;
 
     private float[] accelerometerData = new float[3];
     private float[] magnetometerData = new float[3];
-    private CredentialsClient credentialsClient;
-    private ActivityResultLauncher<Intent> getPhoneNumberLauncher;
+
+    private ProgressDialog voiceDialog;
+//    private AlertDialog.Builder builderInput;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -126,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
 
-
+        resultflag = true;
 
 
 
@@ -143,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         requestPermission();
         eyebtn = findViewById(R.id.eyebtn);
         Log.d("hello_testing",UserDeafultLanguage);
+
+
         eyebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -169,25 +195,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                      // Handle Text-to-Speech initialization error
                  }
         });
-
+        ImageView micButton = findViewById(R.id.micButton);
         // Initialize ShakeListener
         shakeListener = new MicHandler(this);
+        a=false;
         shakeListener.setOnShakeListener(() -> {
             long temp = System.currentTimeMillis();
-            if(temp-currtime >= 3000) {
-                currtime = temp;
+            if(temp-currtime >=5000 && !a ) {
+
+                currtime = System.currentTimeMillis();
+                a = true;
 //                Toast.makeText(MainActivity.this, "Shake detected!", Toast.LENGTH_SHORT).show();
-                startRecording();
+//                startRecording();
+                micButton.performClick();
+
             }
         });
-        ImageView micButton = findViewById(R.id.micButton);
-        CardView objectButton = findViewById(R.id.objectbutton);
+
+        objectButton = findViewById(R.id.objectbutton);
         CardView wordsButton = findViewById(R.id.wordsButton);
         CardView st = findViewById(R.id.btnspeechtotext);
         settingbtn = findViewById(R.id.settings);
-        micButton.setOnClickListener(v -> {
-            vibe.vibrate(50);
-            startVoiceRecognition();
+
+        micButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vibe.vibrate(50);
+
+                startVoiceRecognition();
+                a = false;
+            }
         });
         settingbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -203,7 +240,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View view) {
                 vibe.vibrate(50);
                 speaktext(translationMap.get(speaklang+"_"+"opening object"));
+//                shakeListener.unregisterShakeListener();
                 Intent intent = new Intent(MainActivity.this, Yolodetection.class);
+                SharedPreferences sharedPreferences = getSharedPreferences("Output_lang", Context.MODE_PRIVATE);
+
+                intent.putExtra("Output_lang",sharedPreferences.getString("langname", "en"));
 //                if(!fpsnumber.getText().toString().isEmpty())
 //                {
 //                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
@@ -228,6 +269,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
+                Log.d("check lang please ",""+speaklang);
+//                shakeListener.unregisterShakeListener();
                 speaktext(translationMap.get(speaklang+"_"+"opening translate"));
                 Intent intent = new Intent(MainActivity.this, LangTranslate.class);
                 intent.putExtra("Translation lang",output_lang);
@@ -263,6 +306,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(finalset == null || finalset.size() == 0){
             speech_rate = 1f;
             output_lang = UserDeafultLanguage;
+            SharedPreferences sharedPreferences = getSharedPreferences("Output_lang", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("langname", UserDeafultLanguage);
+            editor.apply(); // Save changes
             blindness = false;
             input_lang = "English";
             trans_input = "en";
@@ -272,6 +319,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }else{
                 Settings currset = finalset.get(0);
                 speech_rate = currset.rate;
+            SharedPreferences sharedPreferences = getSharedPreferences("Output_lang", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("langname", currset.output_speech);
+            editor.apply(); // Save changes
                 output_lang = currset.output_speech;
                 blindness = currset.blindness;
                 input_lang = currset.input_lang;
@@ -319,6 +370,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onStart() {
 //        int READINGRATE = 500000;
+        shakeListener.registerShakeListener();
+//        getAllSettings(this::onSettingsListLoaded);
         if(magnetometer != null) {
             if (accelerometer != null) {
                 sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -327,10 +380,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }else {
             Toast.makeText(MainActivity.this, "Compass is not supported with your device", Toast.LENGTH_LONG).show();
         }
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result;
+                if(output_lang == null) {
+                    result = textToSpeech.setLanguage(Locale.getDefault());
+                }
+                else{
+                    result = textToSpeech.setLanguage(new Locale(output_lang));
+                }
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // Handle language initialization errors here
+                }
+            } else {
+                // Handle Text-to-Speech initialization error
+            }
+        });
         super.onStart();
     }
+
     @Override
     protected void onResume() {
+//        getAllSettings(this::onSettingsListLoaded);
+        translationmap.initializetransMap();
+        shakeListener.registerShakeListener();
         if(magnetometer != null) {
             if (accelerometer != null) {
                 sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -339,19 +412,53 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }else {
             Toast.makeText(MainActivity.this, "Compass is not supported with your device", Toast.LENGTH_LONG).show();
         }
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result;
+                if(output_lang == null) {
+                    result = textToSpeech.setLanguage(Locale.getDefault());
+                }
+                else{
+                    result = textToSpeech.setLanguage(new Locale(output_lang));
+                }
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // Handle language initialization errors here
+                }
+            } else {
+                // Handle Text-to-Speech initialization error
+            }
+        });
         super.onResume();
 
         // Start the shake listener when the activity is resumed
+
+    }
+    @Override
+    protected void onRestart(){
+        translationmap.initializetransMap();
         shakeListener.registerShakeListener();
+//        getAllSettings(this::onSettingsListLoaded);
+        super.onRestart();
     }
     @Override
     protected void onPause() {
         sensorManager.unregisterListener(this);
+        shakeListener.unregisterShakeListener();
         super.onPause();
 
         // Stop the shake listener when the activity is paused
-        shakeListener.unregisterShakeListener();
+
+
     }
+    @Override
+    protected void onStop() {
+        sensorManager.unregisterListener(this);
+        shakeListener.unregisterShakeListener();
+        super.onStop();
+
+
+    }
+
     private void requestPermission() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -372,19 +479,409 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void startVoiceRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        resultflag = false;
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say Commands...");
         // Get the selected language code from the map
         String selectedSourceLanguage = output_lang;
+        sr = SpeechRecognizer.createSpeechRecognizer(this);
+        sr.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+//                Toast.makeText(MainActivity.this, "Ready for speech", Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showAlertDialog(speaklang == null ? "English": speaklang);
+                    }
+                });
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+//                Toast.makeText(MainActivity.this, "Speech started", Toast.LENGTH_SHORT).show();
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                    }
+//                });
+
+
+
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+                // You can update UI here with rmsdB value if you want
+                Log.d("checking decibels",""+rmsdB);
+                voiceDialog.setProgress(Math.max(0,(int)rmsdB));
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+//                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
+//                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onError(int error) {
+                Toast.makeText(MainActivity.this, "No Text Detected", Toast.LENGTH_SHORT).show();
+                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null) {
+                    String resultText = matches.get(0);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            voiceDialog.setMessage("Result : " + resultText);
+                        }
+                    });
+
+//                TranslatorOptions options = new TranslatorOptions.Builder()
+//                    .setSourceLanguage(output_lang)
+//                    .setTargetLanguage("en")
+//                    .build();
+//            Translator translator = Translation.getClient(options);
+                        resultflag = true;
+//                        ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                        String spokenText = resultText.toLowerCase();
+//                        Log.d("Just Spoken",""+spokenText);
+//            translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
+//                @Override
+//                public void onSuccess(Void unused) {
+////                                    myRunnable.stop();
+//                    Task<String> result = translator.translate(spokenText).addOnSuccessListener(new OnSuccessListener<String>() {
+//                        @Override
+//                        public void onSuccess(String s) {
+//                            Log.d("Translated String",""+s);
+//                            s = s.toLowerCase();
+//                            if(s.contains("objec")){
+//                                Intent intent = new Intent(MainActivity.this,Yolodetection.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("translat")){
+//                                Intent intent = new Intent(MainActivity.this,LangTranslate.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("magnifier") || s.contains("magnify")){
+//                                Intent intent = new Intent(MainActivity.this,Magnifying.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("setting")){
+//                                Intent intent = new Intent(MainActivity.this,appsettings.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("read")){
+//                                Intent intent = new Intent(MainActivity.this,TextSpeech.class);
+//                                startActivity(intent);
+//                            }
+//                            // Make the TextView visible
+//
+////                                            textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
+//
+//
+//
+//
+//
+//                        }
+//                    }).addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//
+//                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+////                                    myRunnable.stop();
+//
+//
+//                }
+//            });
+
+                        if (matches != null && !matches.isEmpty()) {
+//                String spokenText = matches.get(0).toLowerCase();
+                            List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
+//                Log.d("checking input cmd",wordList.toString());
+
+                            boolean ismatched = false;
+                            //we got the string seperated by space
+                            if (!ismatched) {                   // for object
+
+                                for (String str : Objects.requireNonNull(commandmap.get("object"))) {
+                                    int n = str.length();
+                                    for (String str2 : wordList) {
+                                        int m = str2.length();
+                                        if (partialmatch(str2, str, m, n,0.7f)) {
+//                                Log.d("here called",""+1);
+//                                speaktext(translationMap.get(speaklang + "_" + "opening object"));
+//                                Intent intent = new Intent(MainActivity.this, Yolodetection.class);
+////                                if(!fpsnumber.getText().toString().isEmpty())
+////                                {
+////                                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
+////                                }
+//                                startActivity(intent);
+                                            objectButton.performClick();
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                            ismatched = true;
+                                            break;
+                                        }
+                                    }
+                                    if (ismatched) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!ismatched) {
+                                // for object
+
+                                for (String str : Objects.requireNonNull(commandmap.get("read"))) {
+                                    int n = str.length();
+                                    for (String str2 : wordList) {
+                                        int m = str2.length();
+//                            Log.d("Checking Strings",""+str+" "+str2+" "+partialmatch(str2, str, m, n,0.7f));
+                                        if (partialmatch(str2, str, m, n,0.7f)) {
+                                            Log.d("Checking read text", "" + str + " " + str2);
+                                            speaktext(translationMap.get(speaklang + "_" + "opening read text"));
+                                            Log.d("here called",""+2);
+                                            Intent intent = new Intent(MainActivity.this, TextSpeech.class);
+                                            startActivity(intent);
+                                            ;
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                            ismatched = true;
+                                            break;
+                                        }
+                                    }
+                                    if (ismatched) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!ismatched) {
+                                // for object
+                                for (String str : Objects.requireNonNull(commandmap.get("translate"))) {
+                                    int n = str.length();
+                                    for (String str2 : wordList) {
+                                        int m = str2.length();
+                                        if (partialmatch(str2, str, m, n,0.7f)) {
+                                            ismatched = true;
+                                            Log.d("here called",""+3);
+                                            break;
+                                        }
+                                    }
+                                    if (ismatched) {
+                                        break;
+                                    }
+                                }
+
+                                if (ismatched) {
+                                    // before starting we have itertate over the map for detecting langugages
+                                    String defaultlang = speaklang ;
+                                    Log.d("am i null",""+defaultlang+" "+langnamemap.get(speaklang));
+
+                                    for (Map.Entry<String, String> entry : Objects.requireNonNull(langnamemap.get(speaklang)).entrySet()) {
+                                        String str = entry.getKey();
+
+                                        int n = str.length();
+                                        for (String currword : wordList) {
+                                            int m = currword.length();
+                                            if (partialmatch(str.toLowerCase(), currword, n, m,0.7f)) {
+                                                defaultlang = langnamemap.get(speaklang).get(str);
+                                                break;
+                                            }
+                                        }
+                                    }
+//                            Log.d("Checking language i am called ", "onActivityResult: " + defaultlang);
+                                    speaktext(translationMap.get(speaklang + "_" + "opening translate"));
+                                    Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+                                    intent.putExtra("Translation lang", languageMap.get(defaultlang));
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                    startActivity(intent);
+                                }
+                            }
+                            if(!ismatched) {
+                                for (String str : Objects.requireNonNull(commandmap.get("magnifier"))) {
+                                    int n = str.length();
+                                    for (String str2 : wordList) {
+                                        int m = str2.length();
+                                        if (partialmatch(str2, str, m, n,0.7f)) {
+                                            Log.d("here called",""+6);
+                                            Log.d("Check Strings 2",str2+" "+str);
+                                            speaktext(translationMap.get(speaklang + "_" + "opening magnifier"));
+                                            Intent intent = new Intent(MainActivity.this, Magnifying.class);
+                                            startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                            ismatched = true;
+                                            break;
+                                        }
+                                    }
+                                    if (ismatched) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!ismatched) {
+                                for (String str : Objects.requireNonNull(commandmap.get("settings"))) {
+                                    int n = str.length();
+                                    for (String str2 : wordList) {
+                                        int m = str2.length();
+                                        if (partialmatch(str2, str, m, n,0.7f)) {
+                                            Log.d("Checking stringshello 2", "" + str + " " + str2);
+                                            Log.d("here called",""+4);
+                                            speaktext(translationMap.get(speaklang + "_" + "opening setting"));
+                                            Intent intent = new Intent(MainActivity.this, appsettings.class);
+                                            startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                            ismatched = true;
+                                            break;
+                                        }
+                                    }
+                                    if (ismatched) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!ismatched) {
+                                for (String str : Objects.requireNonNull(commandmap.get("direction"))) {
+                                    int n = str.length();
+                                    for (String str2 : wordList) {
+                                        int m = str2.length();
+                                        if (partialmatch(str2, str, m, n,0.7f)) {
+                                            ismatched = true;
+                                            Log.d("here called",""+5);
+                                            Log.d("Direction Test", "" + translationMap.get(speaklang + "_" + currdirection));
+
+                                            textToSpeech.speak(translationMap.get(speaklang + "_" + currdirection), TextToSpeech.QUEUE_FLUSH, null, null);
+
+//                                new Handler().postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        // Speak direction
+//                                        speaktext(translationMap.get(speaklang + "_" + currdirection));
+//                                        Log.d("Direction Test", "" + translationMap.get(speaklang + "_" + currdirection));
+//
+//                                        // Assuming MyAsyncTask is the AsyncTask instance
+//                                    }
+//                                }, 1000);
+
+//                                    sensorManager.unregisterListener(this);
+
+                                            break;
+                                        }
+                                    }
+
+                                    if (ismatched) {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if(!ismatched){
+                                Toast.makeText(MainActivity.this, "Command not recognized", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+
+//                    Toast.makeText(MainActivity.this, "Results: " + resultText, Toast.LENGTH_SHORT).show();
+                }
+                Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        voiceDialog.dismiss();
+                    }
+                };
+                handler.postDelayed(runnable,1500);
+//                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+
+
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
+        });
+
+
         if (selectedSourceLanguage != null) {
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
         }
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 20000);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 20000);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 20000);
-        try {
-            startActivityForResult(intent, SPEECH_REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
+        sr.startListening(intent);
+//        Handler handler = new Handler();
+//
+//        // Define the task to be executed
+//        Runnable task = new Runnable() {
+//            @Override
+//            public void run() {
+////                Activity activity = MainActivity.this;
+//                if(!resultflag){
+//                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//                    startActivity(intent);
+////
+////                    findViewById(R.id.relativeLayoutWindow).requestFocus();
+//                }
+//
+//
+//            }
+//        };
+//
+//        // Post the task with a delay of 2000 milliseconds (2 seconds)
+//        handler.postDelayed(task, 8000);
+
+//        try {
+//            startActivityForResult(intent, SPEECH_REQUEST_CODE);
+//
+//        } catch (ActivityNotFoundException e) {
+//            Toast.makeText(this, "Speech recognition is not supported on this device.", Toast.LENGTH_SHORT).show();
+//        }
+
+    }
+    private void showAlertDialog(String language){
+//         builderInput = new AlertDialog.Builder(this);
+//
+//        // Inflate custom layout for the dialog
+//        // Note: You can use a layout file if needed
+//        // builder.setView(R.layout.custom_dialog_layout);
+//
+//        // Set dialog title and message
+//        builderInput.setTitle("Spoken Text")
+//                .setMessage("Language: " +language);
+
+
+        // Create and show the dialog
+        voiceDialog = new ProgressDialog(this);
+//        voiceDialog.setMax(10);
+//        voiceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+
+
+        voiceDialog.setTitle("Language : "+language);
+        voiceDialog.setMessage("Listening...");
+        voiceDialog.setCancelable(true);
+        voiceDialog.setOnCancelListener(dialog -> stopSpeechRecognition());
+
+        voiceDialog.show();
+
+    }
+    private void stopSpeechRecognition() {
+        if (sr != null) {
+            sr.stopListening();
+            sr.cancel();
+            sr.destroy();
+            sr = null;
         }
     }
 
@@ -405,17 +902,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     dp[i%2][j]=dp[(i-1)%2][j-1]+1;
                     if(dp[i%2][j]>res)
                         res=dp[i%2][j];
+//                    ++res;
                 }
                 else dp[i%2][j]=0;
             }
         }
         int t = n;
+//        Log.d("")
+        Log.d("Checking Strings",""+res+" "+threshold*t+" "+text+" "+pattern);
         if(res > threshold*t){
             return true;
         }
         return false;
     }
     private void speaktext(String text){
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -423,6 +924,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }).start();
     }
+//private void speaktext(String text){
+//    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+//        @Override
+//        public void run() {
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+//                }
+//            }).start();
+//        }
+//    }, 100); // 100ms delay
+//}
     // Construct a request for phone numbers and show the picker
     private void getPhoneNumber() throws IntentSender.SendIntentException {
         HintRequest hintRequest = new HintRequest.Builder()
@@ -440,6 +954,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        shakeListener.registerShakeListener();
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESOLVE_HINT) {
             if (resultCode == RESULT_OK && data != null) {
@@ -451,134 +966,222 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         }
-        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if (matches != null && !matches.isEmpty()) {
+        if (requestCode == SPEECH_REQUEST_CODE ) {
+            if(resultCode == RESULT_OK && data != null){
+//                TranslatorOptions options = new TranslatorOptions.Builder()
+//                    .setSourceLanguage(output_lang)
+//                    .setTargetLanguage("en")
+//                    .build();
+//            Translator translator = Translation.getClient(options);
+                resultflag = true;
+                ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 String spokenText = matches.get(0).toLowerCase();
-                List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
+                Log.d("Just Spoken",""+spokenText);
+//            translator.downloadModelIfNeeded().addOnSuccessListener(new OnSuccessListener<Void>() {
+//                @Override
+//                public void onSuccess(Void unused) {
+////                                    myRunnable.stop();
+//                    Task<String> result = translator.translate(spokenText).addOnSuccessListener(new OnSuccessListener<String>() {
+//                        @Override
+//                        public void onSuccess(String s) {
+//                            Log.d("Translated String",""+s);
+//                            s = s.toLowerCase();
+//                            if(s.contains("objec")){
+//                                Intent intent = new Intent(MainActivity.this,Yolodetection.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("translat")){
+//                                Intent intent = new Intent(MainActivity.this,LangTranslate.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("magnifier") || s.contains("magnify")){
+//                                Intent intent = new Intent(MainActivity.this,Magnifying.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("setting")){
+//                                Intent intent = new Intent(MainActivity.this,appsettings.class);
+//                                startActivity(intent);
+//                            }else if(s.contains("read")){
+//                                Intent intent = new Intent(MainActivity.this,TextSpeech.class);
+//                                startActivity(intent);
+//                            }
+//                            // Make the TextView visible
+//
+////                                            textToSpeech.setLanguage(new Locale(Objects.requireNonNull(languageMap.get(sourceLanguageSpinner.getSelectedItem()))));
+//
+//
+//
+//
+//
+//                        }
+//                    }).addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//
+//                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+////                                    myRunnable.stop();
+//
+//
+//                }
+//            });
+
+                if (matches != null && !matches.isEmpty()) {
+//                String spokenText = matches.get(0).toLowerCase();
+                    List<String> wordList = Arrays.asList(spokenText.split("\\s+"));
 //                Log.d("checking input cmd",wordList.toString());
-                Log.d("object cmd", commandmap.get("object").toString());
-                Log.d("traslate cmd", commandmap.get("translate").toString());
-                Log.d("read cmd", commandmap.get("read").toString());
-                boolean ismatched = false;
-                //we got the string seperated by space
-                if (!ismatched) {                   // for object
 
-                    for (String str : Objects.requireNonNull(commandmap.get("object"))) {
-                        int n = str.length();
-                        for (String str2 : wordList) {
-                            int m = str2.length();
-                            if (partialmatch(str2, str, m, n,0.6f)) {
-                                speaktext(translationMap.get(speaklang + "_" + "opening object"));
-                                Intent intent = new Intent(MainActivity.this, Yolodetection.class);
-//                                if(!fpsnumber.getText().toString().isEmpty())
-//                                {
-//                                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
-//                                }
-                                startActivity(intent);
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-                                ismatched = true;
-                                break;
-                            }
-                        }
-                        if (ismatched) {
-                            break;
-                        }
-                    }
-                }
-                if (!ismatched) {
-                    // for object
+                    boolean ismatched = false;
+                    //we got the string seperated by space
+                    if (!ismatched) {                   // for object
 
-                    for (String str : Objects.requireNonNull(commandmap.get("read"))) {
-                        int n = str.length();
-                        for (String str2 : wordList) {
-                            int m = str2.length();
-                            if (partialmatch(str2, str, m, n,0.7f)) {
-                                Log.d("Checking read text", "" + str + " " + str2);
-                                speaktext(translationMap.get(speaklang + "_" + "opening read text"));
-                                Intent intent = new Intent(MainActivity.this, TextSpeech.class);
-                                startActivity(intent);
-                                ;
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-                                ismatched = true;
-                                break;
-                            }
-                        }
-                        if (ismatched) {
-                            break;
-                        }
-                    }
-                }
-                if (!ismatched) {
-                    // for object
-                    for (String str : Objects.requireNonNull(commandmap.get("translate"))) {
-                        int n = str.length();
-                        for (String str2 : wordList) {
-                            int m = str2.length();
-                            if (partialmatch(str2, str, m, n,0.7f)) {
-                                ismatched = true;
-                                break;
-                            }
-                        }
-                        if (ismatched) {
-                            break;
-                        }
-                    }
-
-                    if (ismatched) {
-                        // before starting we have itertate over the map for detecting langugages
-                        String defaultlang = speaklang;
-
-                        for (Map.Entry<String, String> entry : Objects.requireNonNull(langnamemap.get(speaklang)).entrySet()) {
-                            String str = entry.getKey();
-
+                        for (String str : Objects.requireNonNull(commandmap.get("object"))) {
                             int n = str.length();
-                            for (String currword : wordList) {
-                                int m = currword.length();
-                                if (partialmatch(str.toLowerCase(), currword, n, m,0.7f)) {
-                                    defaultlang = langnamemap.get(speaklang).get(str);
+                            for (String str2 : wordList) {
+                                int m = str2.length();
+                                if (partialmatch(str2, str, m, n,0.7f)) {
+//                                Log.d("here called",""+1);
+//                                speaktext(translationMap.get(speaklang + "_" + "opening object"));
+//                                Intent intent = new Intent(MainActivity.this, Yolodetection.class);
+////                                if(!fpsnumber.getText().toString().isEmpty())
+////                                {
+////                                    objdetfps = Integer.parseInt(fpsnumber.getText().toString());
+////                                }
+//                                startActivity(intent);
+                                    objectButton.performClick();
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                    ismatched = true;
                                     break;
                                 }
                             }
-                        }
-                        Log.d("Checking language ", "onActivityResult: " + defaultlang);
-                        speaktext(translationMap.get(speaklang + "_" + "opening translate") + " " + defaultlang);
-                        Intent intent = new Intent(MainActivity.this, LangTranslate.class);
-                        intent.putExtra("Translation lang", languageMap.get(defaultlang));
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-                        startActivity(intent);
-                    }
-                }
-                if (!ismatched) {
-                    for (String str : Objects.requireNonNull(commandmap.get("settings"))) {
-                        int n = str.length();
-                        for (String str2 : wordList) {
-                            int m = str2.length();
-                            if (partialmatch(str2, str, m, n,0.8f)) {
-                                Log.d("Checking strings", "" + str + " " + str2);
-                                speaktext(translationMap.get(speaklang + "_" + "opening setting"));
-                                Intent intent = new Intent(MainActivity.this, appsettings.class);
-                                startActivity(intent);
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-                                ismatched = true;
+                            if (ismatched) {
                                 break;
                             }
                         }
-                        if (ismatched) {
-                            break;
+                    }
+                    if (!ismatched) {
+                        // for object
+
+                        for (String str : Objects.requireNonNull(commandmap.get("read"))) {
+                            int n = str.length();
+                            for (String str2 : wordList) {
+                                int m = str2.length();
+//                            Log.d("Checking Strings",""+str+" "+str2+" "+partialmatch(str2, str, m, n,0.7f));
+                                if (partialmatch(str2, str, m, n,0.7f)) {
+                                    Log.d("Checking read text", "" + str + " " + str2);
+                                    speaktext(translationMap.get(speaklang + "_" + "opening read text"));
+                                    Log.d("here called",""+2);
+                                    Intent intent = new Intent(MainActivity.this, TextSpeech.class);
+                                    startActivity(intent);
+                                    ;
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                    ismatched = true;
+                                    break;
+                                }
+                            }
+                            if (ismatched) {
+                                break;
+                            }
                         }
                     }
-                }
-                if (!ismatched) {
-                    for (String str : Objects.requireNonNull(commandmap.get("direction"))) {
-                        int n = str.length();
-                        for (String str2 : wordList) {
-                            int m = str2.length();
-                            if (partialmatch(str2, str, m, n,0.7f)) {
-                                ismatched = true;
-                                Log.d("Direction Test", "" + translationMap.get(speaklang + "_" + currdirection));
+                    if (!ismatched) {
+                        // for object
+                        for (String str : Objects.requireNonNull(commandmap.get("translate"))) {
+                            int n = str.length();
+                            for (String str2 : wordList) {
+                                int m = str2.length();
+                                if (partialmatch(str2, str, m, n,0.7f)) {
+                                    ismatched = true;
+                                    Log.d("here called",""+3);
+                                    break;
+                                }
+                            }
+                            if (ismatched) {
+                                break;
+                            }
+                        }
 
-                                textToSpeech.speak(translationMap.get(speaklang + "_" + currdirection), TextToSpeech.QUEUE_FLUSH, null, null);
+                        if (ismatched) {
+                            // before starting we have itertate over the map for detecting langugages
+                            String defaultlang = speaklang ;
+                            Log.d("am i null",""+defaultlang+" "+langnamemap.get(speaklang));
+
+                            for (Map.Entry<String, String> entry : Objects.requireNonNull(langnamemap.get(speaklang)).entrySet()) {
+                                String str = entry.getKey();
+
+                                int n = str.length();
+                                for (String currword : wordList) {
+                                    int m = currword.length();
+                                    if (partialmatch(str.toLowerCase(), currword, n, m,0.7f)) {
+                                        defaultlang = langnamemap.get(speaklang).get(str);
+                                        break;
+                                    }
+                                }
+                            }
+//                            Log.d("Checking language i am called ", "onActivityResult: " + defaultlang);
+                            speaktext(translationMap.get(speaklang + "_" + "opening translate") );
+                            Intent intent = new Intent(MainActivity.this, LangTranslate.class);
+                            intent.putExtra("Translation lang", languageMap.get(defaultlang));
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                            startActivity(intent);
+                        }
+                    }
+                    if(!ismatched) {
+                        for (String str : Objects.requireNonNull(commandmap.get("magnifier"))) {
+                            int n = str.length();
+                            for (String str2 : wordList) {
+                                int m = str2.length();
+                                if (partialmatch(str2, str, m, n,0.7f)) {
+                                    Log.d("here called",""+6);
+                                    Log.d("Check Strings 2",str2+" "+str);
+                                    speaktext(translationMap.get(speaklang + "_" + "opening magnifier"));
+                                    Intent intent = new Intent(MainActivity.this, Magnifying.class);
+                                    startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                    ismatched = true;
+                                    break;
+                                }
+                            }
+                            if (ismatched) {
+                                break;
+                            }
+                        }
+                    }
+                    if (!ismatched) {
+                        for (String str : Objects.requireNonNull(commandmap.get("settings"))) {
+                            int n = str.length();
+                            for (String str2 : wordList) {
+                                int m = str2.length();
+                                if (partialmatch(str2, str, m, n,0.7f)) {
+                                    Log.d("Checking stringshello 2", "" + str + " " + str2);
+                                    Log.d("here called",""+4);
+                                    speaktext(translationMap.get(speaklang + "_" + "opening setting"));
+                                    Intent intent = new Intent(MainActivity.this, appsettings.class);
+                                    startActivity(intent);
+//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
+                                    ismatched = true;
+                                    break;
+                                }
+                            }
+                            if (ismatched) {
+                                break;
+                            }
+                        }
+                    }
+                    if (!ismatched) {
+                        for (String str : Objects.requireNonNull(commandmap.get("direction"))) {
+                            int n = str.length();
+                            for (String str2 : wordList) {
+                                int m = str2.length();
+                                if (partialmatch(str2, str, m, n,0.7f)) {
+                                    ismatched = true;
+                                    Log.d("here called",""+5);
+                                    Log.d("Direction Test", "" + translationMap.get(speaklang + "_" + currdirection));
+
+                                    textToSpeech.speak(translationMap.get(speaklang + "_" + currdirection), TextToSpeech.QUEUE_FLUSH, null, null);
 
 //                                new Handler().postDelayed(new Runnable() {
 //                                    @Override
@@ -593,40 +1196,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 //                                    sensorManager.unregisterListener(this);
 
+                                    break;
+                                }
+                            }
+
+                            if (ismatched) {
                                 break;
                             }
                         }
 
-                        if (ismatched) {
-                            break;
-                        }
+
                     }
 
-
-                }
-                if(!ismatched) {
-                    for (String str : Objects.requireNonNull(commandmap.get("magnifier"))) {
-                        int n = str.length();
-                        for (String str2 : wordList) {
-                            int m = str2.length();
-                            if (partialmatch(str2, str, m, n,0.8f)) {
-                                speaktext(translationMap.get(speaklang + "_" + "opening magnifier"));
-                                Intent intent = new Intent(MainActivity.this, Magnifying.class);
-                                startActivity(intent);
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_in_left);
-                                ismatched = true;
-                                break;
-                            }
-                        }
-                        if (ismatched) {
-                            break;
-                        }
+                    if(!ismatched){
+                        Toast.makeText(this, "Command not recognized", Toast.LENGTH_SHORT).show();
                     }
                 }
-                if(!ismatched){
-                    Toast.makeText(this, "Command not recognized", Toast.LENGTH_SHORT).show();
-                }
+            }else{
+//                Toast.makeText(MainActivity.this,"Hellp ",Toast.LENGTH_LONG).show();
             }
+//
         }
     }
     @Override
@@ -655,22 +1244,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onBackPressed(){
 //        finishAffinity();
 //        super.onBackPressed();
+
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
         sensorManager.unregisterListener(this);
+        shakeListener.unregisterShakeListener();
+        shakeListener.onDestroy();
+//        onDestroy();
         Intent startMain = new Intent(Intent.ACTION_MAIN);
         startMain.addCategory(Intent.CATEGORY_HOME);
         startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(startMain);
-        finish();
-        super.onBackPressed();
+//        finish();
+//        onDestroy();
+//        super.onBackPressed();
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do nothing Eat Five Star
     }
+
+
     private String getCompassDirection(float azimuth) {
         if (azimuth >= 337.5 || azimuth < 22.5) {
             return "North";
@@ -698,7 +1294,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-
+        shakeListener.unregisterShakeListener();
         shakeListener.onDestroy();
         long end_time = System.currentTimeMillis();
         UserPreferences userPreferences = new UserPreferences(this);

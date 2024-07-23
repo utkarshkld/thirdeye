@@ -48,7 +48,7 @@
         android:id="@+id/zoombar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription="Zoom"
+        android:contentDescription="Zoom Bar"
         android:layout_below="@+id/llTitleBar"
         android:layout_marginTop="20dp"
         android:max="50"

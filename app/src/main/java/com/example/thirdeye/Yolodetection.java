@@ -71,6 +71,7 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
     private int current_model = 0;
     private int current_cpugpu = 0;
     private Vibrator vibe;
+    private String lang;
 
     private SurfaceView cameraView;
     private TextToSpeech ttsObject;
@@ -87,6 +88,12 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
         setContentView(R.layout.main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED)
+        {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA);
+        }
+        Intent intent = getIntent();
+        lang = intent.getStringExtra("Output_lang");
         cameraView = (SurfaceView) findViewById(R.id.cameraview);
         cameraView.getHolder().setFormat(PixelFormat.RGBA_8888);
         cameraView.getHolder().addCallback(this);
@@ -106,6 +113,16 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
         progressDialog = new ProgressDialog(Yolodetection.this);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(MainActivity.shakeListener != null) {
+//                    MainActivity.shakeListener.unregisterShakeListener();
+//                    MainActivity.shakeListener.onDestroy();
+//                }
+//            }
+//        }).start();
+
 //        firstbutton.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -264,12 +281,14 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
 //            {
 //            }
 //        });
+        Log.d("Check Languages",""+lang);
         options = new TranslatorOptions.Builder()
                 .setSourceLanguage("en")
-                .setTargetLanguage(MainActivity.output_lang)
+                .setTargetLanguage(lang)
                 .build();
         reload();
         translator = Translation.getClient(options);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -327,7 +346,7 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
 //                        translatedTextView.setText(s); // Set the translated text in the TextView
 //                        translatedTextView.setVisibility(View.VISIBLE);
                         // Make the TextView visible
-                        ttsObject.setLanguage(new Locale(""+MainActivity.output_lang));
+                        ttsObject.setLanguage(new Locale(""+lang));
                         ttsObject.speak(s, TextToSpeech.QUEUE_ADD, null, "myUtteranceID");
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -394,6 +413,7 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
         }
         yolov8ncnn.closeCamera();
         long end_time = System.currentTimeMillis();
+        translator.close();
         UserPreferences userPreferences = new UserPreferences(this);
         String time = userPreferences.convertMillisToMinutesSeconds(end_time-starting_time);
         userPreferences.addFeature(time,"Object Detection");
@@ -404,13 +424,16 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback
     @Override
     public void onBackPressed() {
 //        finishAffinity();
+//        onDestroy();
+        Intent intent = new Intent(Yolodetection.this,MainActivity.class);
+        startActivity(intent);
+
         if (ttsObject != null) {
             ttsObject.stop();
             ttsObject.shutdown();
         }
         yolov8ncnn.closeCamera();
-        Intent intent = new Intent(Yolodetection.this,MainActivity.class);
-        startActivity(intent);
-        super.onBackPressed();
+
+//        super.onBackPressed();
     }
 }

@@ -25,6 +25,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/exitbtntexttospeech"
+
+            android:contentDescription="Back button"
             android:src="@drawable/previous"
             android:layout_marginTop="@dimen/_15sdp"
             android:layout_marginBottom="@dimen/_15sdp"
@@ -34,26 +36,28 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"/>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textbackground"
+<!--        <LinearLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/textbackground"-->
 
-            android:layout_marginTop="@dimen/_20sdp"
+<!--            android:layout_marginTop="@dimen/_20sdp"-->
 
-            android:layout_marginBottom="@dimen/_16sdp"
+<!--            android:layout_marginBottom="@dimen/_16sdp"-->
 
-            >
-            <Spinner
-                android:id="@+id/detectlnguage"
-                android:layout_width="150dp"
-                android:layout_height="52dp"
-                android:popupBackground="@drawable/spinner_popup"
-                android:overlapAnchor="false"
-                android:dropDownWidth="150dp"
-                android:padding="3dp"
+<!--            >-->
+<!--            <Spinner-->
+<!--                android:id="@+id/detectlnguage"-->
+<!--                android:layout_width="150dp"-->
+<!--                android:layout_height="52dp"-->
+<!--                android:popupBackground="@drawable/spinner_popup"-->
+<!--                android:overlapAnchor="false"-->
+<!--                android:dropDownWidth="150dp"-->
 
-                /></LinearLayout>
+<!--                android:padding="3dp"-->
+<!--                android:contentDescription="Text Language"-->
+
+<!--                /></LinearLayout>-->
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -62,7 +66,9 @@
             android:id="@+id/micButton1"
             android:layout_width="70dp"
             android:layout_height="70dp"
+
             android:layout_gravity="center"
+            android:contentDescription="Mic Button"
             android:background="@drawable/mic_ripple" />
 
     </LinearLayout>
@@ -118,6 +124,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginBottom="@dimen/_20sdp"
         android:scrollbars="vertical"
+        android:contentDescription="Detected Text"
         />
 
     <ImageButton
@@ -129,6 +136,8 @@
         android:layout_marginBottom="@dimen/_30sdp"
         android:background="@drawable/imagebutton_background"
         android:layout_alignParentBottom="true"
+
+        android:contentDescription="Replay"
         android:foreground="@drawable/ripple_card"
         android:src="@drawable/replay_icon" />
 
@@ -138,6 +147,7 @@
         android:layout_height="wrap_content"
         android:foreground="@drawable/ripple_card"
         android:layout_centerHorizontal="true"
+        android:contentDescription="Take or Retake"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="@dimen/_30sdp"
         android:background="@drawable/imagebutton_background"
@@ -147,7 +157,7 @@
         android:id="@+id/btnPausePlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:contentDescription="Play or Pause"
         android:layout_alignParentBottom="true"
         android:foreground="@drawable/ripple_card"
         android:layout_marginLeft="@dimen/_10sdp"

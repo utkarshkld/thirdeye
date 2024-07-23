@@ -7,7 +7,7 @@ import android.hardware.SensorManager;
 public class MicHandler implements SensorEventListener {
 
     private static final int SHAKE_THRESHOLD = 20; // Adjust this value as needed
-    private static final int SHAKE_TIME_INTERVAL = 120; // Adjust this value as needed
+    private static final int SHAKE_TIME_INTERVAL = 5000; // Adjust this value as needed
 
     private SensorManager sensorManager;
     private OnShakeListener onShakeListener;

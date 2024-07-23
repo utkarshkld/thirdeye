@@ -39,6 +39,7 @@
             android:text="NEXT"
             android:textSize="20dp"
             android:textStyle="bold"
+            android:contentDescription="Next"
             android:background="@drawable/apply_ripple"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

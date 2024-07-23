@@ -326,8 +326,8 @@ JNIEXPORT jboolean JNICALL Java_com_example_thirdeye_Yolov8Ncnn_openCamera(JNIEn
 
     __android_log_print(ANDROID_LOG_DEBUG, "ncnn camera", "openCamera %d %f", facing,magnifyinglevel);
     zoomratio = magnifyinglevel;
-    g_camera->open((int)facing,false,magnifyinglevel);
-    isFirstTime = true;
+    g_camera->open((int)facing,!isFirstTime,magnifyinglevel);
+//    isFirstTime = true;
 
     return JNI_TRUE;
 }
@@ -392,5 +392,5 @@ Java_com_example_thirdeye_Yolov8Ncnn_ChangeZoomRatio(JNIEnv *env, jclass clazz, 
     // TODO: implement ChangeZoomRatio()
 //    g_camera->setZoom(ratio);
     zoomratio = ratio;
-    g_camera->open(1,false,ratio);
+    g_camera->open(1,true,ratio);
 }

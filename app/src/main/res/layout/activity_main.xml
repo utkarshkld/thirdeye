@@ -6,7 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="@color/backgroud">
+    android:id="@+id/relativeLayoutWindow"
+    android:background="@color/backgroud"
+    >
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,11 +40,14 @@
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:gravity="center"
                 android:padding="3dp"
+                android:hint="Magnifier"
+                android:contentDescription="Magnifier"
                 android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
+
 
                     android:contentDescription="Magnifier"
                     android:background="@drawable/background_card"
@@ -93,6 +99,7 @@
         <ImageView
             android:layout_width="65dp"
             android:layout_height="65dp"
+            android:contentDescription="Zoblik Logo"
             android:src="@drawable/zoblik"
             android:padding="10dp"
             android:background="@drawable/zoblik_background"
@@ -123,6 +130,8 @@
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="3dp"
+                android:contentDescription="Settings"
+                android:hint="Settings"
                 >
 
                 <ImageView
@@ -172,13 +181,21 @@
 <!--                android:layout_gravity="center_horizontal"/>-->
 <!--        </LinearLayout>-->
     </LinearLayout>
-    
+
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:gravity="center_horizontal"-->
+<!--        android:text="App is currently in testing phase; you can use it for up to 7 days from installation."-->
+<!--        android:layout_above="@+id/micButton"-->
+<!--        />-->
 
     <ImageView
         android:id="@+id/micButton"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:contentDescription="Mic"
+
         android:foreground="@drawable/mic_ripple_big"
         android:layout_centerVertical="true"
         android:padding="30dp"
@@ -225,6 +242,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
+                    android:contentDescription="Read"
                     android:layout_marginTop="10dp"
                     android:orientation="vertical">
 
@@ -233,6 +251,7 @@
                         android:layout_height="@dimen/_76sdp"
                         android:padding="@dimen/_10sdp"
                         android:contentDescription="Read"
+
                         android:background="@drawable/background_card"
 
                         android:src="@drawable/file" />
@@ -272,6 +291,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
+
+                    android:contentDescription="Object"
                     android:layout_marginTop="10dp"
                     android:orientation="vertical">
 <!--                    <EditText-->
@@ -288,6 +309,7 @@
                         android:contentDescription="Object"
                         android:background="@drawable/background_card"
                         android:padding="@dimen/_13sdp"
+                        android:hint="Object Detection"
                         android:src="@drawable/object" />
 
                     <TextView
@@ -326,6 +348,7 @@
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:gravity="center"
                     android:layout_marginTop="10dp"
+                    android:contentDescription="Translate"
                     android:orientation="vertical">
 
                     <ImageView
@@ -334,6 +357,7 @@
                         android:contentDescription="Translate"
                         android:background="@drawable/background_card"
                         android:paddingBottom="@dimen/_4sdp"
+                        android:hint="Translate"
                         android:src="@drawable/speech_to_text" />
 
                     <TextView

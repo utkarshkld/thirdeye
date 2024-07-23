@@ -84,6 +84,8 @@ public class Magnifying extends AppCompatActivity {
         previewView = findViewById(R.id.cameraPreview);
         exitbtn = findViewById(R.id.exitbtn);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        MainActivity.shakeListener.unregisterShakeListener();
+        MainActivity.shakeListener.onDestroy();
 //        trackAppInstallation(this,"Magnifying");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (ContextCompat.checkSelfPermission(Magnifying.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {

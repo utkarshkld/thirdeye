@@ -57,7 +57,7 @@
             android:layout_gravity="center_vertical"
             android:id="@+id/spinnerOnboard"
             android:layout_width="match_parent"
-            android:contentDescription="Language Selector"
+            android:contentDescription="Language Select"
             android:scrollbarStyle="insideInset"
             android:scrollbarThumbVertical="@drawable/scrollbar"
             android:layout_height="match_parent"

@@ -21,7 +21,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.Spannable;
@@ -103,6 +105,7 @@ public class TextSpeech extends AppCompatActivity {
     private Camera camera;
     private long currtime = 0;
     private boolean next = false;
+    private SpeechRecognizer sr;
 
     private static final String TAG = "ScanVoucherFragment";
     private float speechrate = MainActivity.speech_rate;
@@ -110,6 +113,8 @@ public class TextSpeech extends AppCompatActivity {
     private String input_lang = MainActivity.input_lang;
     private boolean blindness = MainActivity.blindness;
     private boolean flash = false;
+    private String HindiText = "";
+    private String EnglishText = "";
 
     private RelativeLayout rellayout;
     byte[] data2 = null;
@@ -151,6 +156,7 @@ public class TextSpeech extends AppCompatActivity {
     private long lastpgdet = 0,lastpagedet2 = 0,lastpage3=0;
     private ArrayAdapter<String>  text_det_adapter;
     private boolean isCaptured = false;
+    private ProgressDialog voiceDialog;
 
 
     @Override
@@ -162,6 +168,8 @@ public class TextSpeech extends AppCompatActivity {
         final ProgressDialog progressDialog2 = new ProgressDialog(this);
         progressDialog2.setMessage("Loading...");
         progressDialog2.setCancelable(false);
+        MainActivity.shakeListener.unregisterShakeListener();
+        MainActivity.shakeListener.onDestroy();
         progressDialog2.show();
         starting_time = System.currentTimeMillis();
 //        trackAppInstallation(this,"Read Text");
@@ -177,7 +185,7 @@ public class TextSpeech extends AppCompatActivity {
         isLast = false;
         waiting.setCancelable(false);
         waiting.setMessage("please wait");
-        text_det_spinner = findViewById(R.id.detectlnguage);
+//        text_det_spinner = findViewById(R.id.detectlnguage);
         progressprocessing = new ProgressDialog(TextSpeech.this);
         progressprocessing.setCancelable(false);
         deviceHasFlash = MainActivity.deviceHasFlash;
@@ -192,6 +200,8 @@ public class TextSpeech extends AppCompatActivity {
         btnReplay.setVisibility(View.GONE);
         textView.setVisibility(View.GONE);
         btnTakePicture.setBackgroundResource(R.drawable.camera_icon);
+        btnTakePicture.setContentDescription("Capture");
+        btnPausePlay.setContentDescription("Pause");
         Handler handler = new Handler();
         MyRunnable myRunnable = new MyRunnable(this, handler);
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
@@ -217,6 +227,7 @@ public class TextSpeech extends AppCompatActivity {
                                 textView.setText("");
                                 btnPausePlay.setImageResource(R.drawable.stop_fill);
                                 btnTakePicture.setImageResource(R.drawable.retake_icon);
+                                btnTakePicture.setContentDescription("Re take");
                                 btnPausePlay.setVisibility(View.VISIBLE);
                                 btnReplay.setVisibility(View.VISIBLE);
                                 Transition transition2 = new Slide(Gravity.TOP);
@@ -237,6 +248,7 @@ public class TextSpeech extends AppCompatActivity {
                         isPlaying = false;
                         btnPausePlay.setVisibility(View.GONE);
                         btnTakePicture.setImageResource(R.drawable.camera_icon);
+                        btnTakePicture.setContentDescription("Capture");
                         btnReplay.setVisibility(View.GONE);
                         Transition transition2 = new Slide();
                         transition2.setDuration(500);
@@ -258,12 +270,11 @@ public class TextSpeech extends AppCompatActivity {
             Toast.makeText(TextSpeech.this, "Shake detected!", Toast.LENGTH_SHORT).show();
             if(System.currentTimeMillis()-shaketime >= 3000){
                 shaketime = System.currentTimeMillis();
-                startRecording();
+                micc.performClick();
             }
-
         });
         micc.setOnClickListener(v -> {
-
+            textToSpeech.stop();
             startVoiceRecognition();
         });
         btnPausePlay.setOnClickListener(new View.OnClickListener() {
@@ -273,6 +284,7 @@ public class TextSpeech extends AppCompatActivity {
                 if (!isPaused) {
                     isPaused = true;
                     btnPausePlay.setImageResource(R.drawable.stop_fill);
+                    btnPausePlay.setContentDescription("Pause");
                     textView.scrollTo(0,currentScrollPosition);
                     if(isLast){
                         isLast = false;
@@ -284,6 +296,7 @@ public class TextSpeech extends AppCompatActivity {
                 } else {
                     isPaused = false;
                     btnPausePlay.setImageResource(R.drawable.play_fill);
+                    btnPausePlay.setContentDescription("Play");
                     enableTextViewScroll();
                     index2 = index;
                     if (textToSpeech != null) {
@@ -321,54 +334,51 @@ public class TextSpeech extends AppCompatActivity {
 
 
         initializeLanguageMap();
-        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi","Marathi"));
+        List<String> textDetList = new ArrayList<>(Arrays.asList("English", "Hindi"));
+        textDetList.add("Marathi");
         UserPreferences userPreferences = new UserPreferences(this);
-        String country = userPreferences.getCountry();
-        Log.d("checking country",""+country);
-        if(!Objects.equals(country, "India")){
-            textDetList.add("Korean");
-            textDetList.add("Japanese");
-        }
+//        String country = userPreferences.getCountry();
+//        Log.d("checking country",""+country);
+//        if(!Objects.equals(country, "India")){
+//            textDetList.add("Korean");
+//            textDetList.add("Japanese");
+//        }
 
 
-        text_det_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Store the selected index in SharedPreferences
-                sharedPreferences.saveString(position);
-            }
+//        text_det_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                // Store the selected index in SharedPreferences
+//                sharedPreferences.saveString(position);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//                // Not needed in this implementation
+//            }
+//        });
+//        text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Not needed in this implementation
-            }
-        });
-        text_det_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, textDetList);
+//        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 
-        text_det_adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+//        text_det_spinner.setDropDownHorizontalOffset(dpToPx(-3));
 
-        text_det_spinner.setDropDownHorizontalOffset(dpToPx(-3));
-
-        text_det_spinner.setAdapter(text_det_adapter);
-        sharedPreferences = new MySharedPreferences(this);
-        String lang = sharedPreferences.getString();
-        if(!lang.isEmpty()){
-            text_det_spinner.setSelection(Integer.parseInt(lang));
-        }
-
-//        Log.d("checking input language",input_lang);
-
-
-
+//        text_det_spinner.setAdapter(text_det_adapter);
+//        sharedPreferences = new MySharedPreferences(this);
+//        String lang = sharedPreferences.getString();
+//        if(!lang.isEmpty()){
+//            text_det_spinner.setSelection(Integer.parseInt(lang));
+//        }
     }
 
     @Override
     protected void onPause() {
         // Stop or pause speech synthesis when the activity is paused
+        shakeListener.unregisterShakeListener();
         if (isPaused) {
             btnPausePlay.performClick();
         }
-        releaseCamera();
+//        releaseCamera();
 
 
         if (textToSpeech != null) {
@@ -391,7 +401,8 @@ public class TextSpeech extends AppCompatActivity {
     }
     @Override
     protected void onResume() {
-
+        shakeListener.registerShakeListener();
+        resetCamera();
         super.onResume();
     }
 
@@ -581,20 +592,20 @@ public class TextSpeech extends AppCompatActivity {
             // Hindi and marathi
             alltext = new StringBuilder();
 //            detecttextwithlanguage(koreanrecog,image,"Korean",alltext,expirydatebuilder);
-            String selectedlang = text_det_spinner.getSelectedItem().toString();
+//            String selectedlang = text_det_spinner.getSelectedItem().toString();
 
             // Trying to detect all the languages
-            if(selectedlang.equals("Hindi")) {
-                detecttextwithlanguage(hindirecog, image,selectedlang,expirydatebuilder);
-            }else if(selectedlang.equals("Marathi")){
-                detecttextwithlanguage(hindirecog, image,selectedlang,expirydatebuilder);
-            }else if(selectedlang.equals("Japanese")){
-                detecttextwithlanguage(japaneserecog,image,selectedlang,expirydatebuilder);
-            }else if(selectedlang.equals("Korean")){
-                detecttextwithlanguage(koreanrecog,image,selectedlang,expirydatebuilder);
-            }else{
-                 detecttextwithlanguage(engtextrecog,image,selectedlang,expirydatebuilder);
-            }
+//            if(selectedlang.equals("Hindi")) {
+//                detecttextwithlanguage(hindirecog, image,selectedlang,expirydatebuilder);
+//            }else if(selectedlang.equals("Marathi")){
+//                detecttextwithlanguage(hindirecog, image,selectedlang,expirydatebuilder);
+//            }else if(selectedlang.equals("Japanese")){
+//                detecttextwithlanguage(japaneserecog,image,selectedlang,expirydatebuilder);
+//            }else if(selectedlang.equals("Korean")){
+//                detecttextwithlanguage(koreanrecog,image,selectedlang,expirydatebuilder);
+
+            detecttextwithlanguage(engtextrecog,image,"English",expirydatebuilder);
+
 
 
 
@@ -619,8 +630,23 @@ public class TextSpeech extends AppCompatActivity {
                     }
                 }
                 // will get identified text here have to modify here
+                Log.d("I am here","hello");
+                if(stringBuilder1.toString().isEmpty()){
+                    Toast.makeText(TextSpeech.this,"No text detected ...",Toast.LENGTH_LONG).show();
+                    isClickable = true;
+                    btnTakePicture.performClick();
+                    progressprocessing.dismiss();
+                    return;
+                }
                 String x = stringBuilder1.toString();
                 String temp = x.toLowerCase();
+                if(Objects.equals(language, "English")){
+                    EnglishText = x;
+                }else{
+                    HindiText = x;
+                }
+
+
 //                "(use[ ]*by|best[ ]*before|exp|expiry|mfg|mfd|manufacturing)(date)*[. /-:]*(date)*[. /-:]*((([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7](20\\d{2}))|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/(20\\d{2}|[0-9]{2}))|(([0O][1-9]|[12]\\d|3[01])[-./7]([0O][1-9]|1[0-2])[-./7]\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\.([0O][1-9]|1[0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[01])\\/([0O][1-9]|1[0-2])\\/\\d{2})|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./7 ]*(20[0-9]{2}))|(([0O][1-9]|1[0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ 7]*([0-9]{2}))$)"
                 Pattern expiryDatePattern = Pattern.compile("([uj]se *by|best *before|exp|expiry|mfg|mfd|manufacturing)[., /-:(date)]*((([0O][1-9]|[12]\\d|3[01])[-,./]*([0O][1-9]|1[0-2])[-,./]*(20\\d{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\.([0O][1-9]|1[O0-2])\\.(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])\\/([0O][1-9]|1[O0-2])\\/(2[0O]\\d{2}|[O0-9]{2}))|(([0O][1-9]|[12]\\d|3[[0O]1])[-./,]*([0O][1-9]|1[O0-2])[-./,]*\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\.([0O][1-9]|1[O0-2])\\.\\d{2})|(([0O][1-9]|[12]\\d|3[O01])\\/([0O][1-9]|1[O0-2])\\/\\d{2})|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*(2[0O][O0-9]{2}))|(([0O][1-9]|1[O0-2]|(january|february|march|april|may|june|july|august|september|october|november|december)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[-./ ,]*([O0-9]{2}))$)", Pattern.CASE_INSENSITIVE);
                 Matcher matcher = expiryDatePattern.matcher(temp);//
@@ -653,13 +679,24 @@ public class TextSpeech extends AppCompatActivity {
                     }
                 }
                 stringBuilder.append(x);
-
-                // Get the selected language code from the map
+                if(language.equals("English")){
+                    detecttextwithlanguage(hindirecog,image,"Hindi",expirydatebuilder);
+                }
+                if(language.equals("Hindi")){
+//                     Get the selected language code from the map
                 String targetLanguage = outputlangugage;
 //                Toast.makeText(TextSpeech.this, targetLanguage, Toast.LENGTH_SHORT).show();
-
+                String tt = "English";
+                String ss = EnglishText;
+                if(EnglishText.length() >= HindiText.length()){
+                    tt = "English";
+                }else{
+                    tt = "Hindi";
+                    ss = HindiText;
+                }
+                final String kk = ss;
                 TranslatorOptions options = new TranslatorOptions.Builder()
-                        .setSourceLanguage(languageMap.get(language))
+                        .setSourceLanguage(languageMap.get(tt))
                         .setTargetLanguage(targetLanguage)
                         .build();
                 Translator translator = Translation.getClient(options);
@@ -686,7 +723,7 @@ public class TextSpeech extends AppCompatActivity {
 
 
 
-                        Task<String> result = translator.translate(stringBuilder.toString()).addOnSuccessListener(new OnSuccessListener<String>() {
+                        Task<String> result = translator.translate(kk).addOnSuccessListener(new OnSuccessListener<String>() {
                             @Override
                             public void onSuccess(String s) {
 
@@ -714,6 +751,9 @@ public class TextSpeech extends AppCompatActivity {
                         progressDialog.dismiss();
                     }
                 });
+                }
+
+
 
             }
         });
@@ -928,13 +968,176 @@ public class TextSpeech extends AppCompatActivity {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a command...");
-        try {
-            startActivityForResult(intent, SPEECH_REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "Speech recognition is not available on your device.", Toast.LENGTH_SHORT).show();
+        sr = SpeechRecognizer.createSpeechRecognizer(this);
+        sr.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+//                Toast.makeText(MainActivity.this, "Ready for speech", Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showAlertDialog("English");
+                    }
+                });
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+//                Toast.makeText(MainActivity.this, "Speech started", Toast.LENGTH_SHORT).show();
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                    }
+//                });
+
+
+
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+                // You can update UI here with rmsdB value if you want
+                voiceDialog.setProgress(Math.max(0,(int)rmsdB));
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+//                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
+//                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onError(int error) {
+                Toast.makeText(TextSpeech.this, "No Text Detected", Toast.LENGTH_SHORT).show();
+                voiceDialog.dismiss();
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+//                if (matches != null) {
+//                    String resultText = matches.get(0);
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            voiceDialog.setMessage("Result : " + resultText);
+//                        }
+//                    });
+//
+////
+//
+////                voiceDialog.dismiss();
+//                }
+                if (matches != null && !matches.isEmpty()) {
+                    String spokenText = matches.get(0).toLowerCase();
+
+
+                    if (spokenText.contains("click") || spokenText.contains("capture")) {
+                        if (isPlaying) {
+                            speaktext2("Go to capture mode first.");
+                        } else {
+                            btnTakePicture.performClick();
+                        }
+                    } else if (spokenText.contains("replay")) {
+                        if (isPlaying) {
+                            btnReplay.performClick();
+                        } else {
+                            speaktext2("Capture the photo first");
+                        }
+                    } else if (spokenText.contains("pause") || spokenText.contains("stop")) {
+                        if (isPlaying) {
+
+//                            btnPausePlay.performClick();
+//                            if (textToSpeech != null) {
+//                                textToSpeech.stop();
+//                            }
+//                            isPaused = false;
+//                            btnPausePlay.setBackgroundResource(R.drawable.play_fill);
+                        } else {
+                            speaktext2("Capture the photo first");
+                        }
+
+                    } else if (spokenText.contains("play")) {
+                        if (isPlaying) {
+//                        isPaused = true;
+//                        btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
+                            btnPausePlay.performClick();
+                        } else {
+                            speaktext2("Capture the photo first.");
+                        }
+                    } else if (spokenText.contains("re take") || spokenText.contains("re-capture") || spokenText.contains("retake") || spokenText.contains("recapture") || spokenText.contains("retak") || spokenText.contains("retech") || spokenText.contains("re tak") || spokenText.contains("'re tec" +
+                            "")) {
+                        if (isPlaying) {
+                            speaktext2("Getting in Capture Mode");
+                            btnTakePicture.performClick();
+                        } else {
+                            speaktext2("Already In capture Mode, Say capture for capturing");
+                        }
+                    } else {
+                        Toast.makeText(TextSpeech.this, "Command not recognized", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        voiceDialog.dismiss();
+                    }
+                };
+                handler.postDelayed(runnable, 1500);
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+
+
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
+        });
+        sr.startListening(intent);
+    }
+    private void showAlertDialog(String language){
+//         builderInput = new AlertDialog.Builder(this);
+//
+//        // Inflate custom layout for the dialog
+//        // Note: You can use a layout file if needed
+//        // builder.setView(R.layout.custom_dialog_layout);
+//
+//        // Set dialog title and message
+//        builderInput.setTitle("Spoken Text")
+//                .setMessage("Language: " +language);
+
+
+        // Create and show the dialog
+        voiceDialog = new ProgressDialog(this);
+//        voiceDialog.setMax(10);
+//        voiceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        voiceDialog.setTitle("Language : "+language);
+        voiceDialog.setMessage("Listening...");
+        voiceDialog.setCancelable(false);
+        voiceDialog.setOnCancelListener(dialog -> stopSpeechRecognition());
+
+        voiceDialog.show();
+
+    }
+    private void stopSpeechRecognition() {
+        if (sr != null) {
+            sr.stopListening();
+            sr.cancel();
+            sr.destroy();
+            sr = null;
         }
     }
-
     private void startRecording() {
         Button mic1 = findViewById(R.id.micButton1);
         mic1.performClick();
@@ -976,13 +1179,14 @@ public class TextSpeech extends AppCompatActivity {
 
                 } else if (spokenText.contains("play")) {
                     if (isPlaying) {
-                        isPaused = true;
-                        btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
-                        speaknextword();
+//                        isPaused = true;
+//                        btnPausePlay.setBackgroundResource(R.drawable.stop_fill);
+                        btnPausePlay.performClick();
                     } else {
                         speaktext2("Capture the photo first.");
                     }
-                } else if (spokenText.contains("re take") || spokenText.contains("re-capture") || spokenText.contains("retake") || spokenText.contains("recapture")) {
+                } else if (spokenText.contains("re take") || spokenText.contains("re-capture") || spokenText.contains("retake") || spokenText.contains("recapture") || spokenText.contains("retak") || spokenText.contains("retech") || spokenText.contains("re tak") || spokenText.contains("'re tec" +
+                        "")) {
                     if (isPlaying) {
                         speaktext2("Getting in Capture Mode");
                         btnTakePicture.performClick();
