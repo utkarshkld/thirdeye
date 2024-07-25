@@ -7,10 +7,9 @@
     tools:context=".SplashScreen">
 
     <ImageView
-        android:layout_width="280dp"
-        android:layout_height="100dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/zobliktext" />
+        android:layout_width="395dp"
+        android:layout_height="458dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/zobliklogo" />
 
 </RelativeLayout>

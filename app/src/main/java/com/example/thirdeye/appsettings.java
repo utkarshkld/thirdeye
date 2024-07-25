@@ -85,6 +85,7 @@ public class appsettings extends AppCompatActivity {
     private boolean blindness = MainActivity.blindness;
     private float rate = MainActivity.speech_rate;
     private ImageButton backbtn;
+    private Button aboutbtn;
     private Button feedbackBtn;
     private boolean buttonClickable = true;
     private String speaklang;
@@ -112,6 +113,7 @@ public class appsettings extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         backbtn = findViewById(R.id.backbtn_);
         applybtn = findViewById(R.id.buttonApply);
+        aboutbtn = findViewById(R.id.aboutbtn);
         feedbackBtn = findViewById(R.id.buttonfeedback);
         progressDialog2 = new ProgressDialog(appsettings.this);
         progressDialog2.setMessage("Applying all the changes...");
@@ -127,6 +129,14 @@ public class appsettings extends AppCompatActivity {
                 break;
             }
         }
+        // Initialising on click in about button
+        aboutbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(appsettings.this,About.class);
+                startActivity(intent);
+            }
+        });
         // Initialising the on click feedback button
         feedbackBtn.setOnClickListener(new View.OnClickListener() {
             @Override

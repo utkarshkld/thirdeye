@@ -83,7 +83,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static String trans_input;
     public static List<Settings> finalset;
 
+
     public static Map<String, List<String>> commandmap = new HashMap<>();
+    public static Map<String,String> noInternetcmd = new HashMap<>();
     public static SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
@@ -196,10 +198,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         micButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                vibe.vibrate(50);
 
-                startVoiceRecognition();
-                a = false;
+                    vibe.vibrate(50);
+                    startVoiceRecognition();
+                    a = false;
+
+
             }
         });
         settingbtn.setOnClickListener(new View.OnClickListener() {
@@ -461,6 +465,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void startVoiceRecognition() {
+        if(!NetworkUtil.isConnectedToInternet(MainActivity.this)){
+            textToSpeech.setLanguage(new Locale(output_lang));
+            textToSpeech.speak(noInternetcmd.get(output_lang), TextToSpeech.QUEUE_FLUSH, null, null);
+            return;
+        }
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         resultflag = false;
@@ -499,7 +508,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onRmsChanged(float rmsdB) {
                 // You can update UI here with rmsdB value if you want
                 Log.d("checking decibels", "" + rmsdB);
-                voiceDialog.setProgress(Math.max(0, (int) rmsdB));
+
             }
 
             @Override
@@ -509,13 +518,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             @Override
             public void onEndOfSpeech() {
-//                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
 //                voiceDialog.dismiss();
+                if(voiceDialog!=null)
+                voiceDialog.dismiss();
             }
 
             @Override
             public void onError(int error) {
                 Toast.makeText(MainActivity.this, "No Text Detected", Toast.LENGTH_SHORT).show();
+                if(voiceDialog!=null)
                 voiceDialog.dismiss();
             }
 
@@ -527,6 +539,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if(voiceDialog!=null)
                             voiceDialog.setMessage("Result : " + resultText);
                         }
                     });
@@ -781,6 +794,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
+                        if(voiceDialog!=null)
                         voiceDialog.dismiss();
                     }
                 };
@@ -804,6 +818,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedSourceLanguage);
         }
         sr.startListening(intent);
+
+
         //Custom Voice ends
 
 // Google
@@ -839,7 +855,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         voiceDialog.setMessage("Listening...");
         voiceDialog.setCancelable(true);
         voiceDialog.setOnCancelListener(dialog -> stopSpeechRecognition());
-
         voiceDialog.show();
 
     }

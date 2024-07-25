@@ -322,11 +322,11 @@ public class Onboarding extends AppCompatActivity {
     }
 
     public void downloadlanguage() {
-        List<String> languages = new ArrayList<>(Arrays.asList("en", "zh", "hi", "ko", "ja"));
+        List<String> languages = new ArrayList<>(Arrays.asList("en", "hi"));
         languages.add(OnboardingAdapter.languageMap.get(languageSpinner.getSelectedItem().toString()));
         optionslist = new ArrayList<>();
         progressDialog2.show();
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 2; ++i) {
             TranslatorOptions options = new TranslatorOptions.Builder()
                     .setSourceLanguage("en")
                     .setTargetLanguage(languages.get(i))
@@ -340,8 +340,8 @@ public class Onboarding extends AppCompatActivity {
         Translator translator = Translation.getClient(options);
         translator.downloadModelIfNeeded()
                 .addOnSuccessListener(unused -> {
-                    progressDialog2.setProgress((int) (((i + 1) / 6f) * 100f));
-                    if (i == 5) {
+                    progressDialog2.setProgress((int) (((i + 1) / 2f) * 100f));
+                    if (i == 1) {
                         progressDialog2.dismiss();
                         speech_rate = 1f;
                         output_lang = OnboardingAdapter.languageMap.get(languageSpinner.getSelectedItem().toString());

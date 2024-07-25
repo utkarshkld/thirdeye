@@ -3,6 +3,7 @@ import static com.example.thirdeye.MainActivity.translationMap;
 import static com.example.thirdeye.MainActivity.commandmap;
 import static com.example.thirdeye.MainActivity.langnamemap;
 import static com.example.thirdeye.appsettings.languageLocalMap;
+import static com.example.thirdeye.MainActivity.noInternetcmd;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1655,6 +1656,51 @@ public class translationmap {
              languageLocalMap.put("Urdu", "اردو");
              languageLocalMap.put("Vietnamese", "Tiếng Việt");
              languageLocalMap.put("Welsh", "Cymraeg");
+             // Adding Commands for no internet
+             noInternetcmd.put("en", "Speech recognizer doesn't work in offline mode");
+             noInternetcmd.put("es", "El reconocedor de voz no funciona en modo sin conexión");
+             noInternetcmd.put("fr", "Le reconnaisseur vocal ne fonctionne pas en mode hors ligne");
+             noInternetcmd.put("de", "Spracherkennung funktioniert im Offline-Modus nicht");
+             noInternetcmd.put("it", "Il riconoscitore vocale non funziona in modalità offline");
+             noInternetcmd.put("zh", "语音识别器在离线模式下不起作用");
+             noInternetcmd.put("ru", "Распознавание речи не работает в офлайн-режиме");
+             noInternetcmd.put("ar", "لا يعمل التعرف على الكلام في وضع عدم الاتصال");
+             noInternetcmd.put("hi", "स्पीच रिकॉग्नाइज़र ऑफ़लाइन मोड में काम नहीं करता है");
+             noInternetcmd.put("pt", "O reconhecedor de fala não funciona no modo offline");
+             noInternetcmd.put("ja", "音声認識はオフラインモードでは機能しません");
+             noInternetcmd.put("ko", "음성 인식기는 오프라인 모드에서 작동하지 않습니다");
+             noInternetcmd.put("nl", "Spraakherkenning werkt niet in de offline modus");
+             noInternetcmd.put("sv", "Taligenkänning fungerar inte i offline-läge");
+             noInternetcmd.put("fi", "Puheentunnistus ei toimi offline-tilassa");
+             noInternetcmd.put("da", "Talegenkendelse virker ikke i offline-tilstand");
+             noInternetcmd.put("no", "Talegjenkjenning fungerer ikke i frakoblet modus");
+             noInternetcmd.put("pl", "Rozpoznawanie mowy nie działa w trybie offline");
+             noInternetcmd.put("tr", "Konuşma tanıma çevrimdışı modda çalışmaz");
+             noInternetcmd.put("cs", "Rozpoznávání řeči nefunguje v režimu offline");
+             noInternetcmd.put("el", "Ο αναγνωριστής ομιλίας δεν λειτουργεί σε λειτουργία εκτός σύνδεσης");
+             noInternetcmd.put("he", "מזהה הדיבור אינו פועל במצב לא מקוון");
+             noInternetcmd.put("vi", "Nhận dạng giọng nói không hoạt động ở chế độ ngoại tuyến");
+             noInternetcmd.put("th", "ตัวจดจำเสียงไม่ทำงานในโหมดออฟไลน์");
+             noInternetcmd.put("id", "Pengenal suara tidak berfungsi dalam mode offline");
+             noInternetcmd.put("ms", "Pengecam ucapan tidak berfungsi dalam mod luar talian");
+             noInternetcmd.put("uk", "Розпізнавання мови не працює в автономному режимі");
+             noInternetcmd.put("ro", "Recunoașterea vocală nu funcționează în modul offline");
+             noInternetcmd.put("hu", "A beszédfelismerő nem működik offline módban");
+             noInternetcmd.put("bg", "Разпознаването на реч не работи в офлайн режим");
+             noInternetcmd.put("sr", "Препознавање говора не ради у офлајн режиму");
+             noInternetcmd.put("sk", "Rozpoznávanie reči nefunguje v režime offline");
+             noInternetcmd.put("sl", "Prepoznavanje govora ne deluje v načinu brez povezave");
+             noInternetcmd.put("hr", "Prepoznavanje govora ne radi u izvanmrežnom načinu");
+             noInternetcmd.put("lt", "Kalbos atpažinimas neveikia neprisijungus");
+             noInternetcmd.put("lv", "Runas atpazīšana nedarbojas bezsaistes režīmā");
+             noInternetcmd.put("et", "Kõnetuvastus ei tööta võrguühenduseta režiimis");
+             noInternetcmd.put("is", "Talgreinir virkar ekki í ótengdum ham");
+             noInternetcmd.put("mt", "Ir-rikonoxximent tat-taħdit ma jaħdimx fil-modalità offline");
+             noInternetcmd.put("ga", "Ní oibríonn aithint cainte as líne");
+             noInternetcmd.put("cy", "Nid yw adnabod lleferydd yn gweithio mewn modd all-lein");
+             noInternetcmd.put("af", "Spraakherkenning werk nie in vanlynmodus nie");
+             noInternetcmd.put("sw", "Kitambulisho cha hotuba haifanyi kazi katika hali ya nje ya mtandao");
+
      }
 
 }

@@ -2,6 +2,8 @@ package com.example.thirdeye;
 
 //import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
+import static com.example.thirdeye.MainActivity.noInternetcmd;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -352,7 +354,11 @@ public class LangTranslate extends AppCompatActivity {
     }
 
     private void startSpeechRecognition() {
-
+        if(!NetworkUtil.isConnectedToInternet(LangTranslate.this)){
+            textToSpeech.setLanguage(new Locale(outputlangugage));
+            textToSpeech.speak(noInternetcmd.get(outputlangugage), TextToSpeech.QUEUE_FLUSH, null, null);
+            return;
+        }
 
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -395,13 +401,15 @@ public class LangTranslate extends AppCompatActivity {
 
             @Override
             public void onEndOfSpeech() {
-                voiceDialog.dismiss();
+                if(voiceDialog!=null)
+                    voiceDialog.dismiss();
             }
 
             @Override
             public void onError(int error) {
                 Toast.makeText(LangTranslate.this, "No Text Detected", Toast.LENGTH_SHORT).show();
-                voiceDialog.dismiss();
+                if(voiceDialog!=null)
+                    voiceDialog.dismiss();
             }
 
             @Override
@@ -416,6 +424,7 @@ public class LangTranslate extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if(voiceDialog!=null)
                             voiceDialog.setMessage("Result : " + resultText);
                         }
                     });
@@ -425,7 +434,8 @@ public class LangTranslate extends AppCompatActivity {
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
-                        voiceDialog.dismiss();
+                        if(voiceDialog!=null)
+                            voiceDialog.dismiss();
                     }
                 };
                 handler.postDelayed(runnable, 500);

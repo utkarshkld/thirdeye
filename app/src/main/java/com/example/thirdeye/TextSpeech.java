@@ -1,6 +1,8 @@
 package com.example.thirdeye;
 //import static com.example.thirdeye.AnalyticsManager.trackAppInstallation;
 
+import static com.example.thirdeye.MainActivity.noInternetcmd;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -963,6 +965,11 @@ public class TextSpeech extends AppCompatActivity {
     }
 
     private void startVoiceRecognition() {
+        if(!NetworkUtil.isConnectedToInternet(TextSpeech.this)){
+            textToSpeech.setLanguage(new Locale(outputlangugage));
+            textToSpeech.speak(noInternetcmd.get(outputlangugage), TextToSpeech.QUEUE_FLUSH, null, null);
+            return;
+        }
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a command...");
@@ -982,13 +989,7 @@ public class TextSpeech extends AppCompatActivity {
 
             @Override
             public void onBeginningOfSpeech() {
-//                Toast.makeText(MainActivity.this, "Speech started", Toast.LENGTH_SHORT).show();
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
 //
-//                    }
-//                });
 
 
             }
@@ -996,7 +997,8 @@ public class TextSpeech extends AppCompatActivity {
             @Override
             public void onRmsChanged(float rmsdB) {
                 // You can update UI here with rmsdB value if you want
-                voiceDialog.setProgress(Math.max(0, (int) rmsdB));
+
+
             }
 
             @Override
@@ -1008,30 +1010,21 @@ public class TextSpeech extends AppCompatActivity {
             public void onEndOfSpeech() {
 //                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
 //                voiceDialog.dismiss();
+                if(voiceDialog!=null)
+                    voiceDialog.dismiss();
             }
 
             @Override
             public void onError(int error) {
                 Toast.makeText(TextSpeech.this, "No Text Detected", Toast.LENGTH_SHORT).show();
-                voiceDialog.dismiss();
+                if(voiceDialog!=null)
+                    voiceDialog.dismiss();
             }
 
             @Override
             public void onResults(Bundle results) {
                 ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-//                if (matches != null) {
-//                    String resultText = matches.get(0);
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            voiceDialog.setMessage("Result : " + resultText);
-//                        }
-//                    });
 //
-////
-//
-////                voiceDialog.dismiss();
-//                }
                 if (matches != null && !matches.isEmpty()) {
                     String spokenText = matches.get(0).toLowerCase();
 
@@ -1085,6 +1078,7 @@ public class TextSpeech extends AppCompatActivity {
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
+                        if(voiceDialog!=null)
                         voiceDialog.dismiss();
                     }
                 };
@@ -1112,7 +1106,7 @@ public class TextSpeech extends AppCompatActivity {
 //        voiceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         voiceDialog.setTitle("Language : " + language);
         voiceDialog.setMessage("Listening...");
-        voiceDialog.setCancelable(false);
+        voiceDialog.setCancelable(true);
         voiceDialog.setOnCancelListener(dialog -> stopSpeechRecognition());
         voiceDialog.show();
 
