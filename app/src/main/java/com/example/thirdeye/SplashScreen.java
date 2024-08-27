@@ -320,15 +320,15 @@ public class SplashScreen extends AppCompatActivity {
                 start();
             }
         }, 1500);
-        UserPreferences userPreferences = new UserPreferences(this);
-        Location location = AnalyticsManager.getLocation(this);
-        String Country = "";
-        if (location != null) {
-            Country = AnalyticsManager.getCountry(this, location.getLatitude(), location.getLongitude());
-            Log.d("Country check", Country);
-        }
-
-        userPreferences.saveCountry(Country);
+//        UserPreferences userPreferences = new UserPreferences(this);
+//        Location location = AnalyticsManager.getLocation(this);
+//        String Country = "";
+//        if (location != null) {
+//            Country = AnalyticsManager.getCountry(this, location.getLatitude(), location.getLongitude());
+//            Log.d("Country check", Country);
+//        }
+//
+//        userPreferences.saveCountry(Country);
     }
 
     private void start() {

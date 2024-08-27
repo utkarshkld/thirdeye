@@ -55,12 +55,41 @@ public class About extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Open the website in a browser
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.zoblik.in/"));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://zoblik.com/"));
                 startActivity(browserIntent);
             }
         });
     }
-
+    @Override
+    protected void onResume(){
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = textToSpeech.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        // Handle the error if the language is not supported
+                    } else {
+                        // Get the text from the TextView and speak it
+                        TextView aboutMessage = findViewById(R.id.about_message);
+                        String textToSpeak = aboutMessage.getText().toString();
+                        textToSpeech.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
+                } else {
+                    // Initialization failed
+                }
+            }
+        });
+        super.onResume();
+    }
+    @Override
+    protected void onPause(){
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onPause();
+    }
     @Override
     protected void onDestroy() {
         // Shutdown TextToSpeech to release resources

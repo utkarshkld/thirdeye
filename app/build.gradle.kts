@@ -4,6 +4,9 @@ plugins {
     kotlin("kapt")
     id("androidx.navigation.safeargs")
     id("de.undercouch.download")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+
 }
 //apply plugin: "androidx.navigation.safeargs.kotlin"
 android {
@@ -20,6 +23,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -118,6 +122,9 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth-api-phone:17.4.0")
     implementation ("com.google.android.gms:play-services-base:17.3.0")
     implementation ("com.google.android.play:app-update:2.1.0")
+    implementation ("com.google.firebase:firebase-crashlytics:18.2.6")
+
+
 
 
 }

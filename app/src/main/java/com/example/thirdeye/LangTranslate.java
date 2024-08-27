@@ -401,8 +401,8 @@ public class LangTranslate extends AppCompatActivity {
 
             @Override
             public void onEndOfSpeech() {
-                if(voiceDialog!=null)
-                    voiceDialog.dismiss();
+//                if(voiceDialog!=null)
+//                    voiceDialog.dismiss();
             }
 
             @Override
@@ -424,8 +424,10 @@ public class LangTranslate extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(voiceDialog!=null)
-                            voiceDialog.setMessage("Result : " + resultText);
+                            if(voiceDialog!=null){
+                                voiceDialog.setMessage("Result : " + resultText);
+                            }
+
                         }
                     });
 

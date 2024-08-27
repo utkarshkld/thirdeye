@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         objdetfps = 30;
 //        trackAppInstallation(this);
         pm = getPackageManager();
@@ -218,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         objectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 vibe.vibrate(50);
                 speaktext(translationMap.get(speaklang + "_" + "opening object"));
 //                shakeListener.unregisterShakeListener();
@@ -518,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             @Override
             public void onEndOfSpeech() {
-                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Speech ended", Toast.LENGTH_SHORT).show();
 //                voiceDialog.dismiss();
                 if(voiceDialog!=null)
                 voiceDialog.dismiss();

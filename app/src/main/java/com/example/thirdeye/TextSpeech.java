@@ -965,11 +965,14 @@ public class TextSpeech extends AppCompatActivity {
     }
 
     private void startVoiceRecognition() {
-        if(!NetworkUtil.isConnectedToInternet(TextSpeech.this)){
-            textToSpeech.setLanguage(new Locale(outputlangugage));
-            textToSpeech.speak(noInternetcmd.get(outputlangugage), TextToSpeech.QUEUE_FLUSH, null, null);
-            return;
-        }
+        // check if the internet is working or not
+        // here we are using default "en - UK" most of the device has this default language
+        // This could work in offline mode also if the default language is en - UK of the device
+//        if(!NetworkUtil.isConnectedToInternet(TextSpeech.this)){
+//            textToSpeech.setLanguage(new Locale(outputlangugage));
+//            textToSpeech.speak(noInternetcmd.get(outputlangugage), TextToSpeech.QUEUE_FLUSH, null, null);
+//            return;
+//        }
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say a command...");

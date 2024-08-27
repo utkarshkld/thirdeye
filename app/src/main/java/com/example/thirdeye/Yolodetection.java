@@ -119,7 +119,7 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback {
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         // Calculate zoom level from seekbar progress
                         float zoomLevel = (float) progress;
-
+//                        yolov8ncnn.openCamera(1, zoomLevel);
                         // Making JNI call to open camera with the current zoomLevel
                         new Thread(new Runnable() {
                             @Override
@@ -138,7 +138,7 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback {
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         // Not needed in this implementation
                         float zoomLevel = (float) seekBar.getProgress();
-
+//                        yolov8ncnn.openCamera(1, zoomLevel);
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -188,6 +188,7 @@ public class Yolodetection extends Activity implements SurfaceHolder.Callback {
         // Translating Each object name to the target language
         // Speaking the translated objects
         // Preventing object repetition for 4 seconds
+
         new Thread(new Runnable() {
             @Override
             public void run() {
